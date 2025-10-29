@@ -90,61 +90,79 @@ class _RecordScreenState extends State<RecordScreen> {
                     ],
                   ),
                 ),
-                TableCalendar(
-                  firstDay: DateTime.utc(2010, 10, 16),
-                  lastDay: DateTime.utc(2030, 3, 14),
-                  focusedDay: _focusedDay,
-                  calendarFormat: _calendarFormat,
-                  eventLoader: _getEventsForDay,
-                  selectedDayPredicate: (day) {
-                    return isSameDay(_selectedDay, day);
-                  },
-                  onDaySelected: (selectedDay, focusedDay) {
-                    setState(() {
-                      _selectedDay = selectedDay;
-                      _focusedDay = focusedDay;
-                    });
-                  },
-                  onPageChanged: (focusedDay) {
-                    setState(() {
-                      _focusedDay = focusedDay;
-                    });
-                  },
-                  calendarStyle: const CalendarStyle(
-                    todayDecoration: BoxDecoration(
-                      color: Colors.blueAccent,
-                      shape: BoxShape.circle,
-                    ),
-                    selectedDecoration: BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                    ),
+                Container(
+                  margin: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.green.shade200, width: 2),
+                    borderRadius: BorderRadius.circular(8.0),
                   ),
-                  headerVisible: false,
-                  calendarBuilders: CalendarBuilders(
-                    markerBuilder: (context, date, events) {
-                      if (events.isNotEmpty) {
-                        final summary = budgetProvider.getDailySummary(events as List<Transaction>);
-                        return Positioned(
-                          bottom: 1,
-                          child: Column(
-                            children: [
-                              if (summary['income']! > 0)
-                                Text(
-                                  '+${summary['income']!.toStringAsFixed(0)}',
-                                  style: const TextStyle(color: Colors.green, fontSize: 10),
-                                ),
-                              if (summary['expense']! > 0)
-                                Text(
-                                  '-${summary['expense']!.toStringAsFixed(0)}',
-                                  style: const TextStyle(color: Colors.red, fontSize: 10),
-                                ),
-                            ],
-                          ),
-                        );
-                      }
-                      return null;
+                  child: TableCalendar(
+                    firstDay: DateTime.utc(2010, 10, 16),
+                    lastDay: DateTime.utc(2030, 3, 14),
+                    focusedDay: _focusedDay,
+                    calendarFormat: _calendarFormat,
+                    eventLoader: _getEventsForDay,
+                    selectedDayPredicate: (day) {
+                      return isSameDay(_selectedDay, day);
                     },
+                    onDaySelected: (selectedDay, focusedDay) {
+                      setState(() {
+                        _selectedDay = selectedDay;
+                        _focusedDay = focusedDay;
+                      });
+                    },
+                    onPageChanged: (focusedDay) {
+                      setState(() {
+                        _focusedDay = focusedDay;
+                      });
+                    },
+                    headerStyle: HeaderStyle(
+                      titleCentered: true,
+                      formatButtonVisible: false,
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade100,
+                      ),
+                    ),
+                    daysOfWeekStyle: const DaysOfWeekStyle(
+                      weekdayStyle: TextStyle(fontWeight: FontWeight.bold),
+                      weekendStyle: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    calendarBuilders: CalendarBuilders(
+                      dowBuilder: (context, day) {
+                        if (day.weekday == DateTime.sunday) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade100,
+                            ),
+                            child: Center(
+                              child: Text(
+                                DateFormat.E().format(day),
+                                style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          );
+                        } else {
+                           return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade100,
+                            ),
+                            child: Center(
+                              child: Text(
+                                DateFormat.E().format(day),
+                                style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      defaultBuilder: (context, day, focusedDay) =>
+                          _buildDayCell(day, budgetProvider, Colors.transparent),
+                      todayBuilder: (context, day, focusedDay) =>
+                          _buildDayCell(day, budgetProvider, Colors.green.shade200),
+                      selectedBuilder: (context, day, focusedDay) =>
+                          _buildDayCell(day, budgetProvider, Colors.green.shade400),
+                    ),
+                    headerVisible: false,
                   ),
                 ),
                 Padding(
@@ -186,6 +204,49 @@ class _RecordScreenState extends State<RecordScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildDayCell(DateTime day, BudgetProvider budgetProvider, Color backgroundColor) {
+    final events = _getEventsForDay(day);
+    final summary = budgetProvider.getDailySummary(events);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(4.0),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: 4,
+            left: 4,
+            child: Text(
+              '${day.day}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Positioned(
+            bottom: 4,
+            right: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (summary['income']! > 0)
+                  Text(
+                    '+${summary['income']!.toStringAsFixed(0)}',
+                    style: const TextStyle(color: Colors.blue, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                if (summary['expense']! > 0)
+                  Text(
+                    '-${summary['expense']!.toStringAsFixed(0)}',
+                    style: const TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
