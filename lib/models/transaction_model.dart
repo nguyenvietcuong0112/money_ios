@@ -1,23 +1,13 @@
-import 'package:hive/hive.dart';
-
-part 'transaction_model.g.dart';
-
-@HiveType(typeId: 0)
-class TransactionModel extends HiveObject {
-  @HiveField(0)
+class TransactionModel {
   final String id;
-
-  @HiveField(1)
   final String title;
-
-  @HiveField(2)
   final double amount;
-
-  @HiveField(3)
   final DateTime date;
-
-  @HiveField(4)
   final String category;
+  final String? note;
+  final bool isExpense;
+  final String? lender; // Added for loans
+  final String? budget;   // Added for expenses
 
   TransactionModel({
     required this.id,
@@ -25,5 +15,9 @@ class TransactionModel extends HiveObject {
     required this.amount,
     required this.date,
     required this.category,
+    this.note,
+    required this.isExpense,
+    this.lender,
+    this.budget,
   });
 }

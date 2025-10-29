@@ -1,92 +1,74 @@
+
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:money_manager/providers/app_provider.dart';
+import 'package:money_manager/providers/budget_provider.dart';
+import 'package:money_manager/screens/screens.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'app_localizations.dart';
-import 'models/transaction_model.dart';
-import 'models/budget_model.dart';
-import 'providers/app_provider.dart';
-import 'providers/theme_provider.dart';
-import 'screens/home_screen.dart';
-import 'screens/transactions_screen.dart';
-import 'screens/budget_screen.dart';
-import 'screens/statistics_screen.dart';
-import 'screens/settings_screen.dart';
-import 'screens/language_selection_screen.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
-  Hive.registerAdapter(TransactionModelAdapter());
-  Hive.registerAdapter(BudgetModelAdapter());
-  await Hive.openBox<TransactionModel>('transactions');
-  await Hive.openBox<BudgetModel>('budgets');
 
   final prefs = await SharedPreferences.getInstance();
-  final isSetupComplete = prefs.getBool('is_setup_complete') ?? false;
-  final languageCode = prefs.getString('language_code') ?? 'en';
-  final currencyCode = prefs.getString('currency_code') ?? 'USD';
+  final isFirstTime = prefs.getBool('isFirstTime') ?? true;
+  final language = prefs.getString('language');
+  final currency = prefs.getString('currency');
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(
-          create: (_) => AppProvider()
-            ..setLocale(Locale(languageCode, ''))
-            ..setCurrency(currencyCode),
-        ),
-      ],
-      child: MyApp(isSetupComplete: isSetupComplete),
-    ),
-  );
+  runApp(MyApp(
+    isFirstTime: isFirstTime,
+    language: language,
+    currency: currency,
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  final bool isSetupComplete;
-  const MyApp({super.key, required this.isSetupComplete});
+  final bool isFirstTime;
+  final String? language;
+  final String? currency;
+
+  const MyApp({
+    super.key,
+    required this.isFirstTime,
+    this.language,
+    this.currency,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<ThemeProvider, AppProvider>(
-      builder: (context, themeProvider, appProvider, child) {
-        return MaterialApp(
-          title: 'Money Manager',
-          theme: ThemeData(
-            primarySwatch: Colors.green,
-            textTheme: GoogleFonts.latoTextTheme(
-              Theme.of(context).textTheme,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AppProvider(
+          initialLocale: language != null ? Locale(language!) : null,
+          initialCurrency: currency,
+        )),
+        ChangeNotifierProvider(create: (context) => BudgetProvider()),
+      ],
+      child: Consumer<AppProvider>(
+        builder: (context, appProvider, child) {
+          return MaterialApp(
+            title: 'Money Manager',
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+              visualDensity: VisualDensity.adaptivePlatformDensity,
             ),
-          ),
-          darkTheme: ThemeData.dark(),
-          themeMode: themeProvider.themeMode,
-          locale: appProvider.locale,
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            // Add other delegates here
-          ],
-          supportedLocales: const [
-            Locale('en', ''),
-            Locale('vi', ''),
-            Locale('fr', ''),
-          ],
-          home: isSetupComplete ? const MainScreen() : const LanguageSelectionScreen(),
-        );
-      },
+            locale: appProvider.locale,
+            supportedLocales: const [Locale('en', ''), Locale('fr', ''), Locale('vi', '')],
+            home: isFirstTime ? const LanguageSelectionScreen() : const MyHomePage(),
+          );
+        },
+      ),
     );
   }
 }
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
   static const List<Widget> _widgetOptions = <Widget>[
@@ -105,37 +87,35 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-
     return Scaffold(
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: <BottomNavigationBarItem>[
+        items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: localizations.translate('home'),
+            label: 'Home',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.swap_horiz),
-            label: localizations.translate('transactions'),
+            label: 'Transactions',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.pie_chart),
-            label: localizations.translate('budget'),
+            label: 'Budget',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
-            label: localizations.translate('statistics'),
+            label: 'Statistics',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: localizations.translate('settings'),
+            label: 'Settings',
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
+        selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
       ),

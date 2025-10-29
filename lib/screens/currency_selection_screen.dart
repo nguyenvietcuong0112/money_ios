@@ -36,12 +36,14 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
         await prefs.setBool('isFirstTime', false);
         await prefs.setString('currency', _selectedCurrencyCode!);
 
+        if (!mounted) return;
         // Navigate to the main app screen and remove the setup screens from the stack
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const MyHomePage()),
           (Route<dynamic> route) => false,
         );
       } else {
+        if (!mounted) return;
         // Just pop the screen if coming from settings
         Navigator.of(context).pop();
       }
@@ -62,14 +64,21 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
               itemCount: _currencies.length,
               itemBuilder: (context, index) {
                 final currency = _currencies[index];
-                return RadioListTile<String>(
-                  title: Text('${'${currency.name} (${currency.code})'}'),
+                return ListTile(
+                  title: Text('${currency.name} (${currency.code})'),
                   subtitle: Text(currency.symbol),
-                  value: currency.code,
-                  groupValue: _selectedCurrencyCode,
-                  onChanged: (String? value) {
+                  leading: Radio<String>(
+                    value: currency.code,
+                    groupValue: _selectedCurrencyCode,
+                    onChanged: (String? value) {
+                      setState(() {
+                        _selectedCurrencyCode = value;
+                      });
+                    },
+                  ),
+                  onTap: () {
                     setState(() {
-                      _selectedCurrencyCode = value;
+                      _selectedCurrencyCode = currency.code;
                     });
                   },
                 );

@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:money_manager/providers/app_provider.dart';
@@ -35,6 +36,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('language', _selectedLocale!.languageCode);
 
+      if (!mounted) return;
       // Navigate to the next step of the setup
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const CurrencySelectionScreen(isInitialSetup: true)),
@@ -51,15 +53,22 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
       body: Column(
         children: [
           Expanded(
-            child: ListView( // Changed from ListView.builder
+            child: ListView(
               children: _languages.entries.map((entry) {
-                return RadioListTile<Locale>(
+                return ListTile(
                   title: Text(entry.value),
-                  value: Locale(entry.key, ''),
-                  groupValue: _selectedLocale,
-                  onChanged: (Locale? value) {
+                  leading: Radio<Locale>(
+                    value: Locale(entry.key, ''),
+                    groupValue: _selectedLocale,
+                    onChanged: (Locale? value) {
+                      setState(() {
+                        _selectedLocale = value;
+                      });
+                    },
+                  ),
+                  onTap: () {
                     setState(() {
-                      _selectedLocale = value;
+                      _selectedLocale = Locale(entry.key, '');
                     });
                   },
                 );

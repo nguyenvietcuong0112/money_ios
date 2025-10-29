@@ -30,7 +30,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           ListTile(
             title: Text(localizations.translate('language')),
-            trailing: Text(appProvider.locale.languageCode),
+            trailing: Text(appProvider.locale?.languageCode ?? ''),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const LanguageSelectionScreen()),
