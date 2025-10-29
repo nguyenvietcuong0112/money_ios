@@ -48,8 +48,8 @@ class _RecordScreenState extends State<RecordScreen> {
         builder: (context, budgetProvider, child) {
           _events = budgetProvider.getTransactionsByMonth(_focusedDay);
 
+          final monthlySummary = budgetProvider.getMonthlySummary(_focusedDay);
           final selectedDayTransactions = _getEventsForDay(_selectedDay!);
-          final dailySummary = budgetProvider.getDailySummary(selectedDayTransactions);
 
           return SingleChildScrollView(
             child: Column(
@@ -152,9 +152,9 @@ class _RecordScreenState extends State<RecordScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildSummaryItem('Income', '${dailySummary['income']!.toStringAsFixed(0)} ${appProvider.currencySymbol}', Colors.blue),
-                      _buildSummaryItem('Expenses', '${dailySummary['expense']!.toStringAsFixed(0)} ${appProvider.currencySymbol}', Colors.red),
-                      _buildSummaryItem('Total', '${(dailySummary['income']! - dailySummary['expense']!).toStringAsFixed(0)} ${appProvider.currencySymbol}', Colors.black),
+                      _buildSummaryItem('Income', '${monthlySummary['income']!.toStringAsFixed(0)} ${appProvider.currencySymbol}', Colors.blue),
+                      _buildSummaryItem('Expenses', '${monthlySummary['expense']!.toStringAsFixed(0)} ${appProvider.currencySymbol}', Colors.red),
+                      _buildSummaryItem('Total', '${(monthlySummary['income']! - monthlySummary['expense']!).toStringAsFixed(0)} ${appProvider.currencySymbol}', Colors.black),
                     ],
                   ),
                 ),
@@ -196,6 +196,7 @@ class _RecordScreenState extends State<RecordScreen> {
       initialDate: _focusedDay,
       firstDate: DateTime(2010),
       lastDate: DateTime(2030),
+      initialDatePickerMode: DatePickerMode.year,
     );
     if (picked != null && picked != _focusedDay) {
       setState(() {

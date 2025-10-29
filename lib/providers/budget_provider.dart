@@ -74,4 +74,19 @@ class BudgetProvider with ChangeNotifier {
     }
     return {'income': income, 'expense': expense};
   }
+
+  Map<String, double> getMonthlySummary(DateTime month) {
+    double income = 0;
+    double expense = 0;
+    for (final transaction in _transactions) {
+      if (transaction.date.month == month.month && transaction.date.year == month.year) {
+        if (transaction.type == 'income') {
+          income += transaction.amount;
+        } else {
+          expense += transaction.amount;
+        }
+      }
+    }
+    return {'income': income, 'expense': expense};
+  }
 }
