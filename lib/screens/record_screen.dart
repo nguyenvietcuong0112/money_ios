@@ -161,8 +161,13 @@ class _RecordScreenState extends State<RecordScreen> {
                           _buildDayCell(day, budgetProvider, Colors.green.shade200),
                       selectedBuilder: (context, day, focusedDay) =>
                           _buildDayCell(day, budgetProvider, Colors.green.shade400),
+                      markerBuilder: (context, date, events) {
+                        return const SizedBox.shrink();
+                      },
                     ),
+
                     headerVisible: false,
+
                   ),
                 ),
                 Padding(
