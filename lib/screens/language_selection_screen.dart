@@ -38,7 +38,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
 
       if (!mounted) return;
       // Navigate to the next step of the setup
-      Navigator.of(context).pushReplacement(
+      Navigator.of(context).push(
         MaterialPageRoute(builder: (context) => const CurrencySelectionScreen(isInitialSetup: true)),
       );
     }

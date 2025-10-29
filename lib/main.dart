@@ -5,6 +5,7 @@ import 'package:money_manager/providers/budget_provider.dart';
 import 'package:money_manager/screens/screens.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:developer' as developer;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -80,6 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
   ];
 
   void _onItemTapped(int index) {
+    developer.log('Tapped index: $index', name: 'MyHomePage');
     setState(() {
       _selectedIndex = index;
     });
@@ -87,6 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    developer.log('Building with selected index: $_selectedIndex', name: 'MyHomePage');
     return Scaffold(
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
