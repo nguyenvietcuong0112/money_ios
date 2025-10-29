@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:money_manager/providers/app_provider.dart';
 import 'package:money_manager/providers/budget_provider.dart';
+import 'package:money_manager/providers/theme_provider.dart';
 import 'package:money_manager/screens/screens.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -43,18 +44,30 @@ class MyApp extends StatelessWidget {
           initialCurrency: currency,
         )),
         ChangeNotifierProvider(create: (context) => BudgetProvider()),
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
       ],
       child: Consumer<AppProvider>(
         builder: (context, appProvider, child) {
-          return MaterialApp(
-            title: 'Money Manager',
-            theme: ThemeData(
-              primarySwatch: Colors.blue,
-              visualDensity: VisualDensity.adaptivePlatformDensity,
-            ),
-            locale: appProvider.locale,
-            supportedLocales: const [Locale('en', ''), Locale('fr', ''), Locale('vi', '')],
-            home: isFirstTime ? const LanguageSelectionScreen() : const MyHomePage(),
+          return Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return MaterialApp(
+                title: 'Money Manager',
+                theme: ThemeData(
+                  primarySwatch: Colors.blue,
+                  visualDensity: VisualDensity.adaptivePlatformDensity,
+                  brightness: Brightness.light,
+                ),
+                darkTheme: ThemeData(
+                  primarySwatch: Colors.blue,
+                  visualDensity: VisualDensity.adaptivePlatformDensity,
+                  brightness: Brightness.dark,
+                ),
+                themeMode: themeProvider.themeMode,
+                locale: appProvider.locale,
+                supportedLocales: const [Locale('en', ''), Locale('fr', ''), Locale('vi', '')],
+                home: isFirstTime ? const LanguageSelectionScreen() : const MyHomePage(),
+              );
+            },
           );
         },
       ),
