@@ -1,5 +1,7 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:money_manager/app_localizations.dart';
 import 'package:money_manager/providers/app_provider.dart';
 import 'package:money_manager/providers/budget_provider.dart';
 import 'package:money_manager/providers/theme_provider.dart';
@@ -65,6 +67,12 @@ class MyApp extends StatelessWidget {
                 themeMode: themeProvider.themeMode,
                 locale: appProvider.locale,
                 supportedLocales: const [Locale('en', ''), Locale('fr', ''), Locale('vi', '')],
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
                 home: isFirstTime ? const LanguageSelectionScreen() : const MyHomePage(),
               );
             },
