@@ -13,7 +13,7 @@ class BudgetScreen extends StatelessWidget {
     final budgetProvider = Provider.of<BudgetProvider>(context);
     final appProvider = Provider.of<AppProvider>(context);
     final budgets = budgetProvider.budgets;
-    final transactions = appProvider.transactions;
+    final transactions = budgetProvider.transactions;
     final currencySymbol = appProvider.currencySymbol;
 
     return Scaffold(
@@ -27,7 +27,7 @@ class BudgetScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final budget = budgets[index];
                 final expenses = transactions
-                    .where((t) => t.isExpense && t.category == budget.category)
+                    .where((t) => t.type == 'expense' && t.category == budget.category)
                     .map((t) => t.amount.abs())
                     .fold(0.0, (prev, amount) => prev + amount);
                 final progress = (expenses / budget.amount).clamp(0.0, 1.0);

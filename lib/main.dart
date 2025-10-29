@@ -95,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   static final List<Widget> _widgetOptions = <Widget>[
     const HomeScreen(),
-    const TransactionsScreen(),
+    const RecordScreen(),
     const BudgetScreen(),
     const StatisticsScreen(),
     const SettingsScreen(),
@@ -122,8 +122,8 @@ class _MyHomePageState extends State<MyHomePage> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.swap_horiz),
-            label: 'Transactions',
+            icon: Icon(Icons.edit_calendar_outlined),
+            label: 'Record',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.pie_chart),

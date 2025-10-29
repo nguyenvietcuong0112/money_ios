@@ -1,10 +1,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:money_manager/models/models.dart';
 import 'package:provider/provider.dart';
 
-import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/providers/app_provider.dart';
+import 'package:money_manager/providers/budget_provider.dart';
 
 enum TransactionType { expense, income, loan }
 
@@ -277,35 +278,31 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> with Single
 
     _formKey.currentState!.save();
 
-    double finalAmount = _amount!;
-    bool isExpense = true;
-
+    String type;
     switch (_selectedType) {
       case TransactionType.expense:
-        finalAmount = -_amount!;
-        isExpense = true;
+        type = 'expense';
         break;
       case TransactionType.income:
-        isExpense = false;
+        type = 'income';
         break;
       case TransactionType.loan:
-        isExpense = false; // Loans are considered income initially
+        type = 'loan';
         break;
     }
 
-    final newTransaction = TransactionModel(
-      id: DateTime.now().toString(),
-      title: _selectedCategory!, // Or a different title if needed
-      amount: finalAmount,
+    final newTransaction = Transaction(
+      id: DateTime.now().millisecondsSinceEpoch.toString(), // Using epoch for a unique ID
+      amount: _amount!,
       date: DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, _selectedTime.hour, _selectedTime.minute),
       category: _selectedCategory!,
       note: _note,
-      isExpense: isExpense,
+      type: type,
       budget: _selectedType == TransactionType.expense ? _budget : null,
       lender: _selectedType == TransactionType.loan ? _lender : null,
     );
 
-    Provider.of<AppProvider>(context, listen: false).addTransaction(newTransaction);
+    Provider.of<BudgetProvider>(context, listen: false).addTransaction(newTransaction);
     Navigator.of(context).pop();
 }
 

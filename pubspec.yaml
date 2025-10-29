@@ -25,6 +25,7 @@ dependencies:
   provider: ^6.1.5+1
   shared_preferences: ^2.5.3
   currency_picker: ^2.0.21
+  table_calendar: ^3.2.0
   
 
 dev_dependencies:

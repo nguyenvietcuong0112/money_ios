@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import 'package:money_manager/models/transaction_model.dart';
-import 'package:money_manager/providers/app_provider.dart';
+import 'package:money_manager/models/models.dart';
+import 'package:money_manager/providers/budget_provider.dart';
 import 'package:money_manager/utils/constants.dart';
 import 'package:provider/provider.dart';
 
@@ -17,7 +17,7 @@ class StatisticsScreen extends StatefulWidget {
 class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late String _selectedMonth;
-  List<String> _months = [];
+  final List<String> _months = [];
 
   @override
   void initState() {
@@ -54,7 +54,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
-    final appProvider = Provider.of<AppProvider>(context);
+    final budgetProvider = Provider.of<BudgetProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -62,7 +62,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
       ),
       body: Column(
         children: [
-          _buildTotalCard(appProvider),
+          _buildTotalCard(budgetProvider),
           TabBar(
             controller: _tabController,
             tabs: const [
@@ -97,9 +97,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildExpenseView(appProvider),
-                _buildIncomeView(appProvider),
-                _buildLoanView(appProvider),
+                _buildExpenseView(budgetProvider),
+                _buildIncomeView(budgetProvider),
+                _buildLoanView(budgetProvider),
               ],
             ),
           ),
@@ -108,21 +108,21 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
     );
   }
 
-  Widget _buildTotalCard(AppProvider appProvider) {
+  Widget _buildTotalCard(BudgetProvider budgetProvider) {
     final selectedDate = DateFormat('MMM yyyy').parse(_selectedMonth);
-    List<TransactionModel> filteredTransactions;
+    List<Transaction> filteredTransactions;
 
     if (_tabController.index == 0) { // Expense
-      filteredTransactions = appProvider.transactions
+      filteredTransactions = budgetProvider.transactions
           .where((t) =>
-              t.isExpense &&
+              t.type == 'expense' &&
               t.date.year == selectedDate.year &&
               t.date.month == selectedDate.month)
           .toList();
     } else if (_tabController.index == 1) { // Income
-      filteredTransactions = appProvider.transactions
+      filteredTransactions = budgetProvider.transactions
           .where((t) =>
-              !t.isExpense &&
+              t.type == 'income' &&
               t.date.year == selectedDate.year &&
               t.date.month == selectedDate.month)
           .toList();
@@ -154,11 +154,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
     );
   }
 
-  Widget _buildExpenseView(AppProvider appProvider) {
+  Widget _buildExpenseView(BudgetProvider budgetProvider) {
     final selectedDate = DateFormat('MMM yyyy').parse(_selectedMonth);
-    final expenses = appProvider.transactions
+    final expenses = budgetProvider.transactions
         .where((t) =>
-            t.isExpense &&
+            t.type == 'expense' &&
             t.date.year == selectedDate.year &&
             t.date.month == selectedDate.month)
         .toList();
@@ -175,11 +175,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
     return _buildChartAndList(expenseByCategory, true);
   }
 
-  Widget _buildIncomeView(AppProvider appProvider) {
+  Widget _buildIncomeView(BudgetProvider budgetProvider) {
     final selectedDate = DateFormat('MMM yyyy').parse(_selectedMonth);
-    final incomes = appProvider.transactions
+    final incomes = budgetProvider.transactions
         .where((t) =>
-            !t.isExpense &&
+            t.type == 'income' &&
             t.date.year == selectedDate.year &&
             t.date.month == selectedDate.month)
         .toList();
@@ -196,7 +196,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
     return _buildChartAndList(incomeByCategory, false);
   }
 
-  Widget _buildLoanView(AppProvider appProvider) {
+  Widget _buildLoanView(BudgetProvider budgetProvider) {
     return const Center(child: Text('Loan data not available yet'));
   }
 
@@ -219,21 +219,21 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
             child: BarChart(
               BarChartData(
                 alignment: BarChartAlignment.spaceAround,
-                barTouchData: BarTouchData(enabled: false),
+                barTouchData: const BarTouchData(enabled: false),
                 titlesData: FlTitlesData(
                   show: true,
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (double value, TitleMeta meta) {
-                        final style = const TextStyle(
+                        const style = TextStyle(
                           fontSize: 10,
                         );
                         Widget text;
                         if (value.toInt() < chartData.length) {
                           text = Text(chartData[value.toInt()].key, style: style);
                         } else {
-                          text = Text('', style: style);
+                          text = const Text('', style: style);
                         }
                         return Padding(padding: const EdgeInsets.only(top: 8.0), child: text);
                       },
