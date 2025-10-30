@@ -13,17 +13,22 @@ A simple and intuitive money management app to track income and expenses.
 - **Settings Screen:** Users can customize language, currency, and theme (light/dark mode).
 - **Localization:** Supports English, French, and Vietnamese.
 
-## Current Task: Redesign Transactions Screen & Connect to Data
+## Current Task: Redesign Language Selection Screen
 
-- **Objective:** Replace the old `TransactionsScreen` with a new `RecordScreen` and connect it to the `BudgetProvider` to display real transaction data.
-- **Steps:**
-    1.  **Update Navigation:** Changed the bottom navigation bar item from "Transactions" to "Record".
-    2.  **Add Dependency:** Added the `table_calendar` package for the calendar UI.
-    3.  **Create New Screen:** Implemented the `RecordScreen` with the following components:
-        - Month/Year picker.
-        - Calendar view with daily income/expense summary.
-        - Overall income, expense, and total summary.
-        - A list of transactions for the selected day.
-    4.  **Update Provider:** Added `getTransactionsByMonth` and `getDailySummary` methods to `BudgetProvider` to process and group transaction data.
-    5.  **Connect to Data:** Used a `Consumer<BudgetProvider>` in `RecordScreen` to fetch and display live transaction data.
-    6.  **Dummy Data:** Added initial dummy data to `BudgetProvider` for demonstration purposes.
+- **Objective:** Redesign the `LanguageSelectionScreen` with a modern UI, animations, and improved user experience as requested.
+- **Plan:**
+    1.  **Add Dependencies:** Add the `lottie` package for animations.
+    2.  **Create Animation Asset:** Add a Lottie animation file for the animated hand icon.
+    3.  **Update UI:**
+        - Create a new stateful widget `LanguageSelectionScreen`.
+        - The UI will feature a list of selectable language cards.
+        - An animated Lottie hand icon will initially point to the 'English' option.
+        - A 'Next' button (checkmark icon) will be placed in the `AppBar`, initially disabled.
+    4.  **Implement Animation & Logic:**
+        - Use a `Stack` to overlay the animated hand icon.
+        - When a language is selected:
+            - The 'Next' button becomes enabled.
+            - The hand icon will animate its position, moving towards the 'Next' button.
+    5.  **State Management:**
+        - Manage the selected language and button-enabled state within the widget's state.
+        - On pressing 'Next', update the application's locale using the `AppProvider`.

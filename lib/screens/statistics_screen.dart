@@ -219,7 +219,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
             child: BarChart(
               BarChartData(
                 alignment: BarChartAlignment.spaceAround,
-                barTouchData: const BarTouchData(enabled: false),
+                barTouchData:  BarTouchData(enabled: false),
                 titlesData: FlTitlesData(
                   show: true,
                   bottomTitles: AxisTitles(

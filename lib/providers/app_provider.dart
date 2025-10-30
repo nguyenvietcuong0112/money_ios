@@ -1,37 +1,47 @@
+
 import 'package:flutter/material.dart';
-import 'package:currency_picker/currency_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppProvider with ChangeNotifier {
   Locale? _locale;
   String _currency;
-  String _currencySymbol;
 
   Locale? get locale => _locale;
   String get currency => _currency;
-  String get currencySymbol => _currencySymbol;
+  String get currencySymbol => _getCurrencySymbol(_currency);
 
-  AppProvider({Locale? initialLocale, String? initialCurrency}) 
+  AppProvider({Locale? initialLocale, String? initialCurrency})
       : _locale = initialLocale,
-        _currency = initialCurrency ?? 'USD',
-        _currencySymbol = _getCurrencySymbol(initialCurrency ?? 'USD');
+        _currency = initialCurrency ?? 'USD';
 
-  void setLocale(Locale locale) {
+  void setLocale(Locale locale) async {
     _locale = locale;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('languageCode', locale.languageCode);
     notifyListeners();
   }
 
-  void setCurrency(String currencyCode) {
-    _currency = currencyCode;
-    _currencySymbol = _getCurrencySymbol(currencyCode);
+  void setCurrency(String currency) async {
+    _currency = currency;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('currency', currency);
     notifyListeners();
   }
 
-  static String _getCurrencySymbol(String currencyCode) {
-      try {
-        Currency? currency = CurrencyService().findByCode(currencyCode);
-        return currency?.symbol ?? '\$';
-      } catch (e) {
+  String _getCurrencySymbol(String currencyCode) {
+    switch (currencyCode) {
+      case 'USD':
         return '\$';
-      }
+      case 'EUR':
+        return '€';
+      case 'JPY':
+        return '¥';
+      case 'GBP':
+        return '£';
+      case 'VND':
+        return '₫';
+      default:
+        return '\$';
+    }
   }
 }

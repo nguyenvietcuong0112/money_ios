@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:money_manager/app_localizations.dart';
+import 'package:money_manager/localization/app_localizations.dart';
 import 'package:money_manager/providers/app_provider.dart';
 import 'package:money_manager/providers/budget_provider.dart';
 import 'package:money_manager/providers/theme_provider.dart';
@@ -41,10 +41,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => AppProvider(
-          initialLocale: language != null ? Locale(language!) : null,
-          initialCurrency: currency,
-        )),
+        ChangeNotifierProvider(
+            create: (context) => AppProvider(
+                  initialLocale: language != null ? Locale(language!) : null,
+                  initialCurrency: currency,
+                )),
         ChangeNotifierProvider(create: (context) => BudgetProvider()),
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
       ],
@@ -66,14 +67,20 @@ class MyApp extends StatelessWidget {
                 ),
                 themeMode: themeProvider.themeMode,
                 locale: appProvider.locale,
-                supportedLocales: const [Locale('en', ''), Locale('fr', ''), Locale('vi', '')],
+                supportedLocales: const [
+                  Locale('en', ''),
+                  Locale('fr', ''),
+                  Locale('vi', '')
+                ],
                 localizationsDelegates: const [
                   AppLocalizations.delegate,
                   GlobalMaterialLocalizations.delegate,
                   GlobalWidgetsLocalizations.delegate,
                   GlobalCupertinoLocalizations.delegate,
                 ],
-                home: isFirstTime ? const LanguageSelectionScreen() : const MyHomePage(),
+                home: isFirstTime
+                    ? const LanguageSelectionScreen(isInitialSetup: true)
+                    : const MyHomePage(),
               );
             },
           );
@@ -110,7 +117,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    developer.log('Building with selected index: $_selectedIndex', name: 'MyHomePage');
+    developer.log('Building with selected index: $_selectedIndex',
+        name: 'MyHomePage');
     return Scaffold(
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),

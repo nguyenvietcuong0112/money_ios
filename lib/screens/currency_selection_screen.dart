@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-import 'package:money_manager/screens/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:currency_picker/currency_picker.dart';
 import 'package:money_manager/providers/app_provider.dart';
@@ -57,46 +56,31 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
       appBar: AppBar(
         title: const Text('Select Currency'),
         automaticallyImplyLeading: !widget.isInitialSetup, // Hide back button on initial setup
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: _currencies.length,
-              itemBuilder: (context, index) {
-                final currency = _currencies[index];
-                return ListTile(
-                  title: Text('${currency.name} (${currency.code})'),
-                  subtitle: Text(currency.symbol),
-                  leading: Radio<String>(
-                    value: currency.code,
-                    groupValue: _selectedCurrencyCode,
-                    onChanged: (String? value) {
-                      setState(() {
-                        _selectedCurrencyCode = value;
-                      });
-                    },
-                  ),
-                  onTap: () {
-                    setState(() {
-                      _selectedCurrencyCode = currency.code;
-                    });
-                  },
-                );
-              },
+        actions: [
+          if (_selectedCurrencyCode != null)
+            IconButton(
+              icon: const Icon(Icons.save),
+              onPressed: _onNext,
+              tooltip: widget.isInitialSetup ? 'Next' : 'Save',
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: _selectedCurrencyCode != null ? _onNext : null,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-              ),
-              child: Text(widget.isInitialSetup ? 'Next' : 'Save'),
-            ),
-          ),
         ],
+      ),
+      body: ListView.builder(
+        itemCount: _currencies.length,
+        itemBuilder: (context, index) {
+          final currency = _currencies[index];
+          return RadioListTile<String>(
+            title: Text('${currency.name} (${currency.code})'),
+            subtitle: Text(currency.symbol),
+            value: currency.code,
+            groupValue: _selectedCurrencyCode,
+            onChanged: (String? value) {
+              setState(() {
+                _selectedCurrencyCode = value;
+              });
+            },
+          );
+        },
       ),
     );
   }
