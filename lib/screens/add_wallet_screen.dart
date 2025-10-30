@@ -13,7 +13,6 @@ class AddWalletScreen extends StatefulWidget {
 class _AddWalletScreenState extends State<AddWalletScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _amountController = TextEditingController();
   IconData _selectedIcon = Icons.account_balance_wallet;
 
   final List<IconData> _icons = [
@@ -42,8 +41,7 @@ class _AddWalletScreenState extends State<AddWalletScreen> {
             onPressed: () {
               if (_formKey.currentState!.validate()) {
                 final name = _nameController.text;
-                final amount = double.parse(_amountController.text);
-                Provider.of<WalletProvider>(context, listen: false).addWallet(name, amount, _selectedIcon);
+                Provider.of<WalletProvider>(context, listen: false).addWallet(name, 0.0, _selectedIcon);
                 Navigator.pop(context);
               }
             },
@@ -66,25 +64,6 @@ class _AddWalletScreenState extends State<AddWalletScreen> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a wallet name';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16.0),
-              TextFormField(
-                controller: _amountController,
-                decoration: const InputDecoration(
-                  labelText: 'Initial Amount',
-                  border: OutlineInputBorder(),
-                  suffixText: '\$',
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter an amount';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'Please enter a valid number';
                   }
                   return null;
                 },

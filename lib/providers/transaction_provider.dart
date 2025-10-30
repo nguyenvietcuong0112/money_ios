@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:uuid/uuid.dart';
 
 class TransactionProvider with ChangeNotifier {
-  final List<Transaction> _transactions = [];
+  final Box<Transaction> _transactionsBox = Hive.box<Transaction>('transactions');
+  List<Transaction> _transactions = [];
+
+  TransactionProvider() {
+    _loadTransactions();
+  }
 
   List<Transaction> get transactions => _transactions;
 
@@ -14,6 +20,11 @@ class TransactionProvider with ChangeNotifier {
   double get totalExpense => _transactions
       .where((tx) => tx.type == TransactionType.expense)
       .fold(0, (sum, item) => sum + item.amount);
+
+  void _loadTransactions() {
+    _transactions = _transactionsBox.values.toList();
+    notifyListeners();
+  }
 
   void addTransaction(
     String title,
@@ -34,7 +45,12 @@ class TransactionProvider with ChangeNotifier {
       color: color,
       walletId: walletId,
     );
-    _transactions.add(newTransaction);
-    notifyListeners();
+    _transactionsBox.put(newTransaction.id, newTransaction);
+    _loadTransactions();
+  }
+
+  void deleteTransaction(String transactionId) {
+    _transactionsBox.delete(transactionId);
+    _loadTransactions();
   }
 }

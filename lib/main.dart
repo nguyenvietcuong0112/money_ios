@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:money_manager/localization/app_localizations.dart';
+import 'package:money_manager/models/category_model.dart';
+import 'package:money_manager/models/transaction_model.dart';
+import 'package:money_manager/models/wallet_model.dart';
 import 'package:money_manager/providers/app_provider.dart';
 import 'package:money_manager/providers/budget_provider.dart';
 import 'package:money_manager/providers/theme_provider.dart';
@@ -11,9 +15,21 @@ import 'package:money_manager/screens/screens.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer' as developer;
+import 'package:path_provider/path_provider.dart' as path_provider;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final appDocumentDir = await path_provider.getApplicationDocumentsDirectory();
+  await Hive.initFlutter(appDocumentDir.path);
+
+  Hive.registerAdapter(CategoryAdapter());
+  Hive.registerAdapter(TransactionTypeAdapter());
+  Hive.registerAdapter(TransactionAdapter());
+  Hive.registerAdapter(WalletAdapter());
+
+  await Hive.openBox<Wallet>('wallets');
+  await Hive.openBox<Transaction>('transactions');
 
   final prefs = await SharedPreferences.getInstance();
   final isFirstTime = prefs.getBool('isFirstTime') ?? true;

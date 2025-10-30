@@ -3,6 +3,7 @@ import 'package:money_manager/localization/app_localizations.dart';
 import 'package:money_manager/providers/transaction_provider.dart';
 import 'package:money_manager/providers/wallet_provider.dart';
 import 'package:money_manager/screens/add_wallet_screen.dart';
+import 'package:money_manager/screens/wallet_detail_screen.dart';
 import 'package:provider/provider.dart';
 
 class WalletScreen extends StatelessWidget {
@@ -128,16 +129,43 @@ class WalletScreen extends StatelessWidget {
                 itemCount: walletProvider.wallets.length,
                 itemBuilder: (context, index) {
                   final wallet = walletProvider.wallets[index];
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: ListTile(
-                      leading: Icon(wallet.icon, size: 40),
-                      title: Text(wallet.name),
-                      subtitle: Text('\$${wallet.balance.toStringAsFixed(2)}'),
-                      trailing: const Icon(Icons.arrow_forward_ios),
-                      onTap: () {
-                        // Navigate to wallet details screen
-                      },
+                  return Dismissible(
+                    key: Key(wallet.id),
+                    direction: DismissDirection.endToStart,
+                    onDismissed: (direction) {
+                      walletProvider.deleteWallet(wallet.id);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${wallet.name} deleted'),
+                          action: SnackBarAction(
+                            label: 'Undo',
+                            onPressed: () {
+                              // walletProvider.addWallet(wallet.name, wallet.balance, wallet.icon);
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                    background: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: const Icon(Icons.delete, color: Colors.white),
+                    ),
+                    child: Card(
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: ListTile(
+                        leading: Icon(wallet.icon, size: 40),
+                        title: Text(wallet.name),
+                        subtitle: Text('\$${wallet.balance.toStringAsFixed(2)}'),
+                        trailing: const Icon(Icons.arrow_forward_ios),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => WalletDetailScreen(wallet: wallet)),
+                          );
+                        },
+                      ),
                     ),
                   );
                 },

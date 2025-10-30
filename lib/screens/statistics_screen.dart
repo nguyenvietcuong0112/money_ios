@@ -17,6 +17,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
   late TabController _tabController;
   late String _selectedMonth;
   final List<String> _months = [];
+  double _spendingLimit = 1000.0;
 
   @override
   void initState() {
@@ -30,6 +31,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
   }
 
   void _generateMonths() {
+    _months.add('All Time');
     final now = DateTime.now();
     for (int i = 0; i < 12; i++) {
       final date = DateTime(now.year, now.month - i, 1);
@@ -43,6 +45,41 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     super.dispose();
   }
 
+  void _setSpendingLimit() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final controller = TextEditingController(text: _spendingLimit.toString());
+        return AlertDialog(
+          title: const Text('Set Spending Limit'),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Limit',
+              suffixText: '\$',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _spendingLimit = double.tryParse(controller.text) ?? _spendingLimit;
+                });
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,7 +88,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
       ),
       body: Column(
         children: [
-          // _buildTotalCard(transactionProvider),
+          _buildSpendingLimitCard(),
           TabBar(
             controller: _tabController,
             tabs: const [
@@ -95,29 +132,75 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     );
   }
 
+  Widget _buildSpendingLimitCard() {
+    final transactionProvider = Provider.of<TransactionProvider>(context);
+    final totalExpense = transactionProvider.totalExpense;
+    final percentage = totalExpense / _spendingLimit;
+
+    return Card(
+      margin: const EdgeInsets.all(16.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Spending Limit', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                TextButton(
+                  onPressed: _setSpendingLimit,
+                  child: const Text('Set Limit'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            LinearProgressIndicator(
+              value: percentage.isNaN || percentage.isInfinite ? 0 : percentage,
+              minHeight: 10,
+              backgroundColor: Colors.grey[300],
+              valueColor: AlwaysStoppedAnimation<Color>(
+                percentage > 1 ? Colors.red : (percentage > 0.8 ? Colors.orange : Colors.green),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text('\$${totalExpense.toStringAsFixed(2)} / \$${_spendingLimit.toStringAsFixed(2)}'),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildChartView(BuildContext context, {required bool isExpense}) {
     final transactionProvider = Provider.of<TransactionProvider>(context);
-    final selectedDate = DateFormat('MMM yyyy').parse(_selectedMonth);
-    final transactions = transactionProvider.transactions
-        .where((t) =>
-            (isExpense
-                ? t.type == TransactionType.expense
-                : t.type == TransactionType.income) &&
-            t.date.year == selectedDate.year &&
-            t.date.month == selectedDate.month)
-        .toList();
+    final List<Transaction> transactions;
+
+    if (_selectedMonth == 'All Time') {
+      transactions = transactionProvider.transactions
+          .where((t) => isExpense ? t.type == TransactionType.expense : t.type == TransactionType.income)
+          .toList();
+    } else {
+      final selectedDate = DateFormat('MMM yyyy').parse(_selectedMonth);
+      transactions = transactionProvider.transactions
+          .where((t) =>
+              (isExpense ? t.type == TransactionType.expense : t.type == TransactionType.income) &&
+              t.date.year == selectedDate.year &&
+              t.date.month == selectedDate.month)
+          .toList();
+    }
 
     final Map<String, double> dataByCategory = {};
+    final Map<String, IconData> iconsByCategory = {};
     for (var transaction in transactions) {
       dataByCategory.update(
         transaction.title, // Using title as category for now
         (value) => value + transaction.amount.abs(),
         ifAbsent: () => transaction.amount.abs(),
       );
+      iconsByCategory.putIfAbsent(transaction.title, () => transaction.icon);
     }
 
     if (dataByCategory.isEmpty) {
-      return const Center(child: Text('No data for this month.'));
+      return const Center(child: Text('No data for this period.'));
     }
 
     final chartData = dataByCategory.entries.toList();
@@ -139,57 +222,27 @@ class _StatisticsScreenState extends State<StatisticsScreen>
 
     return Column(
       children: [
-        SizedBox(
-          height: 220,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: BarChart(
-              BarChartData(
-                alignment: BarChartAlignment.spaceAround,
-                barTouchData: BarTouchData(enabled: false),
-                titlesData: FlTitlesData(
-                  show: true,
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (double value, TitleMeta meta) {
-                        const style = TextStyle(
-                          fontSize: 10,
-                        );
-                        Widget text;
-                        if (value.toInt() < chartData.length) {
-                          text = Text(chartData[value.toInt()].key, style: style);
-                        } else {
-                          text = const Text('', style: style);
-                        }
-                        return Padding(
-                            padding: const EdgeInsets.only(top: 8.0), child: text);
-                      },
-                      reservedSize: 30,
-                    ),
-                  ),
-                  leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+        Card(
+          margin: const EdgeInsets.all(16.0),
+          child: SizedBox(
+            height: 220,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: PieChart(
+                PieChartData(
+                  sections: List.generate(chartData.length, (index) {
+                    final entry = chartData[index];
+                    return PieChartSectionData(
+                      color: colors[index % colors.length],
+                      value: entry.value,
+                      title: '${(entry.value / transactionProvider.totalExpense * 100).toStringAsFixed(0)}%',
+                      radius: 80,
+                      titleStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                    );
+                  }),
+                  sectionsSpace: 2,
+                  centerSpaceRadius: 40,
                 ),
-                borderData: FlBorderData(show: false),
-                gridData: const FlGridData(show: false),
-                barGroups: List.generate(chartData.length, (index) {
-                  final entry = chartData[index];
-                  return BarChartGroupData(
-                    x: index,
-                    barRods: [
-                      BarChartRodData(
-                          toY: entry.value,
-                          color: colors[index % colors.length],
-                          width: 16,
-                          borderRadius: BorderRadius.circular(4))
-                    ],
-                  );
-                }),
               ),
             ),
           ),
@@ -199,17 +252,20 @@ class _StatisticsScreenState extends State<StatisticsScreen>
             itemCount: chartData.length,
             itemBuilder: (context, index) {
               final entry = chartData[index];
-              // final icon = _getIconForCategory(entry.key);
-              return ListTile(
-                // leading: Icon(icon, color: colors[index % colors.length]),
-                title: Text(entry.key),
-                trailing: Text(
-                  '${isExpense ? '-' : '+'}\$${entry.value.toStringAsFixed(2)}',
-                  style: TextStyle(
-                      color: isExpense
-                          ? Colors.red.shade700
-                          : Colors.green.shade700,
-                      fontWeight: FontWeight.w500),
+              final icon = iconsByCategory[entry.key];
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                child: ListTile(
+                  leading: Icon(icon, color: colors[index % colors.length]),
+                  title: Text(entry.key),
+                  trailing: Text(
+                    '${isExpense ? '-' : '+'}\$${entry.value.toStringAsFixed(2)}',
+                    style: TextStyle(
+                        color: isExpense
+                            ? Colors.red.shade700
+                            : Colors.green.shade700,
+                        fontWeight: FontWeight.w500),
+                  ),
                 ),
               );
             },
