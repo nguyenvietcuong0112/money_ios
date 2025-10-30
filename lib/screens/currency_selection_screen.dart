@@ -55,7 +55,7 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Select Currency'),
-        automaticallyImplyLeading: !widget.isInitialSetup, // Hide back button on initial setup
+        automaticallyImplyLeading: !widget.isInitialSetup,
         actions: [
           if (_selectedCurrencyCode != null)
             IconButton(

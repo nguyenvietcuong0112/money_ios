@@ -78,9 +78,10 @@ class MyApp extends StatelessWidget {
                   GlobalWidgetsLocalizations.delegate,
                   GlobalCupertinoLocalizations.delegate,
                 ],
-                home: isFirstTime
-                    ? const LanguageSelectionScreen(isInitialSetup: true)
-                    : const MyHomePage(),
+                // home: isFirstTime
+                //     ? const LanguageSelectionScreen(isInitialSetup: true)
+                //     : const MyHomePage(),
+                home: const LanguageSelectionScreen(isInitialSetup: true),
               );
             },
           );

@@ -43,7 +43,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
   bool _selectionMade = false;
   bool _animationCompleted = false;
 
-  static const double _iconSize = 50.0; // Increased size for Lottie
+  static const double _iconSize = 40;
 
   @override
   void initState() {
@@ -229,8 +229,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
 
     if (_animationCompleted && _finalIconOffset != null) {
       return Positioned(
-        left: _finalIconOffset!.dx - (_iconSize / 2),
-        top: _finalIconOffset!.dy - (_iconSize / 2),
+        left: _finalIconOffset!.dx - (_iconSize/1.2),
+        top: _finalIconOffset!.dy - (_iconSize / 8),
         child: Lottie.asset('assets/animations/hand_tap.json', width: _iconSize, height: _iconSize),
       );
     }
