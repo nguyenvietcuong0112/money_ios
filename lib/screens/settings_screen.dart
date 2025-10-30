@@ -13,23 +13,31 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final appProvider = Provider.of<AppProvider>(context);
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
+
+    // It's safer to handle the case where localizations might not be ready.
+    if (localizations == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Settings')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.translate('settings')!),
+        title: Text(localizations.translate('settings') ?? 'Settings'),
       ),
       body: ListView(
         children: [
           SwitchListTile(
-            title: Text(localizations.translate('dark_mode')!),
+            title: Text(localizations.translate('dark_mode') ?? 'Dark Mode'),
             value: themeProvider.themeMode == ThemeMode.dark,
             onChanged: (value) {
               themeProvider.toggleTheme();
             },
           ),
           ListTile(
-            title: Text(localizations.translate('language')!),
+            title: Text(localizations.translate('language') ?? 'Language'),
             trailing: Text(appProvider.locale?.languageCode ?? ''),
             onTap: () {
               Navigator.of(context).push(
@@ -38,8 +46,8 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
           ListTile(
-            title: Text(localizations.translate('currency')!),
-            trailing: Text(appProvider.currency),
+            title: Text(localizations.translate('currency') ?? 'Currency'),
+            trailing: Text(appProvider.currency ?? ''),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const CurrencySelectionScreen()),
