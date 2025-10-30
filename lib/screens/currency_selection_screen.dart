@@ -1,10 +1,9 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:currency_picker/currency_picker.dart';
 import 'package:money_manager/providers/app_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:money_manager/main.dart'; // Import to access MyHomePage
+import 'package:money_manager/main.dart';
 
 class CurrencySelectionScreen extends StatefulWidget {
   final bool isInitialSetup;
@@ -79,7 +78,7 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               decoration: BoxDecoration(
-                color: isSelected ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : Colors.transparent,
+                color: isSelected ? Theme.of(context).colorScheme.primary.withAlpha(30) : Colors.transparent,
                 border: Border(
                   left: BorderSide(
                     color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,

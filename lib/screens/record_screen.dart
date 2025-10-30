@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:money_manager/models/models.dart';
+import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/providers/app_provider.dart';
-import 'package:money_manager/providers/budget_provider.dart';
+import 'package:money_manager/providers/transaction_provider.dart';
+import 'package:money_manager/screens/add_transaction_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -44,11 +45,17 @@ class _RecordScreenState extends State<RecordScreen> {
           ),
         ],
       ),
-      body: Consumer<BudgetProvider>(
-        builder: (context, budgetProvider, child) {
-          _events = budgetProvider.getTransactionsByMonth(_focusedDay);
+      body: Consumer<TransactionProvider>(
+        builder: (context, transactionProvider, child) {
+          _events = {};
+          for (var transaction in transactionProvider.transactions) {
+            final day = DateTime(transaction.date.year, transaction.date.month, transaction.date.day);
+            if (_events[day] == null) {
+              _events[day] = [];
+            }
+            _events[day]!.add(transaction);
+          }
 
-          final monthlySummary = budgetProvider.getMonthlySummary(_focusedDay);
           final selectedDayTransactions = _getEventsForDay(_selectedDay!);
 
           return SingleChildScrollView(
@@ -155,12 +162,6 @@ class _RecordScreenState extends State<RecordScreen> {
                           );
                         }
                       },
-                      defaultBuilder: (context, day, focusedDay) =>
-                          _buildDayCell(day, budgetProvider, Colors.transparent),
-                      todayBuilder: (context, day, focusedDay) =>
-                          _buildDayCell(day, budgetProvider, Colors.green.shade200),
-                      selectedBuilder: (context, day, focusedDay) =>
-                          _buildDayCell(day, budgetProvider, Colors.green.shade400),
                       markerBuilder: (context, date, events) {
                         return const SizedBox.shrink();
                       },
@@ -175,9 +176,9 @@ class _RecordScreenState extends State<RecordScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildSummaryItem('Income', '${monthlySummary['income']!.toStringAsFixed(0)} ${appProvider.currencySymbol}', Colors.blue),
-                      _buildSummaryItem('Expenses', '${monthlySummary['expense']!.toStringAsFixed(0)} ${appProvider.currencySymbol}', Colors.red),
-                      _buildSummaryItem('Total', '${(monthlySummary['income']! - monthlySummary['expense']!).toStringAsFixed(0)} ${appProvider.currencySymbol}', Colors.black),
+                      _buildSummaryItem('Income', '${transactionProvider.totalIncome.toStringAsFixed(0)} ${appProvider.currencySymbol}', Colors.blue),
+                      _buildSummaryItem('Expenses', '${transactionProvider.totalExpense.toStringAsFixed(0)} ${appProvider.currencySymbol}', Colors.red),
+                      _buildSummaryItem('Total', '${(transactionProvider.totalIncome - transactionProvider.totalExpense).toStringAsFixed(0)} ${appProvider.currencySymbol}', Colors.black),
                     ],
                   ),
                 ),
@@ -190,12 +191,11 @@ class _RecordScreenState extends State<RecordScreen> {
                     itemBuilder: (context, index) {
                       final transaction = selectedDayTransactions[index];
                       return ListTile(
-                        leading: const Icon(Icons.shopping_cart),
-                        title: Text(transaction.category),
-                        subtitle: Text(transaction.note ?? ''),
+                        leading: Icon(transaction.icon, color: transaction.color),
+                        title: Text(transaction.title),
                         trailing: Text(
-                          '${transaction.type == 'income' ? '+' : '-'}${appProvider.currencySymbol}${transaction.amount.toStringAsFixed(2)}',
-                          style: TextStyle(color: transaction.type == 'income' ? Colors.green : Colors.red),
+                          '${transaction.type == TransactionType.income ? '+' : '-'}${appProvider.currencySymbol}${transaction.amount.toStringAsFixed(2)}',
+                          style: TextStyle(color: transaction.type == TransactionType.income ? Colors.green : Colors.red),
                         ),
                       );
                     },
@@ -210,48 +210,13 @@ class _RecordScreenState extends State<RecordScreen> {
           );
         },
       ),
-    );
-  }
-
-  Widget _buildDayCell(DateTime day, BudgetProvider budgetProvider, Color backgroundColor) {
-    final events = _getEventsForDay(day);
-    final summary = budgetProvider.getDailySummary(events);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(4.0),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: 4,
-            left: 4,
-            child: Text(
-              '${day.day}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Positioned(
-            bottom: 4,
-            right: 4,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                if (summary['income']! > 0)
-                  Text(
-                    '+${summary['income']!.toStringAsFixed(0)}',
-                    style: const TextStyle(color: Colors.blue, fontSize: 10, fontWeight: FontWeight.bold),
-                  ),
-                if (summary['expense']! > 0)
-                  Text(
-                    '-${summary['expense']!.toStringAsFixed(0)}',
-                    style: const TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold),
-                  ),
-              ],
-            ),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const AddTransactionScreen()),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

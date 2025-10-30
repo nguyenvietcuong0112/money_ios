@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +5,8 @@ import 'package:money_manager/localization/app_localizations.dart';
 import 'package:money_manager/providers/app_provider.dart';
 import 'package:money_manager/providers/budget_provider.dart';
 import 'package:money_manager/providers/theme_provider.dart';
+import 'package:money_manager/providers/wallet_provider.dart';
+import 'package:money_manager/providers/transaction_provider.dart';
 import 'package:money_manager/screens/screens.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -43,8 +44,10 @@ class MyApp extends StatelessWidget {
     const Color primarySeedColor = Colors.blue;
 
     final TextTheme appTextTheme = TextTheme(
-      displayLarge: GoogleFonts.oswald(fontSize: 57, fontWeight: FontWeight.bold),
-      titleLarge: GoogleFonts.roboto(fontSize: 22, fontWeight: FontWeight.w500),
+      displayLarge:
+          GoogleFonts.oswald(fontSize: 57, fontWeight: FontWeight.bold),
+      titleLarge:
+          GoogleFonts.roboto(fontSize: 22, fontWeight: FontWeight.w500),
       bodyMedium: GoogleFonts.openSans(fontSize: 14),
     );
 
@@ -58,15 +61,18 @@ class MyApp extends StatelessWidget {
       appBarTheme: AppBarTheme(
         backgroundColor: primarySeedColor,
         foregroundColor: Colors.white,
-        titleTextStyle: GoogleFonts.oswald(fontSize: 24, fontWeight: FontWeight.bold),
+        titleTextStyle:
+            GoogleFonts.oswald(fontSize: 24, fontWeight: FontWeight.bold),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           foregroundColor: Colors.white,
           backgroundColor: primarySeedColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          textStyle: GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.w500),
+          textStyle:
+              GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.w500),
         ),
       ),
     );
@@ -81,15 +87,18 @@ class MyApp extends StatelessWidget {
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.grey[900],
         foregroundColor: Colors.white,
-        titleTextStyle: GoogleFonts.oswald(fontSize: 24, fontWeight: FontWeight.bold),
+        titleTextStyle:
+            GoogleFonts.oswald(fontSize: 24, fontWeight: FontWeight.bold),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           foregroundColor: Colors.black,
           backgroundColor: primarySeedColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          textStyle: GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.w500),
+          textStyle:
+              GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.w500),
         ),
       ),
     );
@@ -103,6 +112,8 @@ class MyApp extends StatelessWidget {
                 )),
         ChangeNotifierProvider(create: (context) => BudgetProvider()),
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ChangeNotifierProvider(create: (context) => WalletProvider()),
+        ChangeNotifierProvider(create: (context) => TransactionProvider()),
       ],
       child: Consumer<AppProvider>(
         builder: (context, appProvider, child) {
@@ -125,9 +136,6 @@ class MyApp extends StatelessWidget {
                   GlobalWidgetsLocalizations.delegate,
                   GlobalCupertinoLocalizations.delegate,
                 ],
-                // home: isFirstTime
-                //     ? const LanguageSelectionScreen(isInitialSetup: true)
-                //     : const MyHomePage(),
                 home: const LanguageSelectionScreen(isInitialSetup: true),
               );
             },
@@ -148,12 +156,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
-  static final List<Widget> _widgetOptions = <Widget>[
-    const HomeScreen(),
-    const RecordScreen(),
-    const BudgetScreen(),
-    const StatisticsScreen(),
-    const SettingsScreen(),
+  static const List<Widget> _widgetOptions = <Widget>[
+    HomeScreen(),
+    RecordScreen(),
+    WalletScreen(),
+    StatisticsScreen(),
+    SettingsScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -167,31 +175,32 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     developer.log('Building with selected index: $_selectedIndex',
         name: 'MyHomePage');
+    final localizations = AppLocalizations.of(context);
     return Scaffold(
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+            icon: const Icon(Icons.home),
+            label: localizations?.translate('home') ?? 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.edit_calendar_outlined),
-            label: 'Record',
+            icon: const Icon(Icons.edit_calendar_outlined),
+            label: localizations?.translate('transactions') ?? 'Transactions',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.pie_chart),
-            label: 'Budget',
+            icon: const Icon(Icons.account_balance_wallet),
+            label: localizations?.translate('my_wallet') ?? 'My Wallet',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Statistics',
+            icon: const Icon(Icons.bar_chart),
+            label: localizations?.translate('statistics') ?? 'Statistics',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: const Icon(Icons.settings),
+            label: localizations?.translate('settings') ?? 'Settings',
           ),
         ],
         currentIndex: _selectedIndex,

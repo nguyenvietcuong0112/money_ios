@@ -32,5 +32,11 @@
   "overspent": "Dépenses excessives",
   "statistics": "Statistiques",
   "filter_by": "Filtrer par",
-  "all": "Tout"
+  "all": "Tout",
+  "my_wallet": "Mon Portefeuille",
+  "credit": "Crédit",
+  "e_wallet": "Portefeuille électronique",
+  "bank": "Banque",
+  "cash": "Espèces",
+  "add_wallet": "Ajouter un portefeuille"
 }

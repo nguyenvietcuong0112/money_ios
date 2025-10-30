@@ -15,7 +15,6 @@ class SettingsScreen extends StatelessWidget {
     final appProvider = Provider.of<AppProvider>(context);
     final localizations = AppLocalizations.of(context);
 
-    // It's safer to handle the case where localizations might not be ready.
     if (localizations == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Settings')),
@@ -47,7 +46,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           ListTile(
             title: Text(localizations.translate('currency') ?? 'Currency'),
-            trailing: Text(appProvider.currency ?? ''),
+            trailing: Text(appProvider.currency!),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const CurrencySelectionScreen()),

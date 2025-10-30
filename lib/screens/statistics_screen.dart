@@ -1,10 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import 'package:money_manager/models/models.dart';
-import 'package:money_manager/providers/budget_provider.dart';
-import 'package:money_manager/utils/constants.dart';
+import 'package:money_manager/models/transaction_model.dart';
+import 'package:money_manager/providers/transaction_provider.dart';
 import 'package:provider/provider.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -14,7 +12,8 @@ class StatisticsScreen extends StatefulWidget {
   State<StatisticsScreen> createState() => _StatisticsScreenState();
 }
 
-class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerProviderStateMixin {
+class _StatisticsScreenState extends State<StatisticsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late String _selectedMonth;
   final List<String> _months = [];
@@ -22,7 +21,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     _generateMonths();
     _selectedMonth = _months.first;
     _tabController.addListener(() {
@@ -44,31 +43,20 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
     super.dispose();
   }
 
-  IconData _getIconForCategory(String categoryName) {
-    final category = categories.firstWhere(
-      (c) => c['name'] == categoryName,
-      orElse: () => {'icon': 0xe88f}, // Default icon (help_outline)
-    );
-    return IconData(category['icon'] as int, fontFamily: 'MaterialIcons');
-  }
-
   @override
   Widget build(BuildContext context) {
-    final budgetProvider = Provider.of<BudgetProvider>(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Statistic'),
       ),
       body: Column(
         children: [
-          _buildTotalCard(budgetProvider),
+          // _buildTotalCard(transactionProvider),
           TabBar(
             controller: _tabController,
             tabs: const [
               Tab(text: 'Expense'),
               Tab(text: 'Income'),
-              Tab(text: 'Loan'),
             ],
           ),
           Padding(
@@ -97,9 +85,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildExpenseView(budgetProvider),
-                _buildIncomeView(budgetProvider),
-                _buildLoanView(budgetProvider),
+                _buildChartView(context, isExpense: true),
+                _buildChartView(context, isExpense: false),
               ],
             ),
           ),
@@ -108,107 +95,47 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
     );
   }
 
-  Widget _buildTotalCard(BudgetProvider budgetProvider) {
+  Widget _buildChartView(BuildContext context, {required bool isExpense}) {
+    final transactionProvider = Provider.of<TransactionProvider>(context);
     final selectedDate = DateFormat('MMM yyyy').parse(_selectedMonth);
-    List<Transaction> filteredTransactions;
-
-    if (_tabController.index == 0) { // Expense
-      filteredTransactions = budgetProvider.transactions
-          .where((t) =>
-              t.type == 'expense' &&
-              t.date.year == selectedDate.year &&
-              t.date.month == selectedDate.month)
-          .toList();
-    } else if (_tabController.index == 1) { // Income
-      filteredTransactions = budgetProvider.transactions
-          .where((t) =>
-              t.type == 'income' &&
-              t.date.year == selectedDate.year &&
-              t.date.month == selectedDate.month)
-          .toList();
-    } else { // Loan
-      filteredTransactions = [];
-    }
-
-    final total = filteredTransactions.fold<double>(0, (prev, t) => prev + t.amount);
-
-    return Card(
-      color: Colors.blue.shade700,
-      margin: const EdgeInsets.all(16.0),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Total', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white70)),
-                Text('\$${total.abs().toStringAsFixed(2)}', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            const Icon(Icons.arrow_forward_ios, color: Colors.white54),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildExpenseView(BudgetProvider budgetProvider) {
-    final selectedDate = DateFormat('MMM yyyy').parse(_selectedMonth);
-    final expenses = budgetProvider.transactions
+    final transactions = transactionProvider.transactions
         .where((t) =>
-            t.type == 'expense' &&
+            (isExpense
+                ? t.type == TransactionType.expense
+                : t.type == TransactionType.income) &&
             t.date.year == selectedDate.year &&
             t.date.month == selectedDate.month)
         .toList();
 
-    final Map<String, double> expenseByCategory = {};
-    for (var transaction in expenses) {
-      expenseByCategory.update(
-        transaction.category,
+    final Map<String, double> dataByCategory = {};
+    for (var transaction in transactions) {
+      dataByCategory.update(
+        transaction.title, // Using title as category for now
         (value) => value + transaction.amount.abs(),
         ifAbsent: () => transaction.amount.abs(),
       );
     }
 
-    return _buildChartAndList(expenseByCategory, true);
-  }
-
-  Widget _buildIncomeView(BudgetProvider budgetProvider) {
-    final selectedDate = DateFormat('MMM yyyy').parse(_selectedMonth);
-    final incomes = budgetProvider.transactions
-        .where((t) =>
-            t.type == 'income' &&
-            t.date.year == selectedDate.year &&
-            t.date.month == selectedDate.month)
-        .toList();
-
-    final Map<String, double> incomeByCategory = {};
-    for (var transaction in incomes) {
-      incomeByCategory.update(
-        transaction.category,
-        (value) => value + transaction.amount,
-        ifAbsent: () => transaction.amount,
-      );
-    }
-
-    return _buildChartAndList(incomeByCategory, false);
-  }
-
-  Widget _buildLoanView(BudgetProvider budgetProvider) {
-    return const Center(child: Text('Loan data not available yet'));
-  }
-
-  Widget _buildChartAndList(Map<String, double> data, bool isExpense) {
-    if (data.isEmpty) {
+    if (dataByCategory.isEmpty) {
       return const Center(child: Text('No data for this month.'));
     }
 
-    final chartData = data.entries.toList();
-    final colors = isExpense 
-      ? [Colors.orange.shade400, Colors.pink.shade300, Colors.teal.shade300, Colors.lightBlue.shade300, Colors.purple.shade300] 
-      : [Colors.green.shade400, Colors.blue.shade400, Colors.teal.shade400, Colors.indigo.shade300, Colors.amber.shade400];
+    final chartData = dataByCategory.entries.toList();
+    final colors = isExpense
+        ? [
+            Colors.orange.shade400,
+            Colors.pink.shade300,
+            Colors.teal.shade300,
+            Colors.lightBlue.shade300,
+            Colors.purple.shade300
+          ]
+        : [
+            Colors.green.shade400,
+            Colors.blue.shade400,
+            Colors.teal.shade400,
+            Colors.indigo.shade300,
+            Colors.amber.shade400
+          ];
 
     return Column(
       children: [
@@ -219,7 +146,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
             child: BarChart(
               BarChartData(
                 alignment: BarChartAlignment.spaceAround,
-                barTouchData:  BarTouchData(enabled: false),
+                barTouchData: BarTouchData(enabled: false),
                 titlesData: FlTitlesData(
                   show: true,
                   bottomTitles: AxisTitles(
@@ -235,14 +162,18 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
                         } else {
                           text = const Text('', style: style);
                         }
-                        return Padding(padding: const EdgeInsets.only(top: 8.0), child: text);
+                        return Padding(
+                            padding: const EdgeInsets.only(top: 8.0), child: text);
                       },
                       reservedSize: 30,
                     ),
                   ),
-                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
                 ),
                 borderData: FlBorderData(show: false),
                 gridData: const FlGridData(show: false),
@@ -252,11 +183,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
                     x: index,
                     barRods: [
                       BarChartRodData(
-                        toY: entry.value,
-                        color: colors[index % colors.length],
-                        width: 16,
-                        borderRadius: BorderRadius.circular(4)
-                      )
+                          toY: entry.value,
+                          color: colors[index % colors.length],
+                          width: 16,
+                          borderRadius: BorderRadius.circular(4))
                     ],
                   );
                 }),
@@ -269,12 +199,17 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
             itemCount: chartData.length,
             itemBuilder: (context, index) {
               final entry = chartData[index];
+              // final icon = _getIconForCategory(entry.key);
               return ListTile(
-                leading: Icon(_getIconForCategory(entry.key), color: colors[index % colors.length]),
+                // leading: Icon(icon, color: colors[index % colors.length]),
                 title: Text(entry.key),
                 trailing: Text(
                   '${isExpense ? '-' : '+'}\$${entry.value.toStringAsFixed(2)}',
-                  style: TextStyle(color: isExpense ? Colors.red.shade700 : Colors.green.shade700, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      color: isExpense
+                          ? Colors.red.shade700
+                          : Colors.green.shade700,
+                      fontWeight: FontWeight.w500),
                 ),
               );
             },

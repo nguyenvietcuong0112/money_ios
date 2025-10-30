@@ -32,5 +32,11 @@
   "overspent": "Vượt chi",
   "statistics": "Thống kê",
   "filter_by": "Lọc theo",
-  "all": "Tất cả"
+  "all": "Tất cả",
+  "my_wallet": "Ví của tôi",
+  "credit": "Tín dụng",
+  "e_wallet": "Ví điện tử",
+  "bank": "Ngân hàng",
+  "cash": "Tiền mặt",
+  "add_wallet": "Thêm ví"
 }

@@ -32,5 +32,11 @@
   "overspent": "Overspent",
   "statistics": "Statistics",
   "filter_by": "Filter by",
-  "all": "All"
+  "all": "All",
+  "my_wallet": "My Wallet",
+  "credit": "Credit",
+  "e_wallet": "E-Wallet",
+  "bank": "Bank",
+  "cash": "Cash",
+  "add_wallet": "Add Wallet"
 }
