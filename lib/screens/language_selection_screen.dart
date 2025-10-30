@@ -44,8 +44,6 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
   void initState() {
     super.initState();
     // Per user request, do not pre-select a language.
-    // _selectedLanguageCode =
-    //     Provider.of<AppProvider>(context, listen: false).locale?.languageCode;
 
     for (var code in _languages.keys) {
       _tileKeys[code] = GlobalKey();
@@ -57,7 +55,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
         final RenderBox? englishBox = _tileKeys['en']?.currentContext?.findRenderObject() as RenderBox?;
         if (englishBox != null) {
           setState(() {
-            _initialIconOffset = englishBox.localToGlobal(englishBox.size.center(Offset.zero));
+            _initialIconOffset = englishBox.localToGlobal(Offset.zero);
           });
         }
       }
@@ -142,82 +140,82 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Language'),
-        automaticallyImplyLeading: !widget.isInitialSetup,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: IconButton(
-              key: _appBarActionKey,
-              icon: Icon(
-                Icons.check_circle,
-                color: _selectedLanguageCode != null && !_isAnimating
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.grey.withAlpha(128),
-                size: 30,
+ @override
+Widget build(BuildContext context) {
+  return Stack(
+    children: [
+      Scaffold(
+        appBar: AppBar(
+          title: const Text('Language'),
+          automaticallyImplyLeading: !widget.isInitialSetup,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 20.0),
+              child: IconButton(
+                key: _appBarActionKey,
+                icon: Icon(
+                  Icons.check_circle,
+                  color: _selectedLanguageCode != null && !_isAnimating
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.grey.withAlpha(128),
+                  size: 30,
+                ),
+                onPressed: (_selectedLanguageCode != null && !_isAnimating) ? _onNext : null,
               ),
-              onPressed: (_selectedLanguageCode != null && !_isAnimating) ? _onNext : null,
             ),
+          ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Please select language to continue',
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _languages.length,
+                  itemBuilder: (context, index) {
+                    final code = _languages.keys.elementAt(index);
+                    final lang = _languages[code]!;
+                    return LanguageTile(
+                      key: _tileKeys[code],
+                      title: lang['name']!,
+                      icon: lang['icon']!,
+                      isSelected: _selectedLanguageCode == code,
+                      onTap: () => _onLanguageSelected(code),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Please select language to continue',
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _languages.length,
-                    itemBuilder: (context, index) {
-                      final code = _languages.keys.elementAt(index);
-                      final lang = _languages[code]!;
-                      return LanguageTile(
-                        key: _tileKeys[code],
-                        title: lang['name']!,
-                        icon: lang['icon']!,
-                        isSelected: _selectedLanguageCode == code,
-                        onTap: () => _onLanguageSelected(code),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Show static icon over 'English' before any selection is made
-          if (!_selectionMade && _initialIconOffset != null)
-            Positioned(
-              left: _initialIconOffset!.dx - 15,
-              top: _initialIconOffset!.dy - 15,
+      // Show static icon over 'English' before any selection is made
+      if (!_selectionMade && _initialIconOffset != null)
+        Positioned(
+          left: _initialIconOffset!.dx + 16, // Adjust for padding
+          top: _initialIconOffset!.dy, // Adjust for padding
+          child: const Icon(Icons.touch_app, size: 30, color: Colors.green),
+        ),
+      
+      // Show animating/final icon after a selection is made
+      if (_selectionMade && _animation != null)
+        AnimatedBuilder(
+          animation: _animation!,
+          builder: (context, child) {
+            return Positioned(
+              left: _animation!.value.dx - 15,
+              top: _animation!.value.dy - 15,
               child: const Icon(Icons.touch_app, size: 30, color: Colors.green),
-            ),
-          
-          // Show animating/final icon after a selection is made
-          if (_selectionMade && _animation != null)
-            AnimatedBuilder(
-              animation: _animation!,
-              builder: (context, child) {
-                return Positioned(
-                  left: _animation!.value.dx - 15,
-                  top: _animation!.value.dy - 15,
-                  child: const Icon(Icons.touch_app, size: 30, color: Colors.green),
-                );
-              },
-            ),
-        ],
-      ),
-    );
-  }
+            );
+          },
+        ),
+    ],
+  );
+}
 }
