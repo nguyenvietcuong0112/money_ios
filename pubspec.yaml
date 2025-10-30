@@ -1,12 +1,12 @@
 name: money_manager
 description: A new Flutter project.
 
-publish_to: 'none'
+publish_to: 'none' 
 
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.2.3 <4.0.0'
+  sdk: '>=3.1.5 <4.0.0'
 
 dependencies:
   flutter:
@@ -16,10 +16,12 @@ dependencies:
   cupertino_icons: ^1.0.2
   provider: ^6.1.1
   shared_preferences: ^2.2.2
+  fl_chart: ^0.63.0
+  flutter_svg: ^2.0.9
+  lottie: ^3.1.2
   intl: ^0.20.2
   currency_picker: ^2.0.21
-  table_calendar: ^3.2.0
-  fl_chart: ^0.63.0
+  table_calendar: ^3.1.2
 
 dev_dependencies:
   flutter_test:
@@ -28,5 +30,20 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
   assets:
+    - assets/images/
+    - assets/icons/
+    - assets/animations/
     - assets/translations/
+
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700

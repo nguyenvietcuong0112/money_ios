@@ -69,37 +69,16 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
         itemCount: _currencies.length,
         itemBuilder: (context, index) {
           final currency = _currencies[index];
-          return InkWell(
-            onTap: () {
+          return RadioListTile<String>(
+            title: Text('${currency.name} (${currency.code})'),
+            subtitle: Text(currency.symbol),
+            value: currency.code,
+            groupValue: _selectedCurrencyCode,
+            onChanged: (String? value) {
               setState(() {
-                _selectedCurrencyCode = currency.code;
+                _selectedCurrencyCode = value;
               });
             },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Row(
-                children: [
-                  Radio<String>(
-                    value: currency.code,
-                    groupValue: _selectedCurrencyCode,
-                    onChanged: (String? value) {
-                      setState(() {
-                        _selectedCurrencyCode = value;
-                      });
-                    },
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('${currency.name} (${currency.code})'),
-                        Text(currency.symbol, style: const TextStyle(color: Colors.grey)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
           );
         },
       ),

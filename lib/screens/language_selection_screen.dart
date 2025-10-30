@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:money_manager/providers/app_provider.dart';
@@ -35,14 +36,14 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
 
   AnimationController? _animationController;
   Animation<Offset>? _animation;
-  Offset? _initialIconOffset; // Position for the initial icon over 'English'
-  Offset? _finalIconOffset; // Position for the icon over the 'Next' button
+  Offset? _initialIconOffset;
+  Offset? _finalIconOffset;
 
   bool _isAnimating = false;
-  bool _selectionMade = false; // To track if a selection has occurred
-  bool _animationCompleted = false; // To track if the animation has finished once
+  bool _selectionMade = false;
+  bool _animationCompleted = false;
 
-  static const double _iconSize = 30.0;
+  static const double _iconSize = 50.0; // Increased size for Lottie
 
   @override
   void initState() {
@@ -51,7 +52,6 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
       _tileKeys[code] = GlobalKey();
     }
 
-    // After the first frame, get the position of the 'English' tile for the initial icon placement.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final RenderBox? englishBox =
@@ -72,8 +72,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
     _animationController!.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         setState(() {
-          _isAnimating = false; // Animation is done
-          _animationCompleted = true; // Mark that animation has run once
+          _isAnimating = false;
+          _animationCompleted = true;
         });
       }
     });
@@ -86,41 +86,40 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
   }
 
   void _onLanguageSelected(String languageCode) {
-    if (_isAnimating || _animationCompleted) return; // Prevent selection during/after animation
-
     setState(() {
       _selectedLanguageCode = languageCode;
-      _selectionMade = true; // A selection has been made
     });
 
-    // Animate the icon from the selected tile to the next button
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final RenderBox? startBox =
-          _tileKeys[languageCode]!.currentContext?.findRenderObject() as RenderBox?;
-      final RenderBox? endBox =
-          _appBarActionKey.currentContext?.findRenderObject() as RenderBox?;
+    if (!_animationCompleted) {
+      _selectionMade = true;
+      
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final RenderBox? startBox =
+            _tileKeys[languageCode]!.currentContext?.findRenderObject() as RenderBox?;
+        final RenderBox? endBox =
+            _appBarActionKey.currentContext?.findRenderObject() as RenderBox?;
 
-      if (startBox != null && endBox != null) {
-        final startOffset = startBox.localToGlobal(startBox.size.center(Offset.zero));
-        final endOffset = endBox.localToGlobal(endBox.size.center(Offset.zero));
+        if (startBox != null && endBox != null) {
+          final startOffset = startBox.localToGlobal(startBox.size.center(Offset.zero));
+          final endOffset = endBox.localToGlobal(endBox.size.center(Offset.zero));
 
-        // Store the final offset so we can place the icon there statically after animation
-        _finalIconOffset = endOffset;
+          _finalIconOffset = endOffset;
 
-        _animation = Tween<Offset>(
-          begin: startOffset,
-          end: endOffset,
-        ).animate(CurvedAnimation(
-          parent: _animationController!,
-          curve: Curves.easeInOut,
-        ));
+          _animation = Tween<Offset>(
+            begin: startOffset,
+            end: endOffset,
+          ).animate(CurvedAnimation(
+            parent: _animationController!,
+            curve: Curves.easeInOut,
+          ));
 
-        setState(() {
-          _isAnimating = true; // Start the animation
-        });
-        _animationController!.forward(from: 0.0);
-      }
-    });
+          setState(() {
+            _isAnimating = true;
+          });
+          _animationController!.forward(from: 0.0);
+        }
+      });
+    }
   }
 
   void _onNext() async {
@@ -161,12 +160,12 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                   key: _appBarActionKey,
                   icon: Icon(
                     Icons.check_circle,
-                    color: _selectedLanguageCode != null && !_isAnimating
+                    color: _selectedLanguageCode != null
                         ? Theme.of(context).colorScheme.primary
                         : Colors.grey.withAlpha(128),
                     size: 30,
                   ),
-                  onPressed: (_selectedLanguageCode != null && !_isAnimating) ? _onNext : null,
+                  onPressed: _selectedLanguageCode != null ? _onNext : null,
                 ),
               ),
             ],
@@ -201,23 +200,20 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
             ),
           ),
         ),
-        // This part handles the animated icon overlay
-        if (_initialIconOffset != null) _buildIconOverlay(),
+        if (_initialIconOffset != null) _buildLottieOverlay(),
       ],
     );
   }
 
-  Widget _buildIconOverlay() {
-    // State 1: Before any selection, show a static icon over 'English'
+  Widget _buildLottieOverlay() {
     if (!_selectionMade) {
       return Positioned(
         left: _initialIconOffset!.dx - (_iconSize / 2),
         top: _initialIconOffset!.dy - (_iconSize / 2),
-        child: const Icon(Icons.touch_app, size: _iconSize, color: Colors.green),
+        child: Lottie.asset('assets/animations/hand_tap.json', width: _iconSize, height: _iconSize),
       );
     }
 
-    // State 2: During the animation from selection to the 'Next' button
     if (_isAnimating && _animation != null) {
       return AnimatedBuilder(
         animation: _animation!,
@@ -225,22 +221,20 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
           return Positioned(
             left: _animation!.value.dx - (_iconSize / 2),
             top: _animation!.value.dy - (_iconSize / 2),
-            child: const Icon(Icons.touch_app, size: _iconSize, color: Colors.green),
+            child: Lottie.asset('assets/animations/hand_tap.json', width: _iconSize, height: _iconSize),
           );
         },
       );
     }
 
-    // State 3: After the animation is complete, show a static icon over the 'Next' button
     if (_animationCompleted && _finalIconOffset != null) {
       return Positioned(
         left: _finalIconOffset!.dx - (_iconSize / 2),
         top: _finalIconOffset!.dy - (_iconSize / 2),
-        child: const Icon(Icons.touch_app, size: _iconSize, color: Colors.green),
+        child: Lottie.asset('assets/animations/hand_tap.json', width: _iconSize, height: _iconSize),
       );
     }
 
-    // Default empty widget if none of the states match
     return const SizedBox.shrink();
   }
 }
