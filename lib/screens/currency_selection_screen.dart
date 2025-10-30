@@ -69,16 +69,42 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
         itemCount: _currencies.length,
         itemBuilder: (context, index) {
           final currency = _currencies[index];
-          return RadioListTile<String>(
-            title: Text('${currency.name} (${currency.code})'),
-            subtitle: Text(currency.symbol),
-            value: currency.code,
-            groupValue: _selectedCurrencyCode,
-            onChanged: (String? value) {
+          final isSelected = currency.code == _selectedCurrencyCode;
+          return InkWell(
+            onTap: () {
               setState(() {
-                _selectedCurrencyCode = value;
+                _selectedCurrencyCode = currency.code;
               });
             },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              decoration: BoxDecoration(
+                color: isSelected ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : Colors.transparent,
+                border: Border(
+                  left: BorderSide(
+                    color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
+                    width: 4.0,
+                  ),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Text(currency.symbol, style: const TextStyle(fontSize: 24.0)),
+                  const SizedBox(width: 16.0),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(currency.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        Text(currency.code),
+                      ],
+                    ),
+                  ),
+                  if (isSelected)
+                    Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary),
+                ],
+              ),
+            ),
           );
         },
       ),
