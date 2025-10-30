@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 part 'category_model.g.dart';
@@ -9,10 +8,14 @@ class Category {
   final String name;
 
   @HiveField(1)
-  final IconData icon;
+  final String iconPath;
 
   @HiveField(2)
-  final Color color;
+  final int colorValue;
 
-  Category({required this.name, required this.icon, required this.color});
+  Category({
+    required this.name,
+    required this.iconPath,
+    required this.colorValue,
+  });
 }

@@ -20,7 +20,7 @@ class WalletAdapter extends TypeAdapter<Wallet> {
       id: fields[0] as String,
       name: fields[1] as String,
       balance: fields[2] as double,
-      icon: fields[3] as IconData,
+      iconPath: fields[3] as String,
       image: fields[4] as String?,
     );
   }
@@ -36,7 +36,7 @@ class WalletAdapter extends TypeAdapter<Wallet> {
       ..writeByte(2)
       ..write(obj.balance)
       ..writeByte(3)
-      ..write(obj.icon)
+      ..write(obj.iconPath)
       ..writeByte(4)
       ..write(obj.image);
   }

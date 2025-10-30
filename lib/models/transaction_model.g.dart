@@ -22,8 +22,8 @@ class TransactionAdapter extends TypeAdapter<Transaction> {
       amount: fields[2] as double,
       date: fields[3] as DateTime,
       type: fields[4] as TransactionType,
-      icon: fields[5] as IconData,
-      color: fields[6] as Color,
+      iconPath: fields[5] as String,
+      colorValue: fields[6] as int,
       walletId: fields[7] as String,
     );
   }
@@ -43,9 +43,9 @@ class TransactionAdapter extends TypeAdapter<Transaction> {
       ..writeByte(4)
       ..write(obj.type)
       ..writeByte(5)
-      ..write(obj.icon)
+      ..write(obj.iconPath)
       ..writeByte(6)
-      ..write(obj.color)
+      ..write(obj.colorValue)
       ..writeByte(7)
       ..write(obj.walletId);
   }

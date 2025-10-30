@@ -44,14 +44,11 @@ class WalletScreen extends StatelessWidget {
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
                       leading: CircleAvatar(
-                        backgroundColor: (wallet.icon.codePoint == Icons.credit_card.codePoint)
-                            ? Colors.blue.shade100
-                            : (wallet.icon.codePoint == Icons.account_balance_wallet.codePoint)
-                                ? Colors.orange.shade100
-                                : (wallet.icon.codePoint == Icons.account_balance.codePoint)
-                                    ? Colors.blue.shade200
-                                    : Colors.green.shade100,
-                        child: Icon(wallet.icon, color: Colors.black54),
+                        backgroundColor: Colors.grey.shade100,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Image.asset(wallet.iconPath),
+                        ),
                       ),
                       title: Text(wallet.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text(

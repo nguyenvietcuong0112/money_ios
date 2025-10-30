@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/models/wallet_model.dart';
 import 'package:money_manager/providers/transaction_provider.dart';
 import 'package:provider/provider.dart';
@@ -48,13 +49,19 @@ class WalletDetailScreen extends StatelessWidget {
                   final transaction = walletTransactions[index];
                   return Card(
                     child: ListTile(
-                      leading: Icon(transaction.icon, color: transaction.color),
+                      leading: CircleAvatar(
+                        backgroundColor: Color(transaction.colorValue),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Image.asset(transaction.iconPath),
+                        ),
+                      ),
                       title: Text(transaction.title),
                       subtitle: Text(transaction.date.toString()),
                       trailing: Text(
                         '\$${transaction.amount.toStringAsFixed(2)}',
                         style: TextStyle(
-                          color: transaction.type == 'expense' ? Colors.red : Colors.green,
+                          color: transaction.type == TransactionType.expense ? Colors.red : Colors.green,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

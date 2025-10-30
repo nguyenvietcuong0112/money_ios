@@ -22,19 +22,20 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Category? _selectedCategory;
   Wallet? _selectedWallet;
 
+  // Updated categories list with iconPath and colorValue
   final List<Category> _categories = [
-    Category(name: 'Food & Dr...', icon: Icons.fastfood, color: Colors.orange),
-    Category(name: 'Household', icon: Icons.house, color: Colors.blue),
-    Category(name: 'Shopping', icon: Icons.shopping_cart, color: Colors.purple),
-    Category(name: 'House', icon: Icons.home, color: Colors.green),
-    Category(name: 'Travel', icon: Icons.flight, color: Colors.indigo),
-    Category(name: 'Sport', icon: Icons.sports_basketball, color: Colors.red),
-    Category(name: 'Cosmetics', icon: Icons.face, color: Colors.pink),
-    Category(name: 'Water Bill', icon: Icons.water_drop, color: Colors.lightBlue),
-    Category(name: 'Electric Bill', icon: Icons.lightbulb, color: Colors.yellow),
-    Category(name: 'Phone', icon: Icons.phone, color: Colors.grey),
-    Category(name: 'Education', icon: Icons.school, color: Colors.brown),
-    Category(name: 'Medical', icon: Icons.medical_services, color: Colors.redAccent),
+    Category(name: 'Food & Dr...', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.orange.value),
+    Category(name: 'Household', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.blue.value),
+    Category(name: 'Shopping', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.purple.value),
+    Category(name: 'House', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.green.value),
+    Category(name: 'Travel', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.indigo.value),
+    Category(name: 'Sport', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.red.value),
+    Category(name: 'Cosmetics', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.pink.value),
+    Category(name: 'Water Bill', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.lightBlue.value),
+    Category(name: 'Electric Bill', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.yellow.value),
+    Category(name: 'Phone', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.grey.value),
+    Category(name: 'Education', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.brown.value),
+    Category(name: 'Medical', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.redAccent.value),
   ];
 
   void _submitData() {
@@ -52,8 +53,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       enteredAmount,
       _selectedDate,
       _selectedType,
-      _selectedCategory!.icon,
-      _selectedCategory!.color,
+      _selectedCategory!.iconPath,
+      _selectedCategory!.colorValue,
       _selectedWallet!.id,
     );
 
@@ -203,7 +204,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               itemBuilder: (context, index) {
                 final wallet = wallets[index];
                 return ListTile(
-                  leading: Icon(wallet.icon),
+                  leading: Image.asset(wallet.iconPath, width: 24, height: 24),
                   title: Text(wallet.name),
                   onTap: () {
                     setState(() {
@@ -251,6 +252,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           itemBuilder: (context, index) {
             final category = _categories[index];
             final isSelected = _selectedCategory?.name == category.name;
+            final categoryColor = Color(category.colorValue);
             return GestureDetector(
               onTap: () {
                 setState(() {
@@ -259,14 +261,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: isSelected ? category.color.withOpacity(0.3) : Colors.grey[200],
+                  color: isSelected ? categoryColor.withAlpha(75) : Colors.grey[200],
                   borderRadius: BorderRadius.circular(10.0),
-                  border: isSelected ? Border.all(color: category.color, width: 2) : null,
+                  border: isSelected ? Border.all(color: categoryColor, width: 2) : null,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(category.icon, size: 30, color: category.color),
+                    Image.asset(category.iconPath, width: 30, height: 30, color: categoryColor),
                     const SizedBox(height: 5),
                     Text(category.name, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12)),
                   ],

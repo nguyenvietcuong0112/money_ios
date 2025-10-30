@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 part 'transaction_model.g.dart';
@@ -30,10 +29,10 @@ class Transaction {
   final TransactionType type;
 
   @HiveField(5)
-  final IconData icon;
+  final String iconPath;
 
   @HiveField(6)
-  final Color color;
+  final int colorValue;
 
   @HiveField(7)
   final String walletId;
@@ -44,8 +43,8 @@ class Transaction {
     required this.amount,
     required this.date,
     required this.type,
-    required this.icon,
-    required this.color,
+    required this.iconPath,
+    required this.colorValue,
     required this.walletId,
   });
 }

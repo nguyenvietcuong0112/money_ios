@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 part 'wallet_model.g.dart';
@@ -15,15 +14,16 @@ class Wallet {
   final double balance;
 
   @HiveField(3)
-  final IconData icon;
+  final String iconPath;
 
   @HiveField(4)
   final String? image;
 
-  Wallet(
-      {required this.id,
-      required this.name,
-      required this.balance,
-      required this.icon,
-      this.image});
+  Wallet({
+    required this.id,
+    required this.name,
+    required this.balance,
+    required this.iconPath,
+    this.image,
+  });
 }

@@ -13,19 +13,12 @@ class AddWalletScreen extends StatefulWidget {
 class _AddWalletScreenState extends State<AddWalletScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  IconData _selectedIcon = Icons.account_balance_wallet;
+  String _selectedIconPath = 'assets/icons/ic_food.png';
 
-  final List<IconData> _icons = [
-    Icons.account_balance_wallet,
-    Icons.credit_card,
-    Icons.account_balance,
-    Icons.money,
-    Icons.sports_esports,
-    Icons.camera_alt,
-    Icons.shopping_cart,
-    Icons.train,
-    Icons.lightbulb_outline,
-    Icons.local_hospital,
+  // This list should be populated with your actual icon assets
+  final List<String> _iconPaths = [
+    'assets/icons/ic_food.png',
+    // Add more icon paths here as you add them to your assets
   ];
 
   @override
@@ -41,7 +34,8 @@ class _AddWalletScreenState extends State<AddWalletScreen> {
             onPressed: () {
               if (_formKey.currentState!.validate()) {
                 final name = _nameController.text;
-                Provider.of<WalletProvider>(context, listen: false).addWallet(name, 0.0, _selectedIcon);
+                Provider.of<WalletProvider>(context, listen: false)
+                    .addWallet(name, 0.0, _selectedIconPath);
                 Navigator.pop(context);
               }
             },
@@ -78,25 +72,32 @@ class _AddWalletScreenState extends State<AddWalletScreen> {
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
                   ),
-                  itemCount: _icons.length,
+                  itemCount: _iconPaths.length,
                   itemBuilder: (context, index) {
-                    final icon = _icons[index];
+                    final iconPath = _iconPaths[index];
                     return GestureDetector(
                       onTap: () {
                         setState(() {
-                          _selectedIcon = icon;
+                          _selectedIconPath = iconPath;
                         });
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: _selectedIcon == icon ? Colors.green.withAlpha(70) : Colors.grey.withAlpha(30),
+                          color: _selectedIconPath == iconPath
+                              ? Colors.green.withAlpha(70)
+                              : Colors.grey.withAlpha(30),
                           borderRadius: BorderRadius.circular(8.0),
                           border: Border.all(
-                            color: _selectedIcon == icon ? Colors.green : Colors.transparent,
+                            color: _selectedIconPath == iconPath
+                                ? Colors.green
+                                : Colors.transparent,
                             width: 2,
                           ),
                         ),
-                        child: Icon(icon, size: 30, color: _selectedIcon == icon ? Colors.green : Colors.black),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Image.asset(iconPath),
+                        ),
                       ),
                     );
                   },

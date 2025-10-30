@@ -31,8 +31,8 @@ class TransactionProvider with ChangeNotifier {
     double amount,
     DateTime date,
     TransactionType type,
-    IconData icon,
-    Color color,
+    String iconPath,
+    int colorValue,
     String walletId,
   ) {
     final newTransaction = Transaction(
@@ -41,8 +41,8 @@ class TransactionProvider with ChangeNotifier {
       amount: amount,
       date: date,
       type: type,
-      icon: icon,
-      color: color,
+      iconPath: iconPath,
+      colorValue: colorValue,
       walletId: walletId,
     );
     _transactionsBox.put(newTransaction.id, newTransaction);

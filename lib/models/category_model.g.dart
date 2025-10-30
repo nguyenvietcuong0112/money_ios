@@ -18,8 +18,8 @@ class CategoryAdapter extends TypeAdapter<Category> {
     };
     return Category(
       name: fields[0] as String,
-      icon: fields[1] as IconData,
-      color: fields[2] as Color,
+      iconPath: fields[1] as String,
+      colorValue: fields[2] as int,
     );
   }
 
@@ -30,9 +30,9 @@ class CategoryAdapter extends TypeAdapter<Category> {
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
-      ..write(obj.icon)
+      ..write(obj.iconPath)
       ..writeByte(2)
-      ..write(obj.color);
+      ..write(obj.colorValue);
   }
 
   @override

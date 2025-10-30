@@ -145,23 +145,24 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
+  late final List<Widget> _widgetOptions;
 
   @override
   void initState() {
     super.initState();
+    _widgetOptions = <Widget>[
+      const HomeScreen(),
+      RecordScreen(onScreenChanged: _onItemTapped),
+      const WalletScreen(),
+      StatisticsScreen(onScreenChanged: _onItemTapped),
+      const SettingsScreen(),
+    ];
+
     // Setup initial wallets after the first frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<WalletProvider>(context, listen: false).setupInitialWallets(context);
     });
   }
-
-  static const List<Widget> _widgetOptions = <Widget>[
-    HomeScreen(),
-    RecordScreen(),
-    WalletScreen(),
-    StatisticsScreen(),
-    SettingsScreen(),
-  ];
 
   void _onItemTapped(int index) {
     developer.log('Tapped index: $index', name: 'MyHomePage');

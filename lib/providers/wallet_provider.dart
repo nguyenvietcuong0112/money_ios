@@ -25,30 +25,32 @@ class WalletProvider with ChangeNotifier {
   void setupInitialWallets(BuildContext context) {
     if (_wallets.isEmpty) {
       final localizations = AppLocalizations.of(context)!;
+      const String placeholderIcon = 'assets/icons/ic_food.png';
+
       final initialWallets = [
         Wallet(
           id: const Uuid().v4(),
           name: localizations.translate('credit') ?? 'Credit',
           balance: 0,
-          icon: Icons.credit_card,
+          iconPath: placeholderIcon,
         ),
         Wallet(
           id: const Uuid().v4(),
           name: localizations.translate('e_wallet') ?? 'E-Wallet',
           balance: 0,
-          icon: Icons.account_balance_wallet,
+          iconPath: placeholderIcon,
         ),
         Wallet(
           id: const Uuid().v4(),
           name: localizations.translate('bank') ?? 'Bank',
           balance: 0,
-          icon: Icons.account_balance,
+          iconPath: placeholderIcon,
         ),
         Wallet(
           id: const Uuid().v4(),
           name: localizations.translate('cash') ?? 'Cash',
           balance: 0,
-          icon: Icons.money,
+          iconPath: placeholderIcon,
         ),
       ];
 
@@ -59,12 +61,12 @@ class WalletProvider with ChangeNotifier {
     }
   }
 
-  void addWallet(String name, double initialBalance, IconData icon) {
+  void addWallet(String name, double initialBalance, String iconPath) {
     final newWallet = Wallet(
       id: const Uuid().v4(),
       name: name,
       balance: initialBalance,
-      icon: icon,
+      iconPath: iconPath,
     );
     _walletsBox.put(newWallet.id, newWallet);
     _loadWallets();
@@ -77,7 +79,7 @@ class WalletProvider with ChangeNotifier {
         id: wallet.id,
         name: wallet.name,
         balance: wallet.balance + amount,
-        icon: wallet.icon,
+        iconPath: wallet.iconPath,
         image: wallet.image,
       );
       _walletsBox.put(walletId, updatedWallet);
