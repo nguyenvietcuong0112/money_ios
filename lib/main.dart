@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:money_manager/localization/app_localizations.dart';
+import 'package:money_manager/models/budget_model.dart';
 import 'package:money_manager/models/category_model.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/models/wallet_model.dart';
@@ -27,9 +28,11 @@ void main() async {
   Hive.registerAdapter(TransactionTypeAdapter());
   Hive.registerAdapter(TransactionAdapter());
   Hive.registerAdapter(WalletAdapter());
+  Hive.registerAdapter(BudgetModelAdapter());
 
   await Hive.openBox<Wallet>('wallets');
   await Hive.openBox<Transaction>('transactions');
+  await Hive.openBox<BudgetModel>('budgets');
 
   final prefs = await SharedPreferences.getInstance();
   final isFirstTime = prefs.getBool('isFirstTime') ?? true;
