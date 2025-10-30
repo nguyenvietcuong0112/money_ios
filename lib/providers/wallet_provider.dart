@@ -17,7 +17,44 @@ class WalletProvider with ChangeNotifier {
 
   void _loadWallets() {
     _wallets = _walletsBox.values.toList();
+    if (_wallets.isEmpty) {
+      _createInitialWallets();
+    }
     notifyListeners();
+  }
+
+  void _createInitialWallets() {
+    final initialWallets = [
+      Wallet(
+        id: const Uuid().v4(),
+        name: 'Credit',
+        balance: 0,
+        icon: Icons.credit_card,
+      ),
+      Wallet(
+        id: const Uuid().v4(),
+        name: 'E-Wallet',
+        balance: -120,
+        icon: Icons.account_balance_wallet,
+      ),
+      Wallet(
+        id: const Uuid().v4(),
+        name: 'Bank',
+        balance: -40,
+        icon: Icons.account_balance,
+      ),
+      Wallet(
+        id: const Uuid().v4(),
+        name: 'Cash',
+        balance: 0,
+        icon: Icons.money,
+      ),
+    ];
+
+    for (var wallet in initialWallets) {
+      _walletsBox.put(wallet.id, wallet);
+    }
+    _loadWallets(); // Reload wallets after creation
   }
 
   void addWallet(String name, double initialBalance, IconData icon) {
