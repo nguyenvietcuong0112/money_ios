@@ -8,7 +8,8 @@ This document outlines the structure and features of the Money Manager app, a Fl
 
 ### Core Features
 
-*   **Multi-Wallet Management:** Users can create and manage multiple wallets, each with its own balance.
+*   **Multi-Wallet Management:** Users can create and manage multiple wallets. The app automatically creates four default wallets (Credit, E-Wallet, Bank, Cash) with a starting balance of zero if no wallets exist.
+*   **Redesigned Wallet Screen:** A modern, intuitive UI for the wallet screen that provides a clear overview of the total balance and individual wallets.
 *   **Transaction Tracking:** Users can add income and expense transactions to their wallets.
 *   **Category Management:** Transactions can be assigned to categories, each with its own name, icon, and color.
 *   **Data Persistence:** All data is stored locally using Hive.
@@ -55,6 +56,14 @@ lib
 ```
 
 ## Current Plan
+
+*   **Implement Transaction Management:**
+    1.  Design and build the `add_transaction_screen.dart` UI to allow users to input transaction details (amount, type (income/expense), category, wallet, date, description).
+    2.  Implement the logic in `transaction_provider.dart` to add new transactions and update the corresponding wallet balance.
+    3.  Display the list of transactions in the `WalletDetailScreen`.
+    4.  Display recent transactions on the `HomeScreen`.
+
+## Future Ideas
 
 *   **Improve `SettingsScreen`:**
     *   Restructure the UI using `Card` widgets.

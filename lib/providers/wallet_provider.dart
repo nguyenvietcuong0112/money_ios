@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:money_manager/localization/app_localizations.dart';
 import 'package:money_manager/models/wallet_model.dart';
 import 'package:uuid/uuid.dart';
 
@@ -13,48 +14,49 @@ class WalletProvider with ChangeNotifier {
 
   List<Wallet> get wallets => _wallets;
 
-  double get totalBalance => _wallets.fold(0, (sum, item) => sum + item.balance);
+  double get totalBalance =>
+      _wallets.fold(0, (sum, item) => sum + item.balance);
 
   void _loadWallets() {
     _wallets = _walletsBox.values.toList();
-    if (_wallets.isEmpty) {
-      _createInitialWallets();
-    }
     notifyListeners();
   }
 
-  void _createInitialWallets() {
-    final initialWallets = [
-      Wallet(
-        id: const Uuid().v4(),
-        name: 'Credit',
-        balance: 0,
-        icon: Icons.credit_card,
-      ),
-      Wallet(
-        id: const Uuid().v4(),
-        name: 'E-Wallet',
-        balance: 0,
-        icon: Icons.account_balance_wallet,
-      ),
-      Wallet(
-        id: const Uuid().v4(),
-        name: 'Bank',
-        balance: 0,
-        icon: Icons.account_balance,
-      ),
-      Wallet(
-        id: const Uuid().v4(),
-        name: 'Cash',
-        balance: 0,
-        icon: Icons.money,
-      ),
-    ];
+  void setupInitialWallets(BuildContext context) {
+    if (_wallets.isEmpty) {
+      final localizations = AppLocalizations.of(context)!;
+      final initialWallets = [
+        Wallet(
+          id: const Uuid().v4(),
+          name: localizations.translate('credit') ?? 'Credit',
+          balance: 0,
+          icon: Icons.credit_card,
+        ),
+        Wallet(
+          id: const Uuid().v4(),
+          name: localizations.translate('e_wallet') ?? 'E-Wallet',
+          balance: 0,
+          icon: Icons.account_balance_wallet,
+        ),
+        Wallet(
+          id: const Uuid().v4(),
+          name: localizations.translate('bank') ?? 'Bank',
+          balance: 0,
+          icon: Icons.account_balance,
+        ),
+        Wallet(
+          id: const Uuid().v4(),
+          name: localizations.translate('cash') ?? 'Cash',
+          balance: 0,
+          icon: Icons.money,
+        ),
+      ];
 
-    for (var wallet in initialWallets) {
-      _walletsBox.put(wallet.id, wallet);
+      for (var wallet in initialWallets) {
+        _walletsBox.put(wallet.id, wallet);
+      }
+      _loadWallets(); // Reload wallets after creation
     }
-    _loadWallets(); // Reload wallets after creation
   }
 
   void addWallet(String name, double initialBalance, IconData icon) {
