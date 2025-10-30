@@ -35,19 +35,33 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
 
   AnimationController? _animationController;
   Animation<Offset>? _animation;
+  Offset? _initialIconOffset; // Position for the initial icon over 'English'
 
   bool _isAnimating = false;
-  bool _selectionMade = false; // To track if the animation icon should be visible
+  bool _selectionMade = false; // To track if a selection has occurred
 
   @override
   void initState() {
     super.initState();
-    _selectedLanguageCode =
-        Provider.of<AppProvider>(context, listen: false).locale?.languageCode;
+    // Per user request, do not pre-select a language.
+    // _selectedLanguageCode =
+    //     Provider.of<AppProvider>(context, listen: false).locale?.languageCode;
 
     for (var code in _languages.keys) {
       _tileKeys[code] = GlobalKey();
     }
+
+    // After the first frame, get the position of the 'English' tile for the initial icon placement.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final RenderBox? englishBox = _tileKeys['en']?.currentContext?.findRenderObject() as RenderBox?;
+        if (englishBox != null) {
+          setState(() {
+            _initialIconOffset = englishBox.localToGlobal(englishBox.size.center(Offset.zero));
+          });
+        }
+      }
+    });
 
     _animationController = AnimationController(
       vsync: this,
@@ -59,7 +73,6 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
         setState(() {
           _isAnimating = false; // Animation is done
         });
-        // DO NOT navigate automatically. Wait for user to press the button.
       }
     });
   }
@@ -75,10 +88,10 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
 
     setState(() {
       _selectedLanguageCode = languageCode;
-      _selectionMade = true; // A selection has been made, prepare for animation
+      _selectionMade = true; // A selection has been made
     });
 
-    // Ensure the keys are available before starting the animation
+    // Animate the icon from the selected tile to the next button
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final RenderBox? startBox =
           _tileKeys[languageCode]!.currentContext?.findRenderObject() as RenderBox?;
@@ -106,7 +119,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
   }
 
   void _onNext() async {
-    if (_selectedLanguageCode != null && ! _isAnimating) {
+    // This button should only be pressable if a language is selected and not animating.
+    if (_selectedLanguageCode != null && !_isAnimating) {
       final locale = Locale(_selectedLanguageCode!);
       Provider.of<AppProvider>(context, listen: false).setLocale(locale);
 
@@ -122,7 +136,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
         );
       } else {
         if (Navigator.canPop(context)) {
-            Navigator.of(context).pop();
+          Navigator.of(context).pop();
         }
       }
     }
@@ -146,7 +160,6 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                     : Colors.grey.withAlpha(128),
                 size: 30,
               ),
-              // Enable button only when a language is selected and not animating
               onPressed: (_selectedLanguageCode != null && !_isAnimating) ? _onNext : null,
             ),
           ),
@@ -183,14 +196,22 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
               ],
             ),
           ),
-          // Show the icon if a selection has been made (animating or finished)
+          // Show static icon over 'English' before any selection is made
+          if (!_selectionMade && _initialIconOffset != null)
+            Positioned(
+              left: _initialIconOffset!.dx - 15,
+              top: _initialIconOffset!.dy - 15,
+              child: const Icon(Icons.touch_app, size: 30, color: Colors.green),
+            ),
+          
+          // Show animating/final icon after a selection is made
           if (_selectionMade && _animation != null)
             AnimatedBuilder(
               animation: _animation!,
               builder: (context, child) {
                 return Positioned(
-                  left: _animation!.value.dx - 15, // Center the icon
-                  top: _animation!.value.dy - 15, // Center the icon
+                  left: _animation!.value.dx - 15,
+                  top: _animation!.value.dy - 15,
                   child: const Icon(Icons.touch_app, size: 30, color: Colors.green),
                 );
               },
