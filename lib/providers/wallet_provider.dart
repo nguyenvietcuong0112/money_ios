@@ -34,13 +34,13 @@ class WalletProvider with ChangeNotifier {
       Wallet(
         id: const Uuid().v4(),
         name: 'E-Wallet',
-        balance: -120,
+        balance: 0,
         icon: Icons.account_balance_wallet,
       ),
       Wallet(
         id: const Uuid().v4(),
         name: 'Bank',
-        balance: -40,
+        balance: 0,
         icon: Icons.account_balance,
       ),
       Wallet(
