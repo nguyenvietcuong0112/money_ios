@@ -22,6 +22,7 @@ dependencies:
   intl: ^0.20.2
   currency_picker: ^2.0.21
   table_calendar: ^3.1.2
+  google_fonts: ^6.3.2
 
 dev_dependencies:
   flutter_test:
