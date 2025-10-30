@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:money_manager/providers/app_provider.dart';
 import 'package:money_manager/screens/currency_selection_screen.dart';
 import 'package:money_manager/widgets/language_tile.dart';
-import 'dart:async';
 
 class LanguageSelectionScreen extends StatefulWidget {
   final bool isInitialSetup;
@@ -21,7 +20,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
     with TickerProviderStateMixin {
   String? _selectedLanguageCode;
   final Map<String, GlobalKey> _tileKeys = {};
-  final GlobalKey _appBarActionKey = GlobalKey(); // Moved here
+  final GlobalKey _appBarActionKey = GlobalKey();
 
   final Map<String, Map<String, String>> _languages = {
     'en': {'name': 'English', 'icon': '🇬🇧'},
@@ -38,6 +37,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
   Animation<Offset>? _animation;
 
   bool _isAnimating = false;
+  bool _selectionMade = false; // To track if the animation icon should be visible
 
   @override
   void initState() {
@@ -57,9 +57,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
     _animationController!.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         setState(() {
-          _isAnimating = false;
+          _isAnimating = false; // Animation is done
         });
-        _onNext(); // Proceed to next screen after animation
+        // DO NOT navigate automatically. Wait for user to press the button.
       }
     });
   }
@@ -75,8 +75,10 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
 
     setState(() {
       _selectedLanguageCode = languageCode;
+      _selectionMade = true; // A selection has been made, prepare for animation
     });
 
+    // Ensure the keys are available before starting the animation
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final RenderBox? startBox =
           _tileKeys[languageCode]!.currentContext?.findRenderObject() as RenderBox?;
@@ -96,7 +98,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
         ));
 
         setState(() {
-          _isAnimating = true;
+          _isAnimating = true; // Start the animation
         });
         _animationController!.forward(from: 0.0);
       }
@@ -104,7 +106,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
   }
 
   void _onNext() async {
-    if (_selectedLanguageCode != null) {
+    if (_selectedLanguageCode != null && ! _isAnimating) {
       final locale = Locale(_selectedLanguageCode!);
       Provider.of<AppProvider>(context, listen: false).setLocale(locale);
 
@@ -119,7 +121,6 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                   const CurrencySelectionScreen(isInitialSetup: true)),
         );
       } else {
-        // Only pop if not in initial setup
         if (Navigator.canPop(context)) {
             Navigator.of(context).pop();
         }
@@ -142,9 +143,10 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
                 Icons.check_circle,
                 color: _selectedLanguageCode != null && !_isAnimating
                     ? Theme.of(context).colorScheme.primary
-                    : Colors.grey.withOpacity(0.5),
+                    : Colors.grey.withAlpha(128),
                 size: 30,
               ),
+              // Enable button only when a language is selected and not animating
               onPressed: (_selectedLanguageCode != null && !_isAnimating) ? _onNext : null,
             ),
           ),
@@ -181,7 +183,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
               ],
             ),
           ),
-          if (_isAnimating && _animation != null)
+          // Show the icon if a selection has been made (animating or finished)
+          if (_selectionMade && _animation != null)
             AnimatedBuilder(
               animation: _animation!,
               builder: (context, child) {
