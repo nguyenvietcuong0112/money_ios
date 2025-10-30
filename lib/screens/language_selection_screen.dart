@@ -36,15 +36,17 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
   AnimationController? _animationController;
   Animation<Offset>? _animation;
   Offset? _initialIconOffset; // Position for the initial icon over 'English'
+  Offset? _finalIconOffset; // Position for the icon over the 'Next' button
 
   bool _isAnimating = false;
   bool _selectionMade = false; // To track if a selection has occurred
+  bool _animationCompleted = false; // To track if the animation has finished once
+
+  static const double _iconSize = 30.0;
 
   @override
   void initState() {
     super.initState();
-    // Per user request, do not pre-select a language.
-
     for (var code in _languages.keys) {
       _tileKeys[code] = GlobalKey();
     }
@@ -52,10 +54,11 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
     // After the first frame, get the position of the 'English' tile for the initial icon placement.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        final RenderBox? englishBox = _tileKeys['en']?.currentContext?.findRenderObject() as RenderBox?;
+        final RenderBox? englishBox =
+            _tileKeys['en']?.currentContext?.findRenderObject() as RenderBox?;
         if (englishBox != null) {
           setState(() {
-            _initialIconOffset = englishBox.localToGlobal(Offset.zero);
+            _initialIconOffset = englishBox.localToGlobal(englishBox.size.center(Offset.zero));
           });
         }
       }
@@ -70,6 +73,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
       if (status == AnimationStatus.completed) {
         setState(() {
           _isAnimating = false; // Animation is done
+          _animationCompleted = true; // Mark that animation has run once
         });
       }
     });
@@ -82,7 +86,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
   }
 
   void _onLanguageSelected(String languageCode) {
-    if (_isAnimating) return; // Prevent selection during animation
+    if (_isAnimating || _animationCompleted) return; // Prevent selection during/after animation
 
     setState(() {
       _selectedLanguageCode = languageCode;
@@ -99,6 +103,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
       if (startBox != null && endBox != null) {
         final startOffset = startBox.localToGlobal(startBox.size.center(Offset.zero));
         final endOffset = endBox.localToGlobal(endBox.size.center(Offset.zero));
+
+        // Store the final offset so we can place the icon there statically after animation
+        _finalIconOffset = endOffset;
 
         _animation = Tween<Offset>(
           begin: startOffset,
@@ -117,7 +124,6 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
   }
 
   void _onNext() async {
-    // This button should only be pressable if a language is selected and not animating.
     if (_selectedLanguageCode != null && !_isAnimating) {
       final locale = Locale(_selectedLanguageCode!);
       Provider.of<AppProvider>(context, listen: false).setLocale(locale);
@@ -140,82 +146,101 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
     }
   }
 
- @override
-Widget build(BuildContext context) {
-  return Stack(
-    children: [
-      Scaffold(
-        appBar: AppBar(
-          title: const Text('Language'),
-          automaticallyImplyLeading: !widget.isInitialSetup,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 20.0),
-              child: IconButton(
-                key: _appBarActionKey,
-                icon: Icon(
-                  Icons.check_circle,
-                  color: _selectedLanguageCode != null && !_isAnimating
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.grey.withAlpha(128),
-                  size: 30,
-                ),
-                onPressed: (_selectedLanguageCode != null && !_isAnimating) ? _onNext : null,
-              ),
-            ),
-          ],
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Please select language to continue',
-                style: TextStyle(color: Colors.grey, fontSize: 16),
-              ),
-              const SizedBox(height: 20),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _languages.length,
-                  itemBuilder: (context, index) {
-                    final code = _languages.keys.elementAt(index);
-                    final lang = _languages[code]!;
-                    return LanguageTile(
-                      key: _tileKeys[code],
-                      title: lang['name']!,
-                      icon: lang['icon']!,
-                      isSelected: _selectedLanguageCode == code,
-                      onTap: () => _onLanguageSelected(code),
-                    );
-                  },
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            title: const Text('Language'),
+            automaticallyImplyLeading: !widget.isInitialSetup,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 20.0),
+                child: IconButton(
+                  key: _appBarActionKey,
+                  icon: Icon(
+                    Icons.check_circle,
+                    color: _selectedLanguageCode != null && !_isAnimating
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.grey.withAlpha(128),
+                    size: 30,
+                  ),
+                  onPressed: (_selectedLanguageCode != null && !_isAnimating) ? _onNext : null,
                 ),
               ),
             ],
           ),
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Please select language to continue',
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _languages.length,
+                    itemBuilder: (context, index) {
+                      final code = _languages.keys.elementAt(index);
+                      final lang = _languages[code]!;
+                      return LanguageTile(
+                        key: _tileKeys[code],
+                        title: lang['name']!,
+                        icon: lang['icon']!,
+                        isSelected: _selectedLanguageCode == code,
+                        onTap: () => _onLanguageSelected(code),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      ),
-      // Show static icon over 'English' before any selection is made
-      if (!_selectionMade && _initialIconOffset != null)
-        Positioned(
-          left: _initialIconOffset!.dx + 16, // Adjust for padding
-          top: _initialIconOffset!.dy, // Adjust for padding
-          child: const Icon(Icons.touch_app, size: 30, color: Colors.green),
-        ),
-      
-      // Show animating/final icon after a selection is made
-      if (_selectionMade && _animation != null)
-        AnimatedBuilder(
-          animation: _animation!,
-          builder: (context, child) {
-            return Positioned(
-              left: _animation!.value.dx - 15,
-              top: _animation!.value.dy - 15,
-              child: const Icon(Icons.touch_app, size: 30, color: Colors.green),
-            );
-          },
-        ),
-    ],
-  );
-}
+        // This part handles the animated icon overlay
+        if (_initialIconOffset != null) _buildIconOverlay(),
+      ],
+    );
+  }
+
+  Widget _buildIconOverlay() {
+    // State 1: Before any selection, show a static icon over 'English'
+    if (!_selectionMade) {
+      return Positioned(
+        left: _initialIconOffset!.dx - (_iconSize / 2),
+        top: _initialIconOffset!.dy - (_iconSize / 2),
+        child: const Icon(Icons.touch_app, size: _iconSize, color: Colors.green),
+      );
+    }
+
+    // State 2: During the animation from selection to the 'Next' button
+    if (_isAnimating && _animation != null) {
+      return AnimatedBuilder(
+        animation: _animation!,
+        builder: (context, child) {
+          return Positioned(
+            left: _animation!.value.dx - (_iconSize / 2),
+            top: _animation!.value.dy - (_iconSize / 2),
+            child: const Icon(Icons.touch_app, size: _iconSize, color: Colors.green),
+          );
+        },
+      );
+    }
+
+    // State 3: After the animation is complete, show a static icon over the 'Next' button
+    if (_animationCompleted && _finalIconOffset != null) {
+      return Positioned(
+        left: _finalIconOffset!.dx - (_iconSize / 2),
+        top: _finalIconOffset!.dy - (_iconSize / 2),
+        child: const Icon(Icons.touch_app, size: _iconSize, color: Colors.green),
+      );
+    }
+
+    // Default empty widget if none of the states match
+    return const SizedBox.shrink();
+  }
 }
