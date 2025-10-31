@@ -196,16 +196,17 @@ class _RecordScreenState extends State<RecordScreen> {
                     final income = totals?['income'] ?? 0;
                     final expense = totals?['expense'] ?? 0;
                     return Container(
-                        margin: const EdgeInsets.all(2.0),
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                                Text('${day.day}', style: const TextStyle(fontSize: 14)),
-                                const SizedBox(height: 2),
-                                Text('\$${income.toStringAsFixed(0)}', style: const TextStyle(color: Colors.blue, fontSize: 10, fontWeight: FontWeight.bold)),
-                                Text('\$${expense.toStringAsFixed(0)}', style: const TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold)),
-                            ],
-                        ),
+                      alignment: Alignment.center,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('${day.day}', style: const TextStyle(fontSize: 12)),
+                          if (income > 0)
+                            Text('+\$${income.toStringAsFixed(0)}', style: const TextStyle(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
+                          if (expense > 0)
+                            Text('-\$${expense.toStringAsFixed(0)}', style: const TextStyle(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
                     );
                 },
                 selectedBuilder: (context, day, focusedDay) {
@@ -213,20 +214,21 @@ class _RecordScreenState extends State<RecordScreen> {
                     final income = totals?['income'] ?? 0;
                     final expense = totals?['expense'] ?? 0;
                     return Container(
-                        margin: const EdgeInsets.all(2.0),
-                        decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                                Text('${day.day}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                                const SizedBox(height: 2),
-                                Text('\$${income.toStringAsFixed(0)}', style: const TextStyle(color: Colors.blue, fontSize: 10, fontWeight: FontWeight.bold)),
-                                Text('\$${expense.toStringAsFixed(0)}', style: const TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold)),
-                            ],
-                        ),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('${day.day}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                          if (income > 0)
+                            Text('+\$${income.toStringAsFixed(0)}', style: const TextStyle(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
+                          if (expense > 0)
+                            Text('-\$${expense.toStringAsFixed(0)}', style: const TextStyle(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
                     );
                 },
                 todayBuilder: (context, day, focusedDay) {
@@ -234,18 +236,19 @@ class _RecordScreenState extends State<RecordScreen> {
                   final income = totals?['income'] ?? 0;
                   final expense = totals?['expense'] ?? 0;
                    return Container(
-                        margin: const EdgeInsets.all(2.0),
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.green, width: 1.5),
                           borderRadius: BorderRadius.circular(8.0),
                         ),
                         child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                                Text('${day.day}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                                const SizedBox(height: 2),
-                                Text('\$${income.toStringAsFixed(0)}', style: const TextStyle(color: Colors.blue, fontSize: 10, fontWeight: FontWeight.bold)),
-                                Text('\$${expense.toStringAsFixed(0)}', style: const TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold)),
+                          mainAxisSize: MainAxisSize.min,
+                           children: [
+                                Text('${day.day}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                if (income > 0)
+                                  Text('+\$${income.toStringAsFixed(0)}', style: const TextStyle(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
+                                if (expense > 0)
+                                  Text('-\$${expense.toStringAsFixed(0)}', style: const TextStyle(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold)),
                             ],
                         ),
                     );
@@ -331,7 +334,7 @@ class _RecordScreenState extends State<RecordScreen> {
       child: ListTile(
         leading: CircleAvatar(
           radius: 20,
-          backgroundColor: Color(transaction.colorValue).withOpacity(0.1),
+          backgroundColor: Color(transaction.colorValue).withAlpha(25),
           child: Image.asset(transaction.iconPath, width: 22, height: 22),
         ),
         title: Text(transaction.title, style: const TextStyle(fontWeight: FontWeight.bold)),
