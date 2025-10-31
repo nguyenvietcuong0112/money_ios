@@ -151,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _widgetOptions = <Widget>[
-      const HomeScreen(),
+      HomeScreen(onScreenChanged: _onItemTapped),
       RecordScreen(onScreenChanged: _onItemTapped),
       const WalletScreen(),
       StatisticsScreen(onScreenChanged: _onItemTapped),
@@ -188,7 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.edit_calendar_outlined),
-            label: localizations?.translate('transactions') ?? 'Transactions',
+            label: localizations?.translate('transactions') ?? 'Record',
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.account_balance_wallet),
