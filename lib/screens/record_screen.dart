@@ -65,11 +65,14 @@ class _RecordScreenState extends State<RecordScreen> {
         builder: (context, transactionProvider, walletProvider, child) {
           final allTransactions = transactionProvider.transactions;
 
-          final transactions = _selectedWallet == 'Total'
-              ? allTransactions
-              : allTransactions.where((tx) => tx.walletId == _selectedWallet).toList();
+          // Correctly filter transactions by selected wallet AND month
+          final monthlyTransactions = allTransactions.where((tx) {
+            final walletMatch = _selectedWallet == 'Total' || tx.walletId == _selectedWallet;
+            final monthMatch = tx.date.year == _focusedDay.year && tx.date.month == _focusedDay.month;
+            return walletMatch && monthMatch;
+          }).toList();
 
-          final dailyTotals = groupBy(transactions, (Transaction tx) => DateTime(tx.date.year, tx.date.month, tx.date.day))
+          final dailyTotals = groupBy(monthlyTransactions, (Transaction tx) => DateTime(tx.date.year, tx.date.month, tx.date.day))
               .map((date, txs) {
                   final income = txs.where((tx) => tx.type == TransactionType.income).fold(0.0, (sum, item) => sum + item.amount);
                   final expense = txs.where((tx) => tx.type == TransactionType.expense).fold(0.0, (sum, item) => sum + item.amount);
@@ -77,14 +80,15 @@ class _RecordScreenState extends State<RecordScreen> {
               });
 
           final groupedTransactions = groupBy(
-            transactions,
+            monthlyTransactions,
             (Transaction tx) => DateTime(tx.date.year, tx.date.month, tx.date.day),
           );
           final sortedDates = groupedTransactions.keys.toList()
             ..sort((a, b) => b.compareTo(a));
 
-          final totalIncome = transactions.where((tx) => tx.type == TransactionType.income).fold(0.0, (sum, item) => sum + item.amount);
-          final totalExpense = transactions.where((tx) => tx.type == TransactionType.expense).fold(0.0, (sum, item) => sum + item.amount);
+          // Calculate totals from the correctly filtered monthly transactions
+          final totalIncome = monthlyTransactions.where((tx) => tx.type == TransactionType.income).fold(0.0, (sum, item) => sum + item.amount);
+          final totalExpense = monthlyTransactions.where((tx) => tx.type == TransactionType.expense).fold(0.0, (sum, item) => sum + item.amount);
 
           return SingleChildScrollView(
             child: Column(
@@ -190,6 +194,7 @@ class _RecordScreenState extends State<RecordScreen> {
             borderRadius: BorderRadius.circular(12.0)
         ),
         child: TableCalendar(
+            headerVisible: false,
             firstDay: _months.first,
             lastDay: _months.last,
             focusedDay: _focusedDay,
@@ -213,9 +218,6 @@ class _RecordScreenState extends State<RecordScreen> {
                     _focusedDay = focusedDay;
                 });
             },
-            headerStyle: const HeaderStyle(
-                headerVisible: false, // This hides the default header
-            ),
             daysOfWeekStyle: const DaysOfWeekStyle(
                 weekdayStyle: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                 weekendStyle: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
@@ -316,12 +318,16 @@ class _RecordScreenState extends State<RecordScreen> {
     );
   }
 
-  Widget _buildTransactionList(List<DateTime> sortedDates, Map<DateTime, List<Transaction>> groupedTransactions) {
+ Widget _buildTransactionList(List<DateTime> sortedDates, Map<DateTime, List<Transaction>> groupedTransactions) {
+  // If a specific day is selected, show only its transactions
   if (_selectedDay != null) {
-    final selectedDayTransactions = groupedTransactions[DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day)] ?? [];
+    final selectedDayKey = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
+    final selectedDayTransactions = groupedTransactions[selectedDayKey] ?? [];
+    
     if (selectedDayTransactions.isEmpty) {
       return const Center(child: Padding(padding: EdgeInsets.all(20.0), child: Text('No transactions on this day.')));
     }
+
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -330,7 +336,8 @@ class _RecordScreenState extends State<RecordScreen> {
         return _buildTransactionItem(context, selectedDayTransactions[index]);
       },
     );
-  } else {
+  } else { 
+    // Otherwise, show all transactions for the month, grouped by day
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -338,8 +345,6 @@ class _RecordScreenState extends State<RecordScreen> {
       itemBuilder: (context, index) {
         final date = sortedDates[index];
         final dailyTransactions = groupedTransactions[date]!;
-        if (dailyTransactions.isEmpty) return const SizedBox.shrink();
-
         final dailyTotal = dailyTransactions.fold(0.0, (sum, tx) {
           return sum + (tx.type == TransactionType.income ? tx.amount : -tx.amount);
         });
