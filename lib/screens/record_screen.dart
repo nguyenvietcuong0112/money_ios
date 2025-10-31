@@ -21,11 +21,27 @@ class _RecordScreenState extends State<RecordScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   String _selectedWallet = 'Total';
+  late List<DateTime> _months;
 
   @override
   void initState() {
     super.initState();
     _selectedDay = _focusedDay;
+    _months = _getMonths();
+  }
+
+  List<DateTime> _getMonths() {
+    final now = DateTime.now();
+    // Go back 24 months and forward 12 months
+    final firstMonth = DateTime(now.year - 2, now.month);
+    final lastMonth = DateTime(now.year + 1, now.month);
+    final months = <DateTime>[];
+    DateTime currentMonth = firstMonth;
+    while (currentMonth.isBefore(lastMonth) || currentMonth.isAtSameMomentAs(lastMonth)) {
+      months.add(currentMonth);
+      currentMonth = DateTime(currentMonth.year, currentMonth.month + 1);
+    }
+    return months;
   }
 
   @override
@@ -103,23 +119,41 @@ class _RecordScreenState extends State<RecordScreen> {
       }),
     ];
 
+    DateTime selectedMonth = _months.firstWhere(
+      (month) => month.year == _focusedDay.year && month.month == _focusedDay.month,
+      orElse: () => _months.firstWhere((m) => m.year == DateTime.now().year && m.month == DateTime.now().month, orElse: () => _months.first)
+    );
+
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Month/Year Picker - To be implemented fully later
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20.0),
             ),
-            child: Row(
-              children: [
-                Text(DateFormat('MM/yyyy').format(_focusedDay), style: const TextStyle(fontWeight: FontWeight.bold)),
-                const Icon(Icons.arrow_drop_down, color: Colors.green),
-              ],
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<DateTime>(
+                value: selectedMonth,
+                icon: const Icon(Icons.arrow_drop_down, color: Colors.green),
+                items: _months.map((DateTime month) {
+                  return DropdownMenuItem<DateTime>(
+                    value: month,
+                    child: Text(DateFormat('MMMM yyyy').format(month)),
+                  );
+                }).toList(),
+                onChanged: (DateTime? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _focusedDay = newValue;
+                    });
+                  }
+                },
+              ),
             ),
           ),
           Container(
@@ -156,8 +190,8 @@ class _RecordScreenState extends State<RecordScreen> {
             borderRadius: BorderRadius.circular(12.0)
         ),
         child: TableCalendar(
-            firstDay: DateTime.utc(2010, 1, 1),
-            lastDay: DateTime.utc(2030, 12, 31),
+            firstDay: _months.first,
+            lastDay: _months.last,
             focusedDay: _focusedDay,
             calendarFormat: _calendarFormat,
             selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
@@ -180,11 +214,7 @@ class _RecordScreenState extends State<RecordScreen> {
                 });
             },
             headerStyle: const HeaderStyle(
-                titleCentered: true,
-                formatButtonVisible: false,
-                leftChevronIcon: Icon(Icons.chevron_left, color: Colors.green),
-                rightChevronIcon: Icon(Icons.chevron_right, color: Colors.green),
-                titleTextStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+                headerVisible: false, // This hides the default header
             ),
             daysOfWeekStyle: const DaysOfWeekStyle(
                 weekdayStyle: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
@@ -216,7 +246,7 @@ class _RecordScreenState extends State<RecordScreen> {
                     return Container(
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.3),
+                          color: Colors.green.withAlpha(75),
                           borderRadius: BorderRadius.circular(8.0),
                       ),
                       child: Column(
@@ -287,6 +317,20 @@ class _RecordScreenState extends State<RecordScreen> {
   }
 
   Widget _buildTransactionList(List<DateTime> sortedDates, Map<DateTime, List<Transaction>> groupedTransactions) {
+  if (_selectedDay != null) {
+    final selectedDayTransactions = groupedTransactions[DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day)] ?? [];
+    if (selectedDayTransactions.isEmpty) {
+      return const Center(child: Padding(padding: EdgeInsets.all(20.0), child: Text('No transactions on this day.')));
+    }
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: selectedDayTransactions.length,
+      itemBuilder: (context, index) {
+        return _buildTransactionItem(context, selectedDayTransactions[index]);
+      },
+    );
+  } else {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -294,6 +338,8 @@ class _RecordScreenState extends State<RecordScreen> {
       itemBuilder: (context, index) {
         final date = sortedDates[index];
         final dailyTransactions = groupedTransactions[date]!;
+        if (dailyTransactions.isEmpty) return const SizedBox.shrink();
+
         final dailyTotal = dailyTransactions.fold(0.0, (sum, tx) {
           return sum + (tx.type == TransactionType.income ? tx.amount : -tx.amount);
         });
@@ -324,6 +370,9 @@ class _RecordScreenState extends State<RecordScreen> {
       },
     );
   }
+}
+
+
 
   Widget _buildTransactionItem(BuildContext context, Transaction transaction) {
     return Card(
