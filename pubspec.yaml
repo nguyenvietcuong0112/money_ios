@@ -21,7 +21,7 @@ dependencies:
   lottie: ^3.1.2
   intl: ^0.20.2
   currency_picker: ^2.0.21
-  table_calendar: ^3.1.2
+  table_calendar: ^3.2.0
   google_fonts: ^6.3.2
   uuid: ^4.4.0
   hive: ^2.2.3
