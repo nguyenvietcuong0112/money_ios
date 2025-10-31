@@ -26,7 +26,7 @@ class _RecordScreenState extends State<RecordScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedDay = _focusedDay;
+    _selectedDay = null; // Default to showing the whole month
     _months = _getMonths();
   }
 
@@ -65,14 +65,14 @@ class _RecordScreenState extends State<RecordScreen> {
         builder: (context, transactionProvider, walletProvider, child) {
           final allTransactions = transactionProvider.transactions;
 
-          // Correctly filter transactions by selected wallet AND month
+          // Filter transactions by selected wallet AND month
           final monthlyTransactions = allTransactions.where((tx) {
             final walletMatch = _selectedWallet == 'Total' || tx.walletId == _selectedWallet;
             final monthMatch = tx.date.year == _focusedDay.year && tx.date.month == _focusedDay.month;
             return walletMatch && monthMatch;
           }).toList();
 
-          final dailyTotals = groupBy(monthlyTransactions, (Transaction tx) => DateTime(tx.date.year, tx.date.month, tx.date.day))
+          final dailyTotals = groupBy(allTransactions, (Transaction tx) => DateTime(tx.date.year, tx.date.month, tx.date.day))
               .map((date, txs) {
                   final income = txs.where((tx) => tx.type == TransactionType.income).fold(0.0, (sum, item) => sum + item.amount);
                   final expense = txs.where((tx) => tx.type == TransactionType.expense).fold(0.0, (sum, item) => sum + item.amount);
@@ -154,6 +154,7 @@ class _RecordScreenState extends State<RecordScreen> {
                   if (newValue != null) {
                     setState(() {
                       _focusedDay = newValue;
+                      _selectedDay = null; // Reset day selection when month changes
                     });
                   }
                 },
@@ -216,6 +217,7 @@ class _RecordScreenState extends State<RecordScreen> {
             onPageChanged: (focusedDay) {
                 setState(() {
                     _focusedDay = focusedDay;
+                    _selectedDay = null; // Reset day selection when page changes
                 });
             },
             daysOfWeekStyle: const DaysOfWeekStyle(
@@ -328,16 +330,26 @@ class _RecordScreenState extends State<RecordScreen> {
       return const Center(child: Padding(padding: EdgeInsets.all(20.0), child: Text('No transactions on this day.')));
     }
 
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: selectedDayTransactions.length,
-      itemBuilder: (context, index) {
-        return _buildTransactionItem(context, selectedDayTransactions[index]);
-      },
+    // Create a mini-list for the single selected day
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+           padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 8.0),
+          child: Text(
+            DateFormat('dd/MM/yyyy').format(selectedDayKey),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.grey[700]),
+          ),
+        ),
+        ...selectedDayTransactions.map((tx) => _buildTransactionItem(context, tx))
+      ],
     );
+
   } else { 
     // Otherwise, show all transactions for the month, grouped by day
+    if (groupedTransactions.isEmpty) {
+        return const Center(child: Padding(padding: EdgeInsets.all(30.0), child: Text('No transactions in this month.')));
+    }
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
