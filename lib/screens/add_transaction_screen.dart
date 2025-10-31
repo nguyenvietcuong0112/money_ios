@@ -261,7 +261,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: isSelected ? categoryColor.withOpacity(0.3) : Colors.grey[200],
+                  color: isSelected ? categoryColor.withAlpha(77) : Colors.grey[200],
                   borderRadius: BorderRadius.circular(10.0),
                   border: isSelected ? Border.all(color: categoryColor, width: 2) : null,
                 ),

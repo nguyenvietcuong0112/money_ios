@@ -1,10 +1,13 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:money_manager/localization/app_localizations.dart';
 import 'package:money_manager/models/category_model.dart';
 import 'package:money_manager/models/transaction_model.dart';
+import 'package:money_manager/models/wallet_model.dart';
 import 'package:money_manager/providers/transaction_provider.dart';
+import 'package:money_manager/providers/wallet_provider.dart';
+import 'package:money_manager/widgets/custom_toggle_button.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class StatisticsScreen extends StatefulWidget {
   final Function(int) onScreenChanged;
@@ -16,9 +19,11 @@ class StatisticsScreen extends StatefulWidget {
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  bool _isExpense = true;
+  bool _isMonthSelected = true;
+  String _selectedYear = DateFormat('yyyy').format(DateTime.now());
+  String _selectedMonth = DateFormat('MMMM').format(DateTime.now());
+  Wallet? _selectedWallet;
 
-  // Using the same hardcoded categories as AddTransactionScreen for consistency
   final List<Category> _categories = [
     Category(name: 'Food & Dr...', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.orange.value),
     Category(name: 'Household', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.blue.value),
@@ -34,194 +39,330 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     Category(name: 'Medical', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.redAccent.value),
   ];
 
-  Category? _selectedCategory;
-
-  @override
-  void initState() {
-    super.initState();
-    // Set a default category if the list is not empty
-    if (_categories.isNotEmpty) {
-      _selectedCategory = _categories.first;
-    }
-  }
+  final List<String> _months = [
+    'January', 'February', 'March', 'April', 'May', 'June', 
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
-
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F7F7),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(localizations?.translate('statistics') ?? 'Statistics'),
+        title: const Text('Report', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.ios_share_outlined, color: Colors.black),
+            onPressed: () {},
+          ),
+        ],
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              _buildToggleButtons(localizations),
-              const SizedBox(height: 24.0),
-              _buildChart(context),
-              const SizedBox(height: 24.0),
-              _buildCategoryDropdown(localizations),
-              const SizedBox(height: 16.0),
-              _buildCategorySpendingList(context),
-            ],
-          ),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            CustomToggleButton(
+              isMonthSelected: _isMonthSelected,
+              onMonthSelected: () => setState(() => _isMonthSelected = true),
+              onYearSelected: () => setState(() => _isMonthSelected = false),
+            ),
+            const SizedBox(height: 24.0),
+            _buildFilters(),
+            const SizedBox(height: 24.0),
+            _buildSummary(),
+            const SizedBox(height: 24.0),
+            _buildChartAndLegend(),
+            const SizedBox(height: 24.0),
+            _buildTransactionList(),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildToggleButtons(AppLocalizations? localizations) {
+  Widget _buildFilters() {
+    final walletProvider = Provider.of<WalletProvider>(context);
+
     return Row(
       children: [
         Expanded(
-          child: ElevatedButton(
-            onPressed: () => setState(() => _isExpense = true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _isExpense ? Colors.red : Colors.grey[300],
-              foregroundColor: _isExpense ? Colors.white : Colors.black,
+          child: _buildDropdownContainer(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              underline: const SizedBox.shrink(),
+              value: _selectedYear,
+              items: ['2023', '2024', '2025'].map((year) => DropdownMenuItem(value: year, child: Text(year))).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() => _selectedYear = value);
+                }
+              },
             ),
-            child: Text(localizations?.translate('expense') ?? 'Expense'),
           ),
         ),
-        const SizedBox(width: 16.0),
-        Expanded(
-          child: ElevatedButton(
-            onPressed: () => setState(() => _isExpense = false),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: !_isExpense ? Colors.green : Colors.grey[300],
-              foregroundColor: !_isExpense ? Colors.white : Colors.black,
+        const SizedBox(width: 16),
+        if (_isMonthSelected)
+          Expanded(
+            child: _buildDropdownContainer(
+              child: DropdownButton<String>(
+                isExpanded: true,
+                underline: const SizedBox.shrink(),
+                value: _selectedMonth,
+                items: _months.map((month) => DropdownMenuItem(value: month, child: Text(month))).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _selectedMonth = value);
+                  }
+                },
+              ),
             ),
-            child: Text(localizations?.translate('income') ?? 'Income'),
+          )
+        else
+          Expanded(
+            child: _buildDropdownContainer(
+              child: DropdownButton<Wallet>(
+                isExpanded: true,
+                underline: const SizedBox.shrink(),
+                hint: const Text('Total'),
+                value: _selectedWallet,
+                items: walletProvider.wallets.map((wallet) {
+                  return DropdownMenuItem(
+                    value: wallet,
+                    child: Row(
+                      children: [
+                        Image.asset(wallet.iconPath, width: 24, height: 24),
+                        const SizedBox(width: 8),
+                        Text(wallet.name),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() => _selectedWallet = value);
+                },
+              ),
+            ),
           ),
-        ),
       ],
     );
   }
 
-  Widget _buildChart(BuildContext context) {
+  Widget _buildDropdownContainer({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildSummary() {
     final transactionProvider = Provider.of<TransactionProvider>(context);
-    final transactions = transactionProvider.transactions
-        .where((tx) => _isExpense ? tx.type == TransactionType.expense : tx.type == TransactionType.income)
+    final transactions = _getFilteredTransactions(transactionProvider.transactions);
+
+    final double totalIncome = transactions
+        .where((tx) => tx.type == TransactionType.income)
+        .fold(0, (sum, item) => sum + item.amount);
+    final double totalExpense = transactions
+        .where((tx) => tx.type == TransactionType.expense)
+        .fold(0, (sum, item) => sum + item.amount);
+    final double total = totalIncome - totalExpense;
+
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      child: Column(
+        children: [
+          _buildSummaryRow('Expense', totalExpense, Colors.red),
+          _buildSummaryRow('Income', totalIncome, Colors.green),
+          const Divider(),
+          _buildSummaryRow('Total', total, total >= 0 ? Colors.green : Colors.red, isTotal: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(String title, double amount, Color color, {bool isTotal = false}) {
+    final format = NumberFormat.simpleCurrency(locale: 'en_GB');
+    final formattedAmount = (amount >= 0 ? '+' : '-') + format.format(amount.abs());
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(title, style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+          Text(
+            formattedAmount,
+            style: TextStyle(
+              fontSize: isTotal ? 20 : 18,
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChartAndLegend() {
+    final transactionProvider = Provider.of<TransactionProvider>(context);
+    final expenseTransactions = _getFilteredTransactions(transactionProvider.transactions)
+        .where((tx) => tx.type == TransactionType.expense)
         .toList();
 
-    final totalAmount = transactions.fold(0.0, (sum, item) => sum + item.amount);
+    final totalExpense = expenseTransactions.fold(0.0, (sum, item) => sum + item.amount);
 
-    // Group transactions by category
     final Map<String, double> categorySpending = {};
-    for (var tx in transactions) {
+    for (var tx in expenseTransactions) {
       categorySpending.update(tx.title, (value) => value + tx.amount, ifAbsent: () => tx.amount);
     }
 
-    // Find the corresponding category object to get color
     final List<PieChartSectionData> sections = categorySpending.entries.map((entry) {
       final category = _categories.firstWhere(
         (cat) => cat.name == entry.key,
         orElse: () => Category(name: 'Other', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.grey.value),
       );
-      final percentage = (entry.value / totalAmount) * 100;
       return PieChartSectionData(
         color: Color(category.colorValue),
         value: entry.value,
-        title: '${percentage.toStringAsFixed(1)}%',
-        radius: 100,
-        titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+        title: '',
+        radius: 40,
       );
     }).toList();
 
-    return SizedBox(
-      height: 250,
-      child: transactions.isEmpty
-          ? const Center(child: Text('No data available'))
-          : PieChart(
-              PieChartData(
-                sections: sections,
-                sectionsSpace: 2,
-                centerSpaceRadius: 40,
-              ),
-            ),
-    );
-  }
-
-  Widget _buildCategoryDropdown(AppLocalizations? localizations) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<Category>(
-          isExpanded: true,
-          value: _selectedCategory,
-          hint: Text(localizations?.translate('select_category') ?? 'Select Category'),
-          onChanged: (Category? newValue) {
-            setState(() {
-              _selectedCategory = newValue;
-            });
-          },
-          items: _categories.map((Category category) {
-            return DropdownMenuItem<Category>(
-              value: category,
-              child: Row(
-                children: [
-                  Image.asset(category.iconPath, width: 24, height: 24, color: Color(category.colorValue)),
-                  const SizedBox(width: 10),
-                  Text(category.name),
-                ],
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCategorySpendingList(BuildContext context) {
-    final transactionProvider = Provider.of<TransactionProvider>(context);
-
-    if (_selectedCategory == null) {
-      return const SizedBox.shrink();
-    }
-
-    final categoryTransactions = transactionProvider.transactions
-        .where((tx) =>
-            tx.title == _selectedCategory!.name &&
-            (_isExpense ? tx.type == TransactionType.expense : tx.type == TransactionType.income))
-        .toList();
-
-    final double totalCategorySpending = categoryTransactions.fold(0, (sum, item) => sum + item.amount);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
-        Text(
-          'Total for ${_selectedCategory!.name}: \$${totalCategorySpending.toStringAsFixed(2)}',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        Expanded(
+          flex: 2,
+          child: Container(
+            height: 200,
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Text(
+                  'Total Expense\n${NumberFormat.simpleCurrency(locale: 'en_GB').format(totalExpense)}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                PieChart(PieChartData(sections: sections, centerSpaceRadius: 60)),
+              ],
+            ),
+          ),
         ),
-        const SizedBox(height: 8.0),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: categoryTransactions.length,
-          itemBuilder: (context, index) {
-            final transaction = categoryTransactions[index];
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Color(transaction.colorValue),
-                child: Image.asset(transaction.iconPath, width: 24, height: 24),
-              ),
-              title: Text(transaction.title),
-              trailing: Text(
-                '\$${transaction.amount.toStringAsFixed(2)}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            );
-          },
-        ),
+        const SizedBox(width: 16),
+        Expanded(
+          flex: 1,
+          child: Container(
+            height: 200,
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            child: ListView.builder(
+              itemCount: categorySpending.length,
+              itemBuilder: (context, index) {
+                final entry = categorySpending.entries.elementAt(index);
+                 final category = _categories.firstWhere(
+                  (cat) => cat.name == entry.key,
+                  orElse: () => Category(name: 'Other', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.grey.value),
+                );
+                return _buildLegendItem(Color(category.colorValue), entry.key);
+              },
+            ),
+          ),
+        )
       ],
     );
+  }
+
+  Widget _buildLegendItem(Color color, String name) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          Container(width: 12, height: 12, color: color),
+          const SizedBox(width: 8),
+          Text(name, style: const TextStyle(fontSize: 12)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTransactionList() {
+    final transactionProvider = Provider.of<TransactionProvider>(context);
+    final transactions = _getFilteredTransactions(transactionProvider.transactions);
+
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      child: ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: transactions.length,
+        itemBuilder: (context, index) {
+          final transaction = transactions[index];
+          return _buildTransactionItem(transaction);
+        },
+      ),
+    );
+  }
+
+  Widget _buildTransactionItem(Transaction transaction) {
+    final category = _categories.firstWhere(
+      (cat) => cat.name == transaction.title,
+      orElse: () => Category(name: 'Other', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.grey.value),
+    );
+
+    final color = Color(transaction.colorValue);
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: color.withAlpha(50),
+        child: Image.asset(transaction.iconPath, width: 24, height: 24, color: color),
+      ),
+      title: Text(transaction.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+      subtitle: Text(DateFormat.yMMMd().format(transaction.date)),
+      trailing: Text(
+        (transaction.type == TransactionType.income ? '+' : '-') + 
+        NumberFormat.simpleCurrency(locale: 'en_GB').format(transaction.amount),
+        style: TextStyle(
+          color: transaction.type == TransactionType.income ? Colors.green : Colors.red,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  List<Transaction> _getFilteredTransactions(List<Transaction> transactions) {
+    return transactions.where((tx) {
+      final txDate = tx.date;
+      final monthAsNumber = _months.indexOf(_selectedMonth) + 1;
+
+      bool yearMatch = txDate.year.toString() == _selectedYear;
+      bool walletMatch = _selectedWallet == null || tx.walletId == _selectedWallet!.id;
+      bool monthMatch = txDate.month == monthAsNumber;
+
+      if (_isMonthSelected) {
+        return yearMatch && monthMatch && walletMatch;
+      }
+      return yearMatch && walletMatch;
+    }).toList();
   }
 }
