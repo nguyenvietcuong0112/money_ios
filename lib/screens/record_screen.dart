@@ -31,11 +31,14 @@ class _RecordScreenState extends State<RecordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F8F7),
       appBar: AppBar(
-        title: const Text('Record'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text('Record', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: const Icon(Icons.search, color: Colors.black54),
             onPressed: () {
               // TODO: Implement search functionality
             },
@@ -46,12 +49,10 @@ class _RecordScreenState extends State<RecordScreen> {
         builder: (context, transactionProvider, walletProvider, child) {
           final allTransactions = transactionProvider.transactions;
 
-          // Filter transactions based on the selected wallet
           final transactions = _selectedWallet == 'Total'
               ? allTransactions
               : allTransactions.where((tx) => tx.walletId == _selectedWallet).toList();
 
-          // Calculate totals for the days visible in the calendar
           final dailyTotals = groupBy(transactions, (Transaction tx) => DateTime(tx.date.year, tx.date.month, tx.date.day))
               .map((date, txs) {
                   final income = txs.where((tx) => tx.type == TransactionType.income).fold(0.0, (sum, item) => sum + item.amount);
@@ -59,7 +60,6 @@ class _RecordScreenState extends State<RecordScreen> {
                   return MapEntry(date, {'income': income, 'expense': expense});
               });
 
-          // Group transactions for the list view
           final groupedTransactions = groupBy(
             transactions,
             (Transaction tx) => DateTime(tx.date.year, tx.date.month, tx.date.day),
@@ -76,6 +76,7 @@ class _RecordScreenState extends State<RecordScreen> {
               children: [
                 _buildHeader(walletProvider),
                 _buildCalendar(dailyTotals),
+                const SizedBox(height: 16),
                 _buildSummary(totalIncome, totalExpense),
                 _buildTransactionList(sortedDates, groupedTransactions),
               ],
@@ -85,6 +86,7 @@ class _RecordScreenState extends State<RecordScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => widget.onScreenChanged(2),
+        backgroundColor: Colors.green[600],
         child: const Icon(Icons.add),
       ),
     );
@@ -106,22 +108,18 @@ class _RecordScreenState extends State<RecordScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // Month/Year Picker - To be implemented fully later
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20.0),
-              boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.2), spreadRadius: 1, blurRadius: 5)],
             ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: DateFormat('MM/yyyy').format(_focusedDay),
-                icon: const Icon(Icons.arrow_drop_down, color: Colors.green),
-                items: [], // Placeholder for month/year picker
-                onChanged: (value) {
-                  // TODO: Implement month/year picker
-                },
-              ),
+            child: Row(
+              children: [
+                Text(DateFormat('MM/yyyy').format(_focusedDay), style: const TextStyle(fontWeight: FontWeight.bold)),
+                const Icon(Icons.arrow_drop_down, color: Colors.green),
+              ],
             ),
           ),
           Container(
@@ -129,7 +127,6 @@ class _RecordScreenState extends State<RecordScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20.0),
-              boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.2), spreadRadius: 1, blurRadius: 5)],
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
@@ -152,92 +149,111 @@ class _RecordScreenState extends State<RecordScreen> {
   }
 
   Widget _buildCalendar(Map<DateTime, Map<String, double>> dailyTotals) {
-    return Card(
-      margin: const EdgeInsets.all(16.0),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: TableCalendar(
-        firstDay: DateTime.utc(2010, 1, 1),
-        lastDay: DateTime.utc(2030, 12, 31),
-        focusedDay: _focusedDay,
-        calendarFormat: _calendarFormat,
-        selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-        onDaySelected: (selectedDay, focusedDay) {
-          setState(() {
-            _selectedDay = selectedDay;
-            _focusedDay = focusedDay;
-          });
-        },
-        onFormatChanged: (format) {
-          if (_calendarFormat != format) {
-            setState(() {
-              _calendarFormat = format;
-            });
-          }
-        },
-        onPageChanged: (focusedDay) {
-          setState(() {
-            _focusedDay = focusedDay;
-          });
-        },
-        calendarBuilders: CalendarBuilders(
-          defaultBuilder: (context, day, focusedDay) {
-            final totals = dailyTotals[DateTime(day.year, day.month, day.day)];
-            final income = totals?['income'] ?? 0;
-            final expense = totals?['expense'] ?? 0;
-            return Container(
-              margin: const EdgeInsets.all(4.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('${day.day}', style: const TextStyle(fontSize: 16)),
-                  if (expense > 0)
-                    Text('-\$${expense.toStringAsFixed(0)}', style: const TextStyle(color: Colors.red, fontSize: 10)),
-                  if (income > 0)
-                    Text('+\$${income.toStringAsFixed(0)}', style: const TextStyle(color: Colors.blue, fontSize: 10)),
-                ],
-              ),
-            );
-          },
-          selectedBuilder: (context, day, focusedDay) {
-            return Container(
-               margin: const EdgeInsets.all(4.0),
-              decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Center(
-                child: Text(
-                  '${day.day}',
-                  style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-            );
-          },
-            todayBuilder: (context, day, focusedDay) {
-            return Container(
-              margin: const EdgeInsets.all(4.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.green, width: 2),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Center(
-                child: Text(
-                  '${day.day}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ),
-            );
-          },
-
+    return Container(
+        margin: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.0)
         ),
-        headerStyle: const HeaderStyle(
-          titleCentered: true,
-          formatButtonVisible: false,
+        child: TableCalendar(
+            firstDay: DateTime.utc(2010, 1, 1),
+            lastDay: DateTime.utc(2030, 12, 31),
+            focusedDay: _focusedDay,
+            calendarFormat: _calendarFormat,
+            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+            onDaySelected: (selectedDay, focusedDay) {
+                setState(() {
+                    _selectedDay = selectedDay;
+                    _focusedDay = focusedDay;
+                });
+            },
+            onFormatChanged: (format) {
+                if (_calendarFormat != format) {
+                    setState(() {
+                        _calendarFormat = format;
+                    });
+                }
+            },
+            onPageChanged: (focusedDay) {
+                setState(() {
+                    _focusedDay = focusedDay;
+                });
+            },
+            headerStyle: const HeaderStyle(
+                titleCentered: true,
+                formatButtonVisible: false,
+                leftChevronIcon: Icon(Icons.chevron_left, color: Colors.green),
+                rightChevronIcon: Icon(Icons.chevron_right, color: Colors.green),
+                titleTextStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+            ),
+            daysOfWeekStyle: const DaysOfWeekStyle(
+                weekdayStyle: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                weekendStyle: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
+            calendarBuilders: CalendarBuilders(
+                defaultBuilder: (context, day, focusedDay) {
+                    final totals = dailyTotals[DateTime(day.year, day.month, day.day)];
+                    final income = totals?['income'] ?? 0;
+                    final expense = totals?['expense'] ?? 0;
+                    return Container(
+                        margin: const EdgeInsets.all(2.0),
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                                Text('${day.day}', style: const TextStyle(fontSize: 14)),
+                                const SizedBox(height: 2),
+                                Text('\$${income.toStringAsFixed(0)}', style: const TextStyle(color: Colors.blue, fontSize: 10, fontWeight: FontWeight.bold)),
+                                Text('\$${expense.toStringAsFixed(0)}', style: const TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold)),
+                            ],
+                        ),
+                    );
+                },
+                selectedBuilder: (context, day, focusedDay) {
+                    final totals = dailyTotals[DateTime(day.year, day.month, day.day)];
+                    final income = totals?['income'] ?? 0;
+                    final expense = totals?['expense'] ?? 0;
+                    return Container(
+                        margin: const EdgeInsets.all(2.0),
+                        decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                                Text('${day.day}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 2),
+                                Text('\$${income.toStringAsFixed(0)}', style: const TextStyle(color: Colors.blue, fontSize: 10, fontWeight: FontWeight.bold)),
+                                Text('\$${expense.toStringAsFixed(0)}', style: const TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold)),
+                            ],
+                        ),
+                    );
+                },
+                todayBuilder: (context, day, focusedDay) {
+                  final totals = dailyTotals[DateTime(day.year, day.month, day.day)];
+                  final income = totals?['income'] ?? 0;
+                  final expense = totals?['expense'] ?? 0;
+                   return Container(
+                        margin: const EdgeInsets.all(2.0),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.green, width: 1.5),
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                                Text('${day.day}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 2),
+                                Text('\$${income.toStringAsFixed(0)}', style: const TextStyle(color: Colors.blue, fontSize: 10, fontWeight: FontWeight.bold)),
+                                Text('\$${expense.toStringAsFixed(0)}', style: const TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold)),
+                            ],
+                        ),
+                    );
+                },
+            ),
         ),
-      ),
     );
-  }
+}
 
   Widget _buildSummary(double income, double expense) {
     final total = income - expense;
@@ -308,13 +324,15 @@ class _RecordScreenState extends State<RecordScreen> {
 
   Widget _buildTransactionItem(BuildContext context, Transaction transaction) {
     return Card(
-      elevation: 0.5,
+      elevation: 0,
+      color: Colors.white,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: ListTile(
         leading: CircleAvatar(
+          radius: 20,
           backgroundColor: Color(transaction.colorValue).withOpacity(0.1),
-          child: Image.asset(transaction.iconPath, width: 24, height: 24),
+          child: Image.asset(transaction.iconPath, width: 22, height: 22),
         ),
         title: Text(transaction.title, style: const TextStyle(fontWeight: FontWeight.bold)),
         trailing: Row(
