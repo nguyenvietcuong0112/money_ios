@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/providers/transaction_provider.dart';
 import 'package:money_manager/providers/wallet_provider.dart';
 import 'package:money_manager/screens/add_transaction_screen.dart';
@@ -121,7 +122,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentTransactions(BuildContext context, List<dynamic> transactions) {
+  Widget _buildRecentTransactions(BuildContext context, List<Transaction> transactions) {
     if (transactions.isEmpty) {
       return const Center(
         child: Text('No transactions yet.'),
@@ -134,13 +135,16 @@ class HomeScreen extends StatelessWidget {
         final transaction = transactions[index];
         return Card(
           child: ListTile(
-            leading: Icon(transaction.icon, color: transaction.color),
+            leading: CircleAvatar(
+              backgroundColor: Color(transaction.colorValue),
+              child: Image.asset(transaction.iconPath, width: 24, height: 24),
+            ),
             title: Text(transaction.title),
             subtitle: Text(transaction.date.toString()),
             trailing: Text(
               '\$${transaction.amount.toStringAsFixed(2)}',
               style: TextStyle(
-                color: transaction.type == 'expense' ? Colors.red : Colors.green,
+                color: transaction.type == TransactionType.expense ? Colors.red : Colors.green,
                 fontWeight: FontWeight.bold,
               ),
             ),
