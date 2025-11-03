@@ -55,7 +55,7 @@ class WalletScreen extends StatelessWidget {
                         ),
                         title: Text(wallet.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text(
-                          '${wallet.balance.toStringAsFixed(0)} ${appController.currency}',
+                          '${wallet.balance.toStringAsFixed(0)} ${appController.currencySymbol}',
                           style: TextStyle(
                             color: wallet.balance < 0 ? Colors.red : Colors.black54,
                             fontWeight: FontWeight.w600,
@@ -120,7 +120,7 @@ class WalletScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4.0),
                 Text(
-                  '${totalBalance.toStringAsFixed(0)} ${appController.currency}',
+                  '${totalBalance.toStringAsFixed(0)} ${appController.currencySymbol}',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         color: totalBalance < 0 ? Colors.red : Colors.black,
                         fontWeight: FontWeight.bold,

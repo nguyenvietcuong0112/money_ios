@@ -17,11 +17,19 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
   final List<Currency> _allCurrencies = CurrencyService().getAll();
   late List<Currency> _filteredCurrencies;
   final TextEditingController _searchController = TextEditingController();
+  Currency? _selectedCurrency;
 
   @override
   void initState() {
     super.initState();
     _filteredCurrencies = _allCurrencies;
+    final appController = Get.find<AppController>();
+    if (appController.currency.isNotEmpty) {
+      _selectedCurrency = _allCurrencies.firstWhere(
+        (c) => c.code == appController.currency,
+        orElse: () => _allCurrencies.first,
+      );
+    }
     _searchController.addListener(_filterCurrencies);
   }
 
@@ -36,29 +44,43 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
     final query = _searchController.text.toLowerCase();
     setState(() {
       _filteredCurrencies = _allCurrencies.where((c) {
-        return c.name.toLowerCase().contains(query) ||
-               c.code.toLowerCase().contains(query);
+        return c.name.toLowerCase().contains(query) || c.code.toLowerCase().contains(query);
       }).toList();
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final AppController appController = Get.find();
-
-    void _onSelect(Currency currency) {
-      appController.setCurrency(currency.code, currency.symbol);
+  void _onConfirm() {
+    if (_selectedCurrency != null) {
+      final AppController appController = Get.find();
+      appController.setCurrency(_selectedCurrency!.code, _selectedCurrency!.symbol);
       if (widget.isInitialSetup) {
         Get.offAll(() => const MyHomePage());
       } else {
         Get.back();
       }
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Select Currency'),
         automaticallyImplyLeading: !widget.isInitialSetup,
+        actions: [
+          TextButton(
+            onPressed: _selectedCurrency == null ? null : _onConfirm,
+            child: Text(
+              'Next',
+              style: TextStyle(
+                color: _selectedCurrency == null
+                    ? Colors.grey
+                    : (Theme.of(context).brightness == Brightness.dark ? Colors.white : Theme.of(context).primaryColor),
+                fontSize: 18,
+              ),
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -81,11 +103,17 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
               itemCount: _filteredCurrencies.length,
               itemBuilder: (context, index) {
                 final currency = _filteredCurrencies[index];
+                final isSelected = _selectedCurrency?.code == currency.code;
                 return ListTile(
                   title: Text(currency.name),
                   subtitle: Text(currency.code),
-                  trailing: Text(currency.symbol, style: const TextStyle(fontSize: 18)),
-                  onTap: () => _onSelect(currency),
+                  trailing: isSelected ? const Icon(Icons.check_circle, color: Colors.green) : Text(currency.symbol, style: const TextStyle(fontSize: 18)),
+                  tileColor: isSelected ? Colors.green.withOpacity(0.1) : null,
+                  onTap: () {
+                    setState(() {
+                      _selectedCurrency = currency;
+                    });
+                  },
                 );
               },
             ),

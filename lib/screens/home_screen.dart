@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             return Row(
               children: [
                 Text(
-                  _isBalanceVisible ? '${appController.currency}${totalBalance.toStringAsFixed(2)}' : '*********',
+                  _isBalanceVisible ? '${appController.currencySymbol}${totalBalance.toStringAsFixed(2)}' : '*********',
                   style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
                 ),
                 IconButton(
@@ -182,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 Obx(() {
                   final appController = Get.find<AppController>();
                   return Text(
-                    _isBalanceVisible ? '${appController.currency}${wallet.balance.toStringAsFixed(2)}' : '***',
+                    _isBalanceVisible ? '${appController.currencySymbol}${wallet.balance.toStringAsFixed(2)}' : '***',
                     style: TextStyle(fontSize: 12, color: wallet.balance < 0 ? Colors.red : Colors.black),
                   );
                 }),
@@ -252,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                          Align(
                           alignment: Alignment.centerLeft,
                            child: Text(
-                              '${_tabController.index == 0 ? '-' : '+'}${appController.currency}${totalAmount.toStringAsFixed(2)}',
+                              '${_tabController.index == 0 ? '-' : '+'}${appController.currencySymbol}${totalAmount.toStringAsFixed(2)}',
                               style: TextStyle(
                                 fontSize: 24, 
                                 fontWeight: FontWeight.bold, 
@@ -430,7 +430,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         trailing: Obx(() {
           final appController = Get.find<AppController>();
           return Text(
-            '${transaction.type == TransactionType.income ? '+' : '-'}${appController.currency}${transaction.amount.toStringAsFixed(2)}',
+            '${transaction.type == TransactionType.income ? '+' : '-'}${appController.currencySymbol}${transaction.amount.toStringAsFixed(2)}',
             style: TextStyle(
               color: transaction.type == TransactionType.income ? Colors.blue : Colors.red,
               fontWeight: FontWeight.bold,

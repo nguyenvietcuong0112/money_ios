@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/models/category_model.dart';
@@ -270,8 +271,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildSummaryRow(String title, double amount, Color color, {bool isTotal = false}) {
-    final format = NumberFormat.simpleCurrency(locale: 'en_GB');
-    final formattedAmount = (title == 'Income' ? '+' : '') + format.format(amount);
+    final AppController appController = Get.find();
+    String displayText;
+    if (isTotal) {
+      displayText = '${amount.toStringAsFixed(2)} ${appController.currencySymbol}';
+    } else {
+      final sign = title == 'Income' ? '+' : '-';
+      displayText = '$sign${amount.toStringAsFixed(2)} ${appController.currencySymbol}';
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -280,7 +287,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         children: [
           Text(title, style: TextStyle(fontSize: 16, color: Colors.grey[600])),
           Text(
-            isTotal ? format.format(amount) : formattedAmount,
+            displayText,
             style: TextStyle(
               fontSize: isTotal ? 20 : 18,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
@@ -336,18 +343,18 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildChartAndLegend() {
+    final AppController appController = Get.find();
     final TransactionController transactionController = Get.find();
     final allTransactions = _getFilteredTransactions(transactionController.transactions);
     
     final TransactionType selectedType = _selectedChartTabIndex == 0 ? TransactionType.expense : TransactionType.income;
-    final Color chartColor = _selectedChartTabIndex == 0 ? Colors.red : Colors.green;
 
     final relevantTransactions = allTransactions.where((tx) => tx.type == selectedType).toList();
     final totalValue = relevantTransactions.fold(0.0, (sum, item) => sum + item.amount);
 
     final Map<String, double> categoryValue = {};
     for (var tx in relevantTransactions) {
-      categoryValue.update(tx.title, (value) => value + tx.amount, ifAbsent: () => tx.amount);
+      categoryValue.update(tx.categoryName, (value) => value + tx.amount, ifAbsent: () => tx.amount);
     }
     
     final List<PieChartSectionData> sections = categoryValue.entries.map((entry) {
@@ -355,7 +362,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         (cat) => cat.name == entry.key,
         orElse: () => Category(name: 'Other', iconPath: '', colorValue: Colors.grey.value),
       );
-      final percentage = (entry.value / totalValue) * 100;
+      final percentage = totalValue > 0 ? (entry.value / totalValue) * 100 : 0.0;
 
       return PieChartSectionData(
         color: Color(category.colorValue),
@@ -379,7 +386,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 alignment: Alignment.center,
                 children: [
                    Text(
-                    'Total\n${NumberFormat.simpleCurrency(locale: 'en_GB').format(totalValue)}',
+                    'Total\n${totalValue.toStringAsFixed(2)} ${appController.currencySymbol}',
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
@@ -416,6 +423,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildLegendItem(Color color, String name, double amount) {
+    final AppController appController = Get.find();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -427,7 +435,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                Text(NumberFormat.simpleCurrency(locale: 'en_GB').format(amount), style: const TextStyle(fontSize: 12)),
+                Text('${amount.toStringAsFixed(2)} ${appController.currencySymbol}', style: const TextStyle(fontSize: 12)),
               ],
             ),
           ),
