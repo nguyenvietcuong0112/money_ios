@@ -46,27 +46,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         elevation: 0,
         title: const Text('Home', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24)),
         actions: [
-          GetBuilder<WalletController>(
-            builder: (walletController) {
-              final totalBalance = walletController.totalBalance;
-              return Row(
-                children: [
-                  Text(
-                    _isBalanceVisible ? '\$${totalBalance.toStringAsFixed(2)}' : '*********',
-                    style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-                  IconButton(
-                    icon: Icon(_isBalanceVisible ? Icons.visibility_off : Icons.visibility, color: Colors.grey[600]),
-                    onPressed: () {
-                      setState(() {
-                        _isBalanceVisible = !_isBalanceVisible;
-                      });
-                    },
-                  ),
-                ],
-              );
-            },
-          ),
+          // Thay GetBuilder bằng Obx để tự động cập nhật tổng số dư
+          Obx(() {
+            final walletController = Get.find<WalletController>();
+            final totalBalance = walletController.totalBalance;
+            return Row(
+              children: [
+                Text(
+                  _isBalanceVisible ? '\$${totalBalance.toStringAsFixed(2)}' : '*********',
+                  style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
+                ),
+                IconButton(
+                  icon: Icon(_isBalanceVisible ? Icons.visibility_off : Icons.visibility, color: Colors.grey[600]),
+                  onPressed: () {
+                    setState(() {
+                      _isBalanceVisible = !_isBalanceVisible;
+                    });
+                  },
+                ),
+              ],
+            );
+          }),
           const SizedBox(width: 8),
         ],
       ),
@@ -110,24 +110,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ],
         ),
         const SizedBox(height: 10),
-        GetBuilder<WalletController>(
-          builder: (walletController) {
-            if (walletController.wallets.isEmpty) {
-              return const Text("No wallets available. Add one!");
-            }
-            return SizedBox(
-              height: 80,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: min(4, walletController.wallets.length),
-                itemBuilder: (context, index) {
-                  final wallet = walletController.wallets[index];
-                  return _buildWalletCard(wallet);
-                },
-              ),
-            );
-          },
-        ),
+        // Thay GetBuilder bằng Obx để tự động cập nhật danh sách ví
+        Obx(() {
+          final walletController = Get.find<WalletController>();
+          if (walletController.wallets.isEmpty) {
+            return const Text("No wallets available. Add one!");
+          }
+          return SizedBox(
+            height: 80,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: min(4, walletController.wallets.length),
+              itemBuilder: (context, index) {
+                final wallet = walletController.wallets[index];
+                return _buildWalletCard(wallet);
+              },
+            ),
+          );
+        }),
       ],
     );
   }
@@ -148,7 +148,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildWalletCard(Wallet wallet) {
-    final color = _getWalletColor(wallet.name);
     return Container(
       width: 150,
       margin: const EdgeInsets.only(right: 12.0),
@@ -169,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: color.withOpacity(0.1),
+            backgroundColor: _getWalletColor(wallet.name).withOpacity(0.1),
             child: Image.asset(wallet.iconPath, width: 24, height: 24),
           ),
           const SizedBox(width: 10),
@@ -233,36 +232,35 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               const SizedBox(height: 20),
               SizedBox(
                 height: 200,
-                child: GetBuilder<TransactionController>(
-                  builder: (transactionController) {
-                      final now = DateTime.now();
-                      final monthTransactions = transactionController.transactions.where((tx) => tx.date.year == now.year && tx.date.month == now.month).toList();
+                // Thay GetBuilder bằng Obx để tự động cập nhật biểu đồ
+                child: Obx(() {
+                    final transactionController = Get.find<TransactionController>();
+                    final now = DateTime.now();
+                    final monthTransactions = transactionController.transactions.where((tx) => tx.date.year == now.year && tx.date.month == now.month).toList();
 
-                      final data = _prepareChartData(monthTransactions);
+                    final data = _prepareChartData(monthTransactions);
 
-                      final chartData = _tabController.index == 0 ? data.$1 : data.$2; // item1 for expense, item2 for income
-                      final totalAmount = _tabController.index == 0 ? data.$3 : data.$4; // item3 for expense total, item4 for income total
+                    final chartData = _tabController.index == 0 ? data.$1 : data.$2; // item1 for expense, item2 for income
+                    final totalAmount = _tabController.index == 0 ? data.$3 : data.$4; // item3 for expense total, item4 for income total
 
-
-                      return Column(
-                        children: [
-                           Align(
-                            alignment: Alignment.centerLeft,
-                             child: Text(
-                                '${_tabController.index == 0 ? '-' : '+'}\$${totalAmount.toStringAsFixed(2)}',
-                                style: TextStyle(
-                                  fontSize: 24, 
-                                  fontWeight: FontWeight.bold, 
-                                  color: _tabController.index == 0 ? Colors.red : Colors.blue
-                                ),
-                              ), 
-                           ),
-                          const SizedBox(height: 10),
-                          Expanded(child: _buildLineChart(chartData, _tabController.index == 0 ? Colors.red : Colors.blue)),
-                        ],
-                      );
-                  }
-                ),
+                    return Column(
+                      children: [
+                         Align(
+                          alignment: Alignment.centerLeft,
+                           child: Text(
+                              '${_tabController.index == 0 ? '-' : '+'}\$${totalAmount.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontSize: 24, 
+                                fontWeight: FontWeight.bold, 
+                                color: _tabController.index == 0 ? Colors.red : Colors.blue
+                              ),
+                            ), 
+                         ),
+                        const SizedBox(height: 10),
+                        Expanded(child: _buildLineChart(chartData, _tabController.index == 0 ? Colors.red : Colors.blue)),
+                      ],
+                    );
+                }),
               ),
             ],
           ),
@@ -389,23 +387,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
         ),
         const SizedBox(height: 10),
-        GetBuilder<TransactionController>(
-          builder: (transactionController) {
-            final recentTransactions = transactionController.transactions.take(5).toList();
-            if (recentTransactions.isEmpty) {
-              return const Text("No recent transactions.");
-            }
-            return ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: recentTransactions.length,
-              itemBuilder: (context, index) {
-                final transaction = recentTransactions[index];
-                return _buildTransactionItem(transaction);
-              },
-            );
-          },
-        ),
+        // Thay GetBuilder bằng Obx để tự động cập nhật giao dịch gần đây
+        Obx(() {
+          final transactionController = Get.find<TransactionController>();
+          final recentTransactions = transactionController.transactions.sortedBy((t) => t.date).reversed.take(5).toList();
+          if (recentTransactions.isEmpty) {
+            return const Text("No recent transactions.");
+          }
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: recentTransactions.length,
+            itemBuilder: (context, index) {
+              final transaction = recentTransactions[index];
+              return _buildTransactionItem(transaction);
+            },
+          );
+        }),
       ],
     );
   }

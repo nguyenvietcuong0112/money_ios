@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:money_manager/models/transaction_model.dart';
@@ -6,7 +5,8 @@ import 'package:uuid/uuid.dart';
 
 class TransactionController extends GetxController {
   final Box<Transaction> _transactionsBox = Hive.box<Transaction>('transactions');
-  final RxList<Transaction> _transactions = <Transaction>[].obs;
+  // Sử dụng RxList để GetX có thể "lắng nghe" sự thay đổi
+  final RxList<Transaction> transactions = <Transaction>[].obs;
 
   @override
   void onInit() {
@@ -14,18 +14,17 @@ class TransactionController extends GetxController {
     _loadTransactions();
   }
 
-  List<Transaction> get transactions => _transactions;
-
-  double get totalIncome => _transactions
+  double get totalIncome => transactions
       .where((tx) => tx.type == TransactionType.income)
       .fold(0, (sum, item) => sum + item.amount);
 
-  double get totalExpense => _transactions
+  double get totalExpense => transactions
       .where((tx) => tx.type == TransactionType.expense)
       .fold(0, (sum, item) => sum + item.amount);
 
   void _loadTransactions() {
-    _transactions.value = _transactionsBox.values.toList();
+    // Gán giá trị cho RxList, nó sẽ tự động thông báo cho các listener (như Obx)
+    transactions.value = _transactionsBox.values.toList();
   }
 
   void addTransaction(
@@ -48,11 +47,13 @@ class TransactionController extends GetxController {
       walletId: walletId,
     );
     _transactionsBox.put(newTransaction.id, newTransaction);
-    _transactions.add(newTransaction);
+    // Chỉ cần thêm vào RxList, Obx sẽ tự động cập nhật UI
+    transactions.add(newTransaction);
   }
 
   void deleteTransaction(String transactionId) {
     _transactionsBox.delete(transactionId);
-    _transactions.removeWhere((transaction) => transaction.id == transactionId);
+    // Chỉ cần xóa khỏi RxList, Obx sẽ tự động cập nhật UI
+    transactions.removeWhere((transaction) => transaction.id == transactionId);
   }
 }

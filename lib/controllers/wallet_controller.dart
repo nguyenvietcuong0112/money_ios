@@ -7,7 +7,8 @@ import 'package:uuid/uuid.dart';
 
 class WalletController extends GetxController {
   final Box<Wallet> _walletsBox = Hive.box<Wallet>('wallets');
-  final RxList<Wallet> _wallets = <Wallet>[].obs;
+  // Sử dụng RxList để GetX có thể "lắng nghe" sự thay đổi
+  final RxList<Wallet> wallets = <Wallet>[].obs;
 
   @override
   void onInit() {
@@ -15,17 +16,15 @@ class WalletController extends GetxController {
     _loadWallets();
   }
 
-  List<Wallet> get wallets => _wallets;
-
-  double get totalBalance =>
-      _wallets.fold(0, (sum, item) => sum + item.balance);
+  // Getter cho tổng số dư, tự động tính toán lại khi `wallets` thay đổi
+  double get totalBalance => wallets.fold(0, (sum, item) => sum + item.balance);
 
   void _loadWallets() {
-    _wallets.value = _walletsBox.values.toList();
+    wallets.value = _walletsBox.values.toList();
   }
 
   void setupInitialWallets(BuildContext context) {
-    if (_wallets.isEmpty) {
+    if (wallets.isEmpty) {
       final localizations = AppLocalizations.of(context)!;
       const String placeholderIcon = 'assets/icons/ic_food.png';
 
@@ -59,7 +58,7 @@ class WalletController extends GetxController {
       for (var wallet in initialWallets) {
         _walletsBox.put(wallet.id, wallet);
       }
-      _loadWallets(); // Reload wallets after creation
+      _loadWallets(); // Tải lại sau khi thiết lập ban đầu
     }
   }
 
@@ -71,12 +70,14 @@ class WalletController extends GetxController {
       iconPath: iconPath,
     );
     _walletsBox.put(newWallet.id, newWallet);
-    _loadWallets();
+    // Tối ưu: Chỉ cần thêm vào RxList
+    wallets.add(newWallet);
   }
 
   void updateBalance(String walletId, double amount) {
-    final wallet = _walletsBox.get(walletId);
-    if (wallet != null) {
+    final walletIndex = wallets.indexWhere((w) => w.id == walletId);
+    if (walletIndex != -1) {
+      final wallet = wallets[walletIndex];
       final updatedWallet = Wallet(
         id: wallet.id,
         name: wallet.name,
@@ -85,16 +86,24 @@ class WalletController extends GetxController {
         image: wallet.image,
       );
       _walletsBox.put(walletId, updatedWallet);
-      _loadWallets();
+      // Tối ưu: Cập nhật phần tử trong RxList, GetX sẽ tự động nhận diện
+      wallets[walletIndex] = updatedWallet;
     }
   }
 
   void deleteWallet(String walletId) {
     _walletsBox.delete(walletId);
-    _loadWallets();
+    // Tối ưu: Chỉ cần xóa khỏi RxList
+    wallets.removeWhere((wallet) => wallet.id == walletId);
   }
 
   Wallet? getWalletById(String id) {
-    return _walletsBox.get(id);
+    // Ưu tiên tìm trong list đang có để có tốc độ nhanh hơn
+    try {
+      return wallets.firstWhere((w) => w.id == id);
+    } catch (e) {
+      // Nếu không có thì tìm trong box, đề phòng trường hợp chưa đồng bộ
+      return _walletsBox.get(id);
+    }
   }
 }

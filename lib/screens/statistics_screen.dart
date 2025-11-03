@@ -52,23 +52,26 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            CustomToggleButton(
-              isMonthSelected: _isMonthSelected,
-              onMonthSelected: () => setState(() => _isMonthSelected = true),
-              onYearSelected: () => setState(() => _isMonthSelected = false),
-            ),
-            const SizedBox(height: 24.0),
-            _buildFilters(),
-            const SizedBox(height: 24.0),
-            _buildSummary(),
-            const SizedBox(height: 24.0),
-            _buildChartTabs(),
-            const SizedBox(height: 16.0),
-            _buildChartAndLegend(),
-          ],
-        ),
+        // Bọc nội dung chính bằng Obx để lắng nghe thay đổi
+        child: Obx(() {
+          return Column(
+            children: [
+              CustomToggleButton(
+                isMonthSelected: _isMonthSelected,
+                onMonthSelected: () => setState(() => _isMonthSelected = true),
+                onYearSelected: () => setState(() => _isMonthSelected = false),
+              ),
+              const SizedBox(height: 24.0),
+              _buildFilters(),
+              const SizedBox(height: 24.0),
+              _buildSummary(),
+              const SizedBox(height: 24.0),
+              _buildChartTabs(),
+              const SizedBox(height: 16.0),
+              _buildChartAndLegend(),
+            ],
+          );
+        }),
       ),
     );
   }
