@@ -48,11 +48,11 @@ class TransactionController extends GetxController {
       walletId: walletId,
     );
     _transactionsBox.put(newTransaction.id, newTransaction);
-    _loadTransactions();
+    _transactions.add(newTransaction);
   }
 
   void deleteTransaction(String transactionId) {
     _transactionsBox.delete(transactionId);
-    _loadTransactions();
+    _transactions.removeWhere((transaction) => transaction.id == transactionId);
   }
 }
