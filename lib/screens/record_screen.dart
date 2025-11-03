@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:get/get.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
@@ -50,8 +51,8 @@ class _RecordScreenState extends State<RecordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Lấy controller ở đây, không cần Get.find() bên trong Obx
     final TransactionController transactionController = Get.find();
+    final AppController appController = Get.find();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F8F7),
@@ -69,13 +70,10 @@ class _RecordScreenState extends State<RecordScreen> {
           ),
         ],
       ),
-      // Thay thế GetBuilder bằng Obx
       body: Obx(
         () {
-          // Dùng transactionController.transactions trực tiếp
           final allTransactions = transactionController.transactions;
 
-          // Filter transactions by selected wallet AND month
           final monthlyTransactions = allTransactions.where((tx) {
             final walletMatch =
                 _selectedWallet == 'Total' || tx.walletId == _selectedWallet;
@@ -106,7 +104,6 @@ class _RecordScreenState extends State<RecordScreen> {
           final sortedDates = groupedTransactions.keys.toList()
             ..sort((a, b) => b.compareTo(a));
 
-          // Calculate totals from the correctly filtered monthly transactions
           final totalIncome = monthlyTransactions
               .where((tx) => tx.type == TransactionType.income)
               .fold(0.0, (sum, item) => sum + item.amount);
@@ -123,10 +120,10 @@ class _RecordScreenState extends State<RecordScreen> {
                     return _buildHeader(walletController);
                   },
                 ),
-                _buildCalendar(dailyTotals),
+                _buildCalendar(dailyTotals, appController),
                 const SizedBox(height: 16),
                 _buildSummary(totalIncome, totalExpense),
-                _buildTransactionList(sortedDates, groupedTransactions),
+                _buildTransactionList(sortedDates, groupedTransactions, appController),
               ],
             ),
           );
@@ -223,7 +220,7 @@ class _RecordScreenState extends State<RecordScreen> {
     );
   }
 
-  Widget _buildCalendar(Map<DateTime, Map<String, double>> dailyTotals) {
+  Widget _buildCalendar(Map<DateTime, Map<String, double>> dailyTotals, AppController appController) {
     return Container(
       margin: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -272,13 +269,13 @@ class _RecordScreenState extends State<RecordScreen> {
                 children: [
                   Text('${day.day}', style: const TextStyle(fontSize: 12)),
                   if (income > 0)
-                    Text('+\$${income.toStringAsFixed(0)}',
+                    Text('+${appController.currency}${income.toStringAsFixed(0)}',
                         style: const TextStyle(
                             color: Colors.blue,
                             fontSize: 9,
                             fontWeight: FontWeight.bold)),
                   if (expense > 0)
-                    Text('-\$${expense.toStringAsFixed(0)}',
+                    Text('-${appController.currency}${expense.toStringAsFixed(0)}',
                         style: const TextStyle(
                             color: Colors.red,
                             fontSize: 9,
@@ -304,13 +301,13 @@ class _RecordScreenState extends State<RecordScreen> {
                       style: const TextStyle(
                           fontSize: 12, fontWeight: FontWeight.bold)),
                   if (income > 0)
-                    Text('+\$${income.toStringAsFixed(0)}',
+                    Text('+${appController.currency}${income.toStringAsFixed(0)}',
                         style: const TextStyle(
                             color: Colors.blue,
                             fontSize: 9,
                             fontWeight: FontWeight.bold)),
                   if (expense > 0)
-                    Text('-\$${expense.toStringAsFixed(0)}',
+                    Text('-${appController.currency}${expense.toStringAsFixed(0)}',
                         style: const TextStyle(
                             color: Colors.red,
                             fontSize: 9,
@@ -336,13 +333,13 @@ class _RecordScreenState extends State<RecordScreen> {
                       style: const TextStyle(
                           fontSize: 12, fontWeight: FontWeight.bold)),
                   if (income > 0)
-                    Text('+\$${income.toStringAsFixed(0)}',
+                    Text('+${appController.currency}${income.toStringAsFixed(0)}',
                         style: const TextStyle(
                             color: Colors.blue,
                             fontSize: 9,
                             fontWeight: FontWeight.bold)),
                   if (expense > 0)
-                    Text('-\$${expense.toStringAsFixed(0)}',
+                    Text('-${appController.currency}${expense.toStringAsFixed(0)}',
                         style: const TextStyle(
                             color: Colors.red,
                             fontSize: 9,
@@ -377,17 +374,20 @@ class _RecordScreenState extends State<RecordScreen> {
       children: [
         Text(title, style: TextStyle(color: Colors.grey[600], fontSize: 16)),
         const SizedBox(height: 4.0),
-        Text(
-          '\$${amount.toStringAsFixed(2)}',
-          style: TextStyle(
-              color: color, fontWeight: FontWeight.bold, fontSize: 18),
-        ),
+        Obx(() {
+           final appController = Get.find<AppController>();
+          return Text(
+            '${appController.currency}${amount.toStringAsFixed(2)}',
+            style: TextStyle(
+                color: color, fontWeight: FontWeight.bold, fontSize: 18),
+          );
+        }),
       ],
     );
   }
 
   Widget _buildTransactionList(List<DateTime> sortedDates,
-      Map<DateTime, List<Transaction>> groupedTransactions) {
+      Map<DateTime, List<Transaction>> groupedTransactions, AppController appController) {
     // If a specific day is selected, show only its transactions
     if (_selectedDay != null) {
       final selectedDayKey =
@@ -455,7 +455,7 @@ class _RecordScreenState extends State<RecordScreen> {
                           color: Colors.grey[700]),
                     ),
                     Text(
-                      '${dailyTotal >= 0 ? '+' : ''}\$${dailyTotal.abs().toStringAsFixed(2)}',
+                      '${dailyTotal >= 0 ? '+' : ''}${appController.currency}${dailyTotal.abs().toStringAsFixed(2)}',
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
@@ -492,15 +492,18 @@ class _RecordScreenState extends State<RecordScreen> {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              '${transaction.type == TransactionType.income ? '+' : '-'}\$${transaction.amount.toStringAsFixed(2)}',
-              style: TextStyle(
-                  color: transaction.type == TransactionType.income
-                      ? Colors.blue
-                      : Colors.red,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16),
-            ),
+            Obx(() {
+               final appController = Get.find<AppController>();
+              return Text(
+                '${transaction.type == TransactionType.income ? '+' : '-'}${appController.currency}${transaction.amount.toStringAsFixed(2)}',
+                style: TextStyle(
+                    color: transaction.type == TransactionType.income
+                        ? Colors.blue
+                        : Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16),
+              );
+            }),
             const SizedBox(width: 8),
             const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
           ],

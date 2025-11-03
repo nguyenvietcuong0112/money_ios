@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/localization/app_localizations.dart';
 import 'package:money_manager/screens/add_wallet_screen.dart';
@@ -11,8 +12,8 @@ class WalletScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    // Khởi tạo controller ở đây để sử dụng trong toàn bộ màn hình
     final WalletController walletController = Get.find();
+    final AppController appController = Get.find();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6FEF7), // Light green-ish background
@@ -26,13 +27,11 @@ class WalletScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           children: [
-            // Total Balance Card - Thay bằng Obx
             Obx(() {
-              return _buildTotalBalanceCard(context, walletController.totalBalance, localizations);
+              return _buildTotalBalanceCard(context, walletController.totalBalance, localizations, appController);
             }),
             const SizedBox(height: 24.0),
 
-            // Wallets List - Thay bằng Obx
             Expanded(
               child: Obx(() {
                 return ListView.builder(
@@ -56,7 +55,7 @@ class WalletScreen extends StatelessWidget {
                         ),
                         title: Text(wallet.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text(
-                          '${wallet.balance.toStringAsFixed(0)} \$',
+                          '${wallet.balance.toStringAsFixed(0)} ${appController.currency}',
                           style: TextStyle(
                             color: wallet.balance < 0 ? Colors.red : Colors.black54,
                             fontWeight: FontWeight.w600,
@@ -74,7 +73,6 @@ class WalletScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16.0),
 
-            // Add Wallet Button
             ElevatedButton(
               onPressed: () {
                 Get.to(() => const AddWalletScreen());
@@ -99,7 +97,7 @@ class WalletScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTotalBalanceCard(BuildContext context, double totalBalance, AppLocalizations? localizations) {
+  Widget _buildTotalBalanceCard(BuildContext context, double totalBalance, AppLocalizations? localizations, AppController appController) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
@@ -122,7 +120,7 @@ class WalletScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4.0),
                 Text(
-                  '${totalBalance.toStringAsFixed(0)} \$',
+                  '${totalBalance.toStringAsFixed(0)} ${appController.currency}',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         color: totalBalance < 0 ? Colors.red : Colors.black,
                         fontWeight: FontWeight.bold,

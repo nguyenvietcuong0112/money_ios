@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/models/transaction_model.dart';
@@ -47,14 +48,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         elevation: 0,
         title: const Text('Home', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24)),
         actions: [
-          // Thay GetBuilder bằng Obx để tự động cập nhật tổng số dư
           Obx(() {
             final walletController = Get.find<WalletController>();
+            final appController = Get.find<AppController>();
             final totalBalance = walletController.totalBalance;
             return Row(
               children: [
                 Text(
-                  _isBalanceVisible ? '\$${totalBalance.toStringAsFixed(2)}' : '*********',
+                  _isBalanceVisible ? '${appController.currency}${totalBalance.toStringAsFixed(2)}' : '*********',
                   style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
                 ),
                 IconButton(
@@ -111,7 +112,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ],
         ),
         const SizedBox(height: 10),
-        // Thay GetBuilder bằng Obx để tự động cập nhật danh sách ví
         Obx(() {
           final walletController = Get.find<WalletController>();
           if (walletController.wallets.isEmpty) {
@@ -179,10 +179,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(wallet.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                Text(
-                  _isBalanceVisible ? '\$${wallet.balance.toStringAsFixed(2)}' : '***',
-                  style: TextStyle(fontSize: 12, color: wallet.balance < 0 ? Colors.red : Colors.black),
-                ),
+                Obx(() {
+                  final appController = Get.find<AppController>();
+                  return Text(
+                    _isBalanceVisible ? '${appController.currency}${wallet.balance.toStringAsFixed(2)}' : '***',
+                    style: TextStyle(fontSize: 12, color: wallet.balance < 0 ? Colors.red : Colors.black),
+                  );
+                }),
               ],
             ),
           ),
@@ -233,9 +236,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               const SizedBox(height: 20),
               SizedBox(
                 height: 200,
-                // Thay GetBuilder bằng Obx để tự động cập nhật biểu đồ
                 child: Obx(() {
                     final transactionController = Get.find<TransactionController>();
+                    final appController = Get.find<AppController>();
                     final now = DateTime.now();
                     final monthTransactions = transactionController.transactions.where((tx) => tx.date.year == now.year && tx.date.month == now.month).toList();
 
@@ -249,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                          Align(
                           alignment: Alignment.centerLeft,
                            child: Text(
-                              '${_tabController.index == 0 ? '-' : '+'}\$${totalAmount.toStringAsFixed(2)}',
+                              '${_tabController.index == 0 ? '-' : '+'}${appController.currency}${totalAmount.toStringAsFixed(2)}',
                               style: TextStyle(
                                 fontSize: 24, 
                                 fontWeight: FontWeight.bold, 
@@ -388,7 +391,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
         ),
         const SizedBox(height: 10),
-        // Thay GetBuilder bằng Obx để tự động cập nhật giao dịch gần đây
         Obx(() {
           final transactionController = Get.find<TransactionController>();
           // The list is now pre-sorted in the controller
@@ -425,14 +427,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         title: Text(transaction.categoryName, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(transaction.title.isNotEmpty ? transaction.title : DateFormat('d MMMM yyyy').format(transaction.date)),
-        trailing: Text(
-          '${transaction.type == TransactionType.income ? '+' : '-'}\$${transaction.amount.toStringAsFixed(2)}',
-          style: TextStyle(
-            color: transaction.type == TransactionType.income ? Colors.blue : Colors.red,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
+        trailing: Obx(() {
+          final appController = Get.find<AppController>();
+          return Text(
+            '${transaction.type == TransactionType.income ? '+' : '-'}${appController.currency}${transaction.amount.toStringAsFixed(2)}',
+            style: TextStyle(
+              color: transaction.type == TransactionType.income ? Colors.blue : Colors.red,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          );
+        }),
         onTap: () {
           Get.to(() => TransactionDetailScreen(transaction: transaction));
         },
