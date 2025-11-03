@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
-import 'package:money_manager/localization/app_localizations.dart';
 
 class AddWalletScreen extends StatefulWidget {
   const AddWalletScreen({super.key});
@@ -24,11 +23,10 @@ class _AddWalletScreenState extends State<AddWalletScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations?.translate('add_wallet') ?? 'Add Wallet', style: AppTextStyles.title),
+        title: Text('add_wallet'.tr, style: AppTextStyles.title),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),

@@ -8,6 +8,8 @@ import 'package:get/get.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
 
+import '../controllers/app_controller.dart';
+
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
 

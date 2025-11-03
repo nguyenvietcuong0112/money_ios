@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:money_manager/localization/app_localizations.dart';
 import 'package:money_manager/models/wallet_model.dart';
 import 'package:uuid/uuid.dart';
 
@@ -25,31 +24,30 @@ class WalletController extends GetxController {
 
   void setupInitialWallets(BuildContext context) {
     if (wallets.isEmpty) {
-      final localizations = AppLocalizations.of(context)!;
       const String placeholderIcon = 'assets/icons/ic_food.png';
 
       final initialWallets = [
         Wallet(
           id: const Uuid().v4(),
-          name: localizations.translate('credit') ?? 'Credit',
+          name: 'Credit',
           balance: 0,
           iconPath: placeholderIcon,
         ),
         Wallet(
           id: const Uuid().v4(),
-          name: localizations.translate('e_wallet') ?? 'E-Wallet',
+          name: 'E-Wallet',
           balance: 0,
           iconPath: placeholderIcon,
         ),
         Wallet(
           id: const Uuid().v4(),
-          name: localizations.translate('bank') ?? 'Bank',
+          name:   'Bank',
           balance: 0,
           iconPath: placeholderIcon,
         ),
         Wallet(
           id: const Uuid().v4(),
-          name: localizations.translate('cash') ?? 'Cash',
+          name:  'Cash',
           balance: 0,
           iconPath: placeholderIcon,
         ),
