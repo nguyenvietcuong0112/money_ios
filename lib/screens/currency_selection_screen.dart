@@ -1,8 +1,7 @@
+import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:currency_picker/currency_picker.dart';
 import 'package:money_manager/controllers/app_controller.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:money_manager/main.dart';
 
 class CurrencySelectionScreen extends StatefulWidget {
@@ -15,92 +14,83 @@ class CurrencySelectionScreen extends StatefulWidget {
 }
 
 class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
-  String? _selectedCurrencyCode;
-  final List<Currency> _currencies = CurrencyService().getAll();
+  final List<Currency> _allCurrencies = CurrencyService().getAll();
+  late List<Currency> _filteredCurrencies;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _selectedCurrencyCode = Get.find<AppController>().currency;
+    _filteredCurrencies = _allCurrencies;
+    _searchController.addListener(_filterCurrencies);
   }
 
-  void _onNext() async {
-    if (_selectedCurrencyCode != null) {
-      // Update controller
-      Get.find<AppController>().setCurrency(_selectedCurrencyCode!);
+  @override
+  void dispose() {
+    _searchController.removeListener(_filterCurrencies);
+    _searchController.dispose();
+    super.dispose();
+  }
 
-      if (widget.isInitialSetup) {
-        // Save the flag that setup is complete
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('isFirstTime', false);
-        await prefs.setString('currency', _selectedCurrencyCode!);
-
-        // Navigate to the main app screen and remove the setup screens from the stack
-        Get.offAll(() => const MyHomePage());
-      } else {
-        // Just pop the screen if coming from settings
-        Get.back();
-      }
-    }
+  void _filterCurrencies() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredCurrencies = _allCurrencies.where((c) {
+        return c.name.toLowerCase().contains(query) ||
+               c.code.toLowerCase().contains(query);
+      }).toList();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppController appController = Get.find();
+
+    void _onSelect(Currency currency) {
+      appController.setCurrency(currency.code, currency.symbol);
+      if (widget.isInitialSetup) {
+        Get.offAll(() => const MyHomePage());
+      } else {
+        Get.back();
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Select Currency'),
         automaticallyImplyLeading: !widget.isInitialSetup,
-        actions: [
-          if (_selectedCurrencyCode != null)
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _onNext,
-              tooltip: widget.isInitialSetup ? 'Next' : 'Save',
-            ),
-        ],
       ),
-      body: ListView.builder(
-        itemCount: _currencies.length,
-        itemBuilder: (context, index) {
-          final currency = _currencies[index];
-          final isSelected = currency.code == _selectedCurrencyCode;
-          return InkWell(
-            onTap: () {
-              setState(() {
-                _selectedCurrencyCode = currency.code;
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              decoration: BoxDecoration(
-                color: isSelected ? Theme.of(context).colorScheme.primary.withAlpha(30) : Colors.transparent,
-                border: Border(
-                  left: BorderSide(
-                    color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
-                    width: 4.0,
-                  ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                labelText: 'Search',
+                hintText: 'Search by currency name or code',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
                 ),
               ),
-              child: Row(
-                children: [
-                  Text(currency.symbol, style: const TextStyle(fontSize: 24.0)),
-                  const SizedBox(width: 16.0),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(currency.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        Text(currency.code),
-                      ],
-                    ),
-                  ),
-                  if (isSelected)
-                    Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary),
-                ],
-              ),
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _filteredCurrencies.length,
+              itemBuilder: (context, index) {
+                final currency = _filteredCurrencies[index];
+                return ListTile(
+                  title: Text(currency.name),
+                  subtitle: Text(currency.code),
+                  trailing: Text(currency.symbol, style: const TextStyle(fontSize: 18)),
+                  onTap: () => _onSelect(currency),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

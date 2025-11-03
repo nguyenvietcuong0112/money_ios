@@ -132,7 +132,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
 
       if (!mounted) return;
       if (widget.isInitialSetup) {
-        Get.to(() => const CurrencySelectionScreen(isInitialSetup: true));
+        Get.off(() => const CurrencySelectionScreen(isInitialSetup: true));
       } else {
         if (Get.key.currentState?.canPop() ?? false) {
           Get.back();

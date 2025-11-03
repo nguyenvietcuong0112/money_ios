@@ -41,9 +41,14 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
   final String? languageCode = prefs.getString('languageCode');
-  final String? currency = prefs.getString('currency');
+  final String? currencyCode = prefs.getString('currencyCode');
+  final String? currencySymbol = prefs.getString('currencySymbol');
 
-  Get.put(AppController(initialLocale: languageCode != null ? Locale(languageCode) : null, initialCurrency: currency));
+  Get.put(AppController(
+    initialLocale: languageCode != null ? Locale(languageCode) : null,
+    initialCurrencyCode: currencyCode,
+    initialCurrencySymbol: currencySymbol,
+  ));
   Get.put(ThemeController());
   Get.put(WalletController());
   Get.put(TransactionController());

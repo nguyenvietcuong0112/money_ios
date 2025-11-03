@@ -60,7 +60,7 @@ class SettingsScreen extends StatelessWidget {
                   const Divider(),
                   ListTile(
                     title: Text(localizations.translate('currency') ?? 'Currency'),
-                    trailing: Text(appController.currency),
+                    trailing: Text(appController.currencySymbol),
                     leading: const Icon(Icons.monetization_on),
                     onTap: () {
                       Get.to(() => const CurrencySelectionScreen());

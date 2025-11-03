@@ -269,13 +269,13 @@ class _RecordScreenState extends State<RecordScreen> {
                 children: [
                   Text('${day.day}', style: const TextStyle(fontSize: 12)),
                   if (income > 0)
-                    Text('+${appController.currency}${income.toStringAsFixed(0)}',
+                    Text('+${appController.currencySymbol}${income.toStringAsFixed(0)}',
                         style: const TextStyle(
                             color: Colors.blue,
                             fontSize: 9,
                             fontWeight: FontWeight.bold)),
                   if (expense > 0)
-                    Text('-${appController.currency}${expense.toStringAsFixed(0)}',
+                    Text('-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
                         style: const TextStyle(
                             color: Colors.red,
                             fontSize: 9,
@@ -301,13 +301,13 @@ class _RecordScreenState extends State<RecordScreen> {
                       style: const TextStyle(
                           fontSize: 12, fontWeight: FontWeight.bold)),
                   if (income > 0)
-                    Text('+${appController.currency}${income.toStringAsFixed(0)}',
+                    Text('+${appController.currencySymbol}${income.toStringAsFixed(0)}',
                         style: const TextStyle(
                             color: Colors.blue,
                             fontSize: 9,
                             fontWeight: FontWeight.bold)),
                   if (expense > 0)
-                    Text('-${appController.currency}${expense.toStringAsFixed(0)}',
+                    Text('-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
                         style: const TextStyle(
                             color: Colors.red,
                             fontSize: 9,
@@ -333,13 +333,13 @@ class _RecordScreenState extends State<RecordScreen> {
                       style: const TextStyle(
                           fontSize: 12, fontWeight: FontWeight.bold)),
                   if (income > 0)
-                    Text('+${appController.currency}${income.toStringAsFixed(0)}',
+                    Text('+${appController.currencySymbol}${income.toStringAsFixed(0)}',
                         style: const TextStyle(
                             color: Colors.blue,
                             fontSize: 9,
                             fontWeight: FontWeight.bold)),
                   if (expense > 0)
-                    Text('-${appController.currency}${expense.toStringAsFixed(0)}',
+                    Text('-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
                         style: const TextStyle(
                             color: Colors.red,
                             fontSize: 9,
@@ -377,7 +377,7 @@ class _RecordScreenState extends State<RecordScreen> {
         Obx(() {
            final appController = Get.find<AppController>();
           return Text(
-            '${appController.currency}${amount.toStringAsFixed(2)}',
+            '${appController.currencySymbol}${amount.toStringAsFixed(2)}',
             style: TextStyle(
                 color: color, fontWeight: FontWeight.bold, fontSize: 18),
           );
@@ -455,7 +455,7 @@ class _RecordScreenState extends State<RecordScreen> {
                           color: Colors.grey[700]),
                     ),
                     Text(
-                      '${dailyTotal >= 0 ? '+' : ''}${appController.currency}${dailyTotal.abs().toStringAsFixed(2)}',
+                      '${dailyTotal >= 0 ? '+' : ''}${appController.currencySymbol}${dailyTotal.abs().toStringAsFixed(2)}',
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
@@ -495,7 +495,7 @@ class _RecordScreenState extends State<RecordScreen> {
             Obx(() {
                final appController = Get.find<AppController>();
               return Text(
-                '${transaction.type == TransactionType.income ? '+' : '-'}${appController.currency}${transaction.amount.toStringAsFixed(2)}',
+                '${transaction.type == TransactionType.income ? '+' : '-'}${appController.currencySymbol}${transaction.amount.toStringAsFixed(2)}',
                 style: TextStyle(
                     color: transaction.type == TransactionType.income
                         ? Colors.blue
