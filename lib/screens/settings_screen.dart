@@ -31,7 +31,7 @@ class SettingsScreen extends StatelessWidget {
           Card(
             child: Column(
               children: [
-                GetBuilder<ThemeController>(
+                GetX<ThemeController>(
                   builder: (themeController) => SwitchListTile(
                     title: Text(localizations.translate('dark_mode') ?? 'Dark Mode'),
                     value: themeController.themeMode == ThemeMode.dark,
@@ -46,7 +46,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           _buildSectionTitle(context, 'General'),
           Card(
-            child: GetBuilder<AppController>(
+            child: GetX<AppController>(
               builder: (appController) => Column(
                 children: [
                   ListTile(
@@ -60,7 +60,7 @@ class SettingsScreen extends StatelessWidget {
                   const Divider(),
                   ListTile(
                     title: Text(localizations.translate('currency') ?? 'Currency'),
-                    trailing: Text(appController.currency ?? ''),
+                    trailing: Text(appController.currency),
                     leading: const Icon(Icons.monetization_on),
                     onTap: () {
                       Get.to(() => const CurrencySelectionScreen());

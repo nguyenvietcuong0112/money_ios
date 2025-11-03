@@ -23,14 +23,12 @@ class AppController extends GetxController {
     _locale.value = locale;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('languageCode', locale.languageCode);
-    update();
   }
 
   void setCurrency(String currency) async {
     _currency.value = currency;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('currency', currency);
-    update();
   }
 
   String _getCurrencySymbol(String currencyCode) {

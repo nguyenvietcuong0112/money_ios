@@ -40,8 +40,10 @@ void main() async {
 
   final prefs = await SharedPreferences.getInstance();
   final bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
+  final String? languageCode = prefs.getString('languageCode');
+  final String? currency = prefs.getString('currency');
 
-  Get.put(AppController());
+  Get.put(AppController(initialLocale: languageCode != null ? Locale(languageCode) : null, initialCurrency: currency));
   Get.put(ThemeController());
   Get.put(WalletController());
   Get.put(TransactionController());
@@ -56,29 +58,34 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeController themeController = Get.find();
-    final AppController appController = Get.find();
-
-    return GetMaterialApp(
-      title: 'Money Manager',
-      theme: lightTheme,
-      darkTheme: darkTheme,
-      themeMode: themeController.themeMode,
-      locale: appController.locale,
-      supportedLocales: const [
-        Locale('en', ''),
-        Locale('fr', ''),
-        Locale('vi', '')
-      ],
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      home: isFirstTime
-          ? const LanguageSelectionScreen(isInitialSetup: true)
-          : const MyHomePage(),
+    return GetX<ThemeController>(
+      builder: (themeController) {
+        return GetX<AppController>(
+          builder: (appController) {
+            return GetMaterialApp(
+              title: 'Money Manager',
+              theme: lightTheme,
+              darkTheme: darkTheme,
+              themeMode: themeController.themeMode,
+              locale: appController.locale,
+              supportedLocales: const [
+                Locale('en', ''),
+                Locale('fr', ''),
+                Locale('vi', '')
+              ],
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              home: isFirstTime
+                  ? const LanguageSelectionScreen(isInitialSetup: true)
+                  : const MyHomePage(),
+            );
+          },
+        );
+      },
     );
   }
 }
