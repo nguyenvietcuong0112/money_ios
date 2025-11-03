@@ -14,8 +14,8 @@ import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/models/wallet_model.dart';
 import 'package:money_manager/screens/home_screen.dart';
 import 'package:money_manager/screens/language_selection_screen.dart';
+import 'package:money_manager/screens/more_screen.dart';
 import 'package:money_manager/screens/record_screen.dart';
-import 'package:money_manager/screens/settings_screen.dart';
 import 'package:money_manager/screens/statistics_screen.dart';
 import 'package:money_manager/screens/wallet_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -154,7 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
       RecordScreen(onScreenChanged: _onItemTapped),
       const WalletScreen(),
       StatisticsScreen(onScreenChanged: _onItemTapped),
-      const SettingsScreen(),
+      const MoreScreen(),
     ];
 
     // Setup initial wallets after the first frame is rendered
@@ -198,8 +198,8 @@ class _MyHomePageState extends State<MyHomePage> {
             label: localizations?.translate('statistics') ?? 'Statistics',
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.settings),
-            label: localizations?.translate('settings') ?? 'Settings',
+            icon: const Icon(Icons.more_horiz),
+            label: localizations?.translate('more') ?? 'More',
           ),
         ],
         currentIndex: _selectedIndex,
