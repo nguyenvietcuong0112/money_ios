@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:uuid/uuid.dart';
 
-class TransactionProvider with ChangeNotifier {
+class TransactionController extends GetxController {
   final Box<Transaction> _transactionsBox = Hive.box<Transaction>('transactions');
-  List<Transaction> _transactions = [];
+  final RxList<Transaction> _transactions = <Transaction>[].obs;
 
-  TransactionProvider() {
+  @override
+  void onInit() {
+    super.onInit();
     _loadTransactions();
   }
 
@@ -22,8 +25,7 @@ class TransactionProvider with ChangeNotifier {
       .fold(0, (sum, item) => sum + item.amount);
 
   void _loadTransactions() {
-    _transactions = _transactionsBox.values.toList();
-    notifyListeners();
+    _transactions.value = _transactionsBox.values.toList();
   }
 
   void addTransaction(

@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:money_manager/providers/theme_provider.dart';
-import 'package:money_manager/providers/app_provider.dart';
+import 'package:get/get.dart';
+import 'package:money_manager/controllers/app_controller.dart';
+import 'package:money_manager/controllers/theme_controller.dart';
 import 'package:money_manager/localization/app_localizations.dart';
-import 'package:money_manager/screens/language_selection_screen.dart';
 import 'package:money_manager/screens/currency_selection_screen.dart';
+import 'package:money_manager/screens/language_selection_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final appProvider = Provider.of<AppProvider>(context);
     final localizations = AppLocalizations.of(context);
 
     if (localizations == null) {
@@ -33,43 +31,43 @@ class SettingsScreen extends StatelessWidget {
           Card(
             child: Column(
               children: [
-                SwitchListTile(
-                  title: Text(localizations.translate('dark_mode') ?? 'Dark Mode'),
-                  value: themeProvider.themeMode == ThemeMode.dark,
-                  onChanged: (value) {
-                    themeProvider.toggleTheme();
-                  },
-                  secondary: const Icon(Icons.palette),
+                GetBuilder<ThemeController>(
+                  builder: (themeController) => SwitchListTile(
+                    title: Text(localizations.translate('dark_mode') ?? 'Dark Mode'),
+                    value: themeController.themeMode == ThemeMode.dark,
+                    onChanged: (value) {
+                      themeController.toggleTheme();
+                    },
+                    secondary: const Icon(Icons.palette),
+                  ),
                 ),
               ],
             ),
           ),
           _buildSectionTitle(context, 'General'),
           Card(
-            child: Column(
-              children: [
-                ListTile(
-                  title: Text(localizations.translate('language') ?? 'Language'),
-                  trailing: Text(appProvider.locale?.languageCode ?? ''),
-                  leading: const Icon(Icons.language),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const LanguageSelectionScreen()),
-                    );
-                  },
-                ),
-                const Divider(),
-                ListTile(
-                  title: Text(localizations.translate('currency') ?? 'Currency'),
-                  trailing: Text(appProvider.currency!),
-                  leading: const Icon(Icons.monetization_on),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const CurrencySelectionScreen()),
-                    );
-                  },
-                ),
-              ],
+            child: GetBuilder<AppController>(
+              builder: (appController) => Column(
+                children: [
+                  ListTile(
+                    title: Text(localizations.translate('language') ?? 'Language'),
+                    trailing: Text(appController.locale?.languageCode ?? ''),
+                    leading: const Icon(Icons.language),
+                    onTap: () {
+                      Get.to(() => const LanguageSelectionScreen());
+                    },
+                  ),
+                  const Divider(),
+                  ListTile(
+                    title: Text(localizations.translate('currency') ?? 'Currency'),
+                    trailing: Text(appController.currency ?? ''),
+                    leading: const Icon(Icons.monetization_on),
+                    onTap: () {
+                      Get.to(() => const CurrencySelectionScreen());
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
           _buildSectionTitle(context, 'Notifications'),

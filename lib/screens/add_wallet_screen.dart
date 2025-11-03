@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/localization/app_localizations.dart';
-import 'package:money_manager/providers/wallet_provider.dart';
-import 'package:provider/provider.dart';
 
 class AddWalletScreen extends StatefulWidget {
   const AddWalletScreen({super.key});
@@ -34,9 +34,9 @@ class _AddWalletScreenState extends State<AddWalletScreen> {
             onPressed: () {
               if (_formKey.currentState!.validate()) {
                 final name = _nameController.text;
-                Provider.of<WalletProvider>(context, listen: false)
+                Get.find<WalletController>()
                     .addWallet(name, 0.0, _selectedIconPath);
-                Navigator.pop(context);
+                Get.back();
               }
             },
           ),

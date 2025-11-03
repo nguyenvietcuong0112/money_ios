@@ -1,13 +1,16 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'dart:math';
+
+import 'package:collection/collection.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:money_manager/providers/transaction_provider.dart';
-import 'package:money_manager/providers/wallet_provider.dart';
+import 'package:money_manager/controllers/transaction_controller.dart';
+import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/models/wallet_model.dart';
-import 'dart:math';
-import 'package:collection/collection.dart';
+
+import 'add_transaction_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int) onScreenChanged;
@@ -43,9 +46,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         elevation: 0,
         title: const Text('Home', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24)),
         actions: [
-          Consumer<WalletProvider>(
-            builder: (context, walletProvider, child) {
-              final totalBalance = walletProvider.totalBalance;
+          GetBuilder<WalletController>(
+            builder: (walletController) {
+              final totalBalance = walletController.totalBalance;
               return Row(
                 children: [
                   Text(
@@ -82,6 +85,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
       ),
+        floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.to(() => const AddTransactionScreen());
+        },
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
@@ -100,18 +110,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ],
         ),
         const SizedBox(height: 10),
-        Consumer<WalletProvider>(
-          builder: (context, walletProvider, child) {
-            if (walletProvider.wallets.isEmpty) {
+        GetBuilder<WalletController>(
+          builder: (walletController) {
+            if (walletController.wallets.isEmpty) {
               return const Text("No wallets available. Add one!");
             }
             return SizedBox(
               height: 80,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: min(4, walletProvider.wallets.length),
+                itemCount: min(4, walletController.wallets.length),
                 itemBuilder: (context, index) {
-                  final wallet = walletProvider.wallets[index];
+                  final wallet = walletController.wallets[index];
                   return _buildWalletCard(wallet);
                 },
               ),
@@ -223,15 +233,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               const SizedBox(height: 20),
               SizedBox(
                 height: 200,
-                child: Consumer<TransactionProvider>(
-                  builder: (context, transactionProvider, child) {
+                child: GetBuilder<TransactionController>(
+                  builder: (transactionController) {
                       final now = DateTime.now();
-                      final monthTransactions = transactionProvider.transactions.where((tx) => tx.date.year == now.year && tx.date.month == now.month).toList();
+                      final monthTransactions = transactionController.transactions.where((tx) => tx.date.year == now.year && tx.date.month == now.month).toList();
 
                       final data = _prepareChartData(monthTransactions);
 
-                      final chartData = _tabController.index == 0 ? data.item1 : data.item2; // item1 for expense, item2 for income
-                      final totalAmount = _tabController.index == 0 ? data.item3 : data.item4; // item3 for expense total, item4 for income total
+                      final chartData = _tabController.index == 0 ? data.$1 : data.$2; // item1 for expense, item2 for income
+                      final totalAmount = _tabController.index == 0 ? data.$3 : data.$4; // item3 for expense total, item4 for income total
 
 
                       return Column(
@@ -262,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
 
-  Tuple4<List<FlSpot>, List<FlSpot>, double, double> _prepareChartData(List<Transaction> transactions) {
+  (List<FlSpot>, List<FlSpot>, double, double) _prepareChartData(List<Transaction> transactions) {
       // Prepare Expense Data
       final expenseTransactions = transactions.where((tx) => tx.type == TransactionType.expense).toList();
       final totalExpense = expenseTransactions.fold(0.0, (sum, item) => sum + item.amount);
@@ -285,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       }
        if (incomeSpots.isEmpty) incomeSpots.add(const FlSpot(1, 0));
 
-      return Tuple4(expenseSpots, incomeSpots, totalExpense, totalIncome);
+      return (expenseSpots, incomeSpots, totalExpense, totalIncome);
   }
 
 
@@ -379,9 +389,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
         ),
         const SizedBox(height: 10),
-        Consumer<TransactionProvider>(
-          builder: (context, transactionProvider, child) {
-            final recentTransactions = transactionProvider.transactions.take(5).toList();
+        GetBuilder<TransactionController>(
+          builder: (transactionController) {
+            final recentTransactions = transactionController.transactions.take(5).toList();
             if (recentTransactions.isEmpty) {
               return const Text("No recent transactions.");
             }
@@ -401,8 +411,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildTransactionItem(Transaction transaction) {
-    final walletProvider = Provider.of<WalletProvider>(context, listen: false);
-    final wallet = walletProvider.getWalletById(transaction.walletId);
+    final walletController = Get.find<WalletController>();
+    final wallet = walletController.getWalletById(transaction.walletId);
     final color = wallet != null ? _getWalletColor(wallet.name) : Colors.grey;
 
     return Card(
@@ -432,13 +442,4 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
   }
-}
-
-class Tuple4<T1, T2, T3, T4> {
-  final T1 item1;
-  final T2 item2;
-  final T3 item3;
-  final T4 item4;
-
-  Tuple4(this.item1, this.item2, this.item3, this.item4);
 }

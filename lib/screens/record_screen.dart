@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:money_manager/models/transaction_model.dart';
-import 'package:money_manager/providers/transaction_provider.dart';
-import 'package:money_manager/providers/wallet_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
+import 'package:money_manager/controllers/transaction_controller.dart';
+import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:collection/collection.dart';
+
+import 'add_transaction_screen.dart';
 
 class RecordScreen extends StatefulWidget {
   final Function(int) onScreenChanged;
@@ -61,9 +63,9 @@ class _RecordScreenState extends State<RecordScreen> {
           ),
         ],
       ),
-      body: Consumer2<TransactionProvider, WalletProvider>(
-        builder: (context, transactionProvider, walletProvider, child) {
-          final allTransactions = transactionProvider.transactions;
+      body: GetBuilder<TransactionController>(
+        builder: (transactionController) {
+          final allTransactions = transactionController.transactions;
 
           // Filter transactions by selected wallet AND month
           final monthlyTransactions = allTransactions.where((tx) {
@@ -94,7 +96,11 @@ class _RecordScreenState extends State<RecordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(walletProvider),
+                GetBuilder<WalletController>(
+                  builder: (walletController) {
+                    return _buildHeader(walletController);
+                  },
+                ),
                 _buildCalendar(dailyTotals),
                 const SizedBox(height: 16),
                 _buildSummary(totalIncome, totalExpense),
@@ -104,18 +110,20 @@ class _RecordScreenState extends State<RecordScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => widget.onScreenChanged(2),
+        floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.to(() => const AddTransactionScreen());
+        },
         backgroundColor: Colors.green[600],
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  Widget _buildHeader(WalletProvider walletProvider) {
+  Widget _buildHeader(WalletController walletController) {
     List<DropdownMenuItem<String>> walletItems = [
       const DropdownMenuItem(value: 'Total', child: Text('Total')),
-      ...walletProvider.wallets.map((wallet) {
+      ...walletController.wallets.map((wallet) {
         return DropdownMenuItem(
           value: wallet.id,
           child: Text(wallet.name),

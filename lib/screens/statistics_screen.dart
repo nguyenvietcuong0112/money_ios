@@ -1,12 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:money_manager/controllers/transaction_controller.dart';
+import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/models/category_model.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/models/wallet_model.dart';
-import 'package:money_manager/providers/transaction_provider.dart';
-import 'package:money_manager/providers/wallet_provider.dart';
 import 'package:money_manager/widgets/custom_toggle_button.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -84,7 +84,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildFilters() {
-    final walletProvider = Provider.of<WalletProvider>(context);
+    final WalletController walletController = Get.find();
 
     return Row(
       children: [
@@ -128,7 +128,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 underline: const SizedBox.shrink(),
                 hint: const Text('Total'),
                 value: _selectedWallet,
-                items: walletProvider.wallets.map((wallet) {
+                items: walletController.wallets.map((wallet) {
                   return DropdownMenuItem(
                     value: wallet,
                     child: Row(
@@ -162,8 +162,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildSummary() {
-    final transactionProvider = Provider.of<TransactionProvider>(context);
-    final transactions = _getFilteredTransactions(transactionProvider.transactions);
+    final TransactionController transactionController = Get.find();
+    final transactions = _getFilteredTransactions(transactionController.transactions);
 
     final double totalIncome = transactions
         .where((tx) => tx.type == TransactionType.income)
@@ -214,8 +214,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildChartAndLegend() {
-    final transactionProvider = Provider.of<TransactionProvider>(context);
-    final expenseTransactions = _getFilteredTransactions(transactionProvider.transactions)
+    final TransactionController transactionController = Get.find();
+    final expenseTransactions = _getFilteredTransactions(transactionController.transactions)
         .where((tx) => tx.type == TransactionType.expense)
         .toList();
 
@@ -304,8 +304,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildTransactionList() {
-    final transactionProvider = Provider.of<TransactionProvider>(context);
-    final transactions = _getFilteredTransactions(transactionProvider.transactions);
+    final TransactionController transactionController = Get.find();
+    final transactions = _getFilteredTransactions(transactionController.transactions);
 
     return Container(
       padding: const EdgeInsets.all(16.0),

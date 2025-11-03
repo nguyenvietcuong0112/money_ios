@@ -1,9 +1,9 @@
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:money_manager/providers/app_provider.dart';
+import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/screens/currency_selection_screen.dart';
 import 'package:money_manager/widgets/language_tile.dart';
 
@@ -125,21 +125,17 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
   void _onNext() async {
     if (_selectedLanguageCode != null && !_isAnimating) {
       final locale = Locale(_selectedLanguageCode!);
-      Provider.of<AppProvider>(context, listen: false).setLocale(locale);
+      Get.find<AppController>().setLocale(locale);
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('languageCode', _selectedLanguageCode!);
 
       if (!mounted) return;
       if (widget.isInitialSetup) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-              builder: (context) =>
-                  const CurrencySelectionScreen(isInitialSetup: true)),
-        );
+        Get.to(() => const CurrencySelectionScreen(isInitialSetup: true));
       } else {
-        if (Navigator.canPop(context)) {
-          Navigator.of(context).pop();
+        if (Get.key.currentState?.canPop() ?? false) {
+          Get.back();
         }
       }
     }

@@ -1,31 +1,36 @@
-
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AppProvider with ChangeNotifier {
-  Locale? _locale;
-  String _currency;
+class AppController extends GetxController {
+  final Rx<Locale?> _locale = (null as Locale?).obs;
+  final RxString _currency = 'USD'.obs;
 
-  Locale? get locale => _locale;
-  String get currency => _currency;
-  String get currencySymbol => _getCurrencySymbol(_currency);
+  Locale? get locale => _locale.value;
+  String get currency => _currency.value;
+  String get currencySymbol => _getCurrencySymbol(currency);
 
-  AppProvider({Locale? initialLocale, String? initialCurrency})
-      : _locale = initialLocale,
-        _currency = initialCurrency ?? 'USD';
+  AppController({Locale? initialLocale, String? initialCurrency}) {
+    if (initialLocale != null) {
+      _locale.value = initialLocale;
+    }
+    if (initialCurrency != null) {
+      _currency.value = initialCurrency;
+    }
+  }
 
   void setLocale(Locale locale) async {
-    _locale = locale;
+    _locale.value = locale;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('languageCode', locale.languageCode);
-    notifyListeners();
+    update();
   }
 
   void setCurrency(String currency) async {
-    _currency = currency;
+    _currency.value = currency;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('currency', currency);
-    notifyListeners();
+    update();
   }
 
   String _getCurrencySymbol(String currencyCode) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 import 'package:currency_picker/currency_picker.dart';
-import 'package:money_manager/providers/app_provider.dart';
+import 'package:money_manager/controllers/app_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:money_manager/main.dart';
 
@@ -21,13 +21,13 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedCurrencyCode = Provider.of<AppProvider>(context, listen: false).currency;
+    _selectedCurrencyCode = Get.find<AppController>().currency;
   }
 
   void _onNext() async {
     if (_selectedCurrencyCode != null) {
-      // Update provider
-      Provider.of<AppProvider>(context, listen: false).setCurrency(_selectedCurrencyCode!);
+      // Update controller
+      Get.find<AppController>().setCurrency(_selectedCurrencyCode!);
 
       if (widget.isInitialSetup) {
         // Save the flag that setup is complete
@@ -35,16 +35,11 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
         await prefs.setBool('isFirstTime', false);
         await prefs.setString('currency', _selectedCurrencyCode!);
 
-        if (!mounted) return;
         // Navigate to the main app screen and remove the setup screens from the stack
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const MyHomePage()),
-          (Route<dynamic> route) => false,
-        );
+        Get.offAll(() => const MyHomePage());
       } else {
-        if (!mounted) return;
         // Just pop the screen if coming from settings
-        Navigator.of(context).pop();
+        Get.back();
       }
     }
   }

@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:money_manager/controllers/app_controller.dart';
+import 'package:money_manager/controllers/theme_controller.dart';
+import 'package:money_manager/controllers/transaction_controller.dart';
+import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/localization/app_localizations.dart';
 import 'package:money_manager/models/budget_model.dart';
 import 'package:money_manager/models/category_model.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/models/wallet_model.dart';
-import 'package:money_manager/providers/app_provider.dart';
-import 'package:money_manager/providers/budget_provider.dart';
-import 'package:money_manager/providers/theme_provider.dart';
-import 'package:money_manager/providers/wallet_provider.dart';
-import 'package:money_manager/providers/transaction_provider.dart';
-import 'package:money_manager/screens/screens.dart';
-import 'package:provider/provider.dart';
+import 'package:money_manager/screens/home_screen.dart';
+import 'package:money_manager/screens/language_selection_screen.dart';
+import 'package:money_manager/screens/record_screen.dart';
+import 'package:money_manager/screens/settings_screen.dart';
+import 'package:money_manager/screens/statistics_screen.dart';
+import 'package:money_manager/screens/wallet_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer' as developer;
 import 'package:path_provider/path_provider.dart' as path_provider;
@@ -37,6 +41,11 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
 
+  Get.put(AppController());
+  Get.put(ThemeController());
+  Get.put(WalletController());
+  Get.put(TransactionController());
+
   runApp(MyApp(isFirstTime: isFirstTime));
 }
 
@@ -47,39 +56,29 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => AppProvider()),
-        ChangeNotifierProvider(create: (context) => ThemeProvider()),
-        ChangeNotifierProvider(create: (context) => WalletProvider()),
-        ChangeNotifierProvider(create: (context) => TransactionProvider()),
-        ChangeNotifierProvider(create: (context) => BudgetProvider()),
+    final ThemeController themeController = Get.find();
+    final AppController appController = Get.find();
+
+    return GetMaterialApp(
+      title: 'Money Manager',
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: themeController.themeMode,
+      locale: appController.locale,
+      supportedLocales: const [
+        Locale('en', ''),
+        Locale('fr', ''),
+        Locale('vi', '')
       ],
-      child: Consumer<AppProvider>(
-        builder: (context, appProvider, child) {
-          return MaterialApp(
-            title: 'Money Manager',
-            theme: lightTheme,
-            darkTheme: darkTheme,
-            themeMode: Provider.of<ThemeProvider>(context).themeMode,
-            locale: appProvider.locale,
-            supportedLocales: const [
-              Locale('en', ''),
-              Locale('fr', ''),
-              Locale('vi', '')
-            ],
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            home: isFirstTime
-                ? const LanguageSelectionScreen(isInitialSetup: true)
-                : const MyHomePage(),
-          );
-        },
-      ),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: isFirstTime
+          ? const LanguageSelectionScreen(isInitialSetup: true)
+          : const MyHomePage(),
     );
   }
 }
@@ -160,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Setup initial wallets after the first frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<WalletProvider>(context, listen: false).setupInitialWallets(context);
+      Get.find<WalletController>().setupInitialWallets(context);
     });
   }
 

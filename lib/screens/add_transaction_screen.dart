@@ -3,9 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:money_manager/models/category_model.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/models/wallet_model.dart';
-import 'package:money_manager/providers/transaction_provider.dart';
-import 'package:money_manager/providers/wallet_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
+import 'package:money_manager/controllers/transaction_controller.dart';
+import 'package:money_manager/controllers/wallet_controller.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
@@ -45,10 +45,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       return;
     }
 
-    final transactionProvider = Provider.of<TransactionProvider>(context, listen: false);
-    final walletProvider = Provider.of<WalletProvider>(context, listen: false);
+    final transactionController = Get.find<TransactionController>();
+    final walletController = Get.find<WalletController>();
 
-    transactionProvider.addTransaction(
+    transactionController.addTransaction(
       _selectedCategory!.name,
       enteredAmount,
       _selectedDate,
@@ -58,17 +58,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       _selectedWallet!.id,
     );
 
-    walletProvider.updateBalance(
+    walletController.updateBalance(
       _selectedWallet!.id,
       _selectedType == TransactionType.income ? enteredAmount : -enteredAmount,
     );
 
-    Navigator.of(context).pop();
+    Get.back();
   }
 
   @override
   Widget build(BuildContext context) {
-    final walletProvider = Provider.of<WalletProvider>(context);
+    final walletController = Get.find<WalletController>();
 
     return Scaffold(
       appBar: AppBar(
@@ -85,7 +85,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             const SizedBox(height: 20),
             _buildDateField(),
             const Divider(),
-            _buildWalletField(walletProvider.wallets),
+            _buildWalletField(walletController.wallets),
             const Divider(),
             _buildNoteField(),
             const Divider(),

@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:money_manager/localization/app_localizations.dart';
 import 'package:money_manager/models/wallet_model.dart';
 import 'package:uuid/uuid.dart';
 
-class WalletProvider with ChangeNotifier {
+class WalletController extends GetxController {
   final Box<Wallet> _walletsBox = Hive.box<Wallet>('wallets');
-  List<Wallet> _wallets = [];
+  final RxList<Wallet> _wallets = <Wallet>[].obs;
 
-  WalletProvider() {
+  @override
+  void onInit() {
+    super.onInit();
     _loadWallets();
   }
 
@@ -18,8 +21,7 @@ class WalletProvider with ChangeNotifier {
       _wallets.fold(0, (sum, item) => sum + item.balance);
 
   void _loadWallets() {
-    _wallets = _walletsBox.values.toList();
-    notifyListeners();
+    _wallets.value = _walletsBox.values.toList();
   }
 
   void setupInitialWallets(BuildContext context) {

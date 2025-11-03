@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:money_manager/controllers/transaction_controller.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/models/wallet_model.dart';
-import 'package:money_manager/providers/transaction_provider.dart';
-import 'package:provider/provider.dart';
 
 class WalletDetailScreen extends StatelessWidget {
   final Wallet wallet;
@@ -11,8 +11,8 @@ class WalletDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final transactionProvider = Provider.of<TransactionProvider>(context);
-    final walletTransactions = transactionProvider.transactions
+    final transactionController = Get.find<TransactionController>();
+    final walletTransactions = transactionController.transactions
         .where((transaction) => transaction.walletId == wallet.id)
         .toList();
 

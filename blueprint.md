@@ -1,72 +1,40 @@
-# Money Manager App Blueprint
+
+# Blueprint: Money Manager App Refactoring
 
 ## Overview
 
-This document outlines the structure and features of the Money Manager app, a Flutter application designed to help users track their income and expenses.
+This document outlines the plan to refactor the Money Manager application from using the `provider` package for state management to `GetX`. This change will professionalize the codebase, making it more concise, organized, and performant.
 
-## Features
+## Current Architecture (Provider)
 
-### Core Features
+*   **State Management:** `ChangeNotifierProvider`, `ChangeNotifier`, `Consumer`, and `Provider.of` are used throughout the app.
+*   **Dependencies:** Providers are injected at the top of the widget tree in `main.dart`.
+*   **Navigation:** Standard `Navigator.push` and `MaterialPageRoute` are used for routing.
 
-*   **Multi-Wallet Management:** Users can create and manage multiple wallets. The app automatically creates four default wallets (Credit, E-Wallet, Bank, Cash) with a starting balance of zero if no wallets exist.
-*   **Redesigned Wallet Screen:** A modern, intuitive UI for the wallet screen that provides a clear overview of the total balance and individual wallets.
-*   **Transaction Tracking:** Users can add income and expense transactions to their wallets.
-*   **Category Management:** Transactions can be assigned to categories, each with its own name, icon, and color.
-*   **Data Persistence:** All data is stored locally using Hive.
+## Proposed Architecture (GetX)
 
-### Screens
+*   **State Management:** We will replace `ChangeNotifier` with `GetxController`. Widgets will be updated using `GetBuilder`.
+*   **Dependency Injection:** Dependencies will be managed using `Get.put()` and accessed with `Get.find()`.
+*   **Navigation:** We will replace `Navigator` calls with `Get.to()`, `Get.back()`, etc., and use `GetMaterialApp`.
 
-*   **Home Screen:** Provides an overview of the user's finances, including total balance, recent transactions, and a summary of income and expenses.
-*   **Add Transaction Screen:** Allows users to add new income or expense transactions.
-*   **Wallet Screen:** Displays a list of all wallets, with options to add, delete, and view the details of each wallet.
-*   **Wallet Detail Screen:** Shows the balance and a list of all transactions for a specific wallet.
-*   **Statistics Screen:** Provides a detailed overview of the user's spending habits, with a pie chart showing spending by category, a spending limit feature, and the ability to filter by month or view all-time data.
-*   **Settings Screen:** Allows users to customize the app, with options for dark mode, language, currency, notifications, and security.
+## Refactoring Plan
 
-## Project Structure
-
-```
-lib
-├── main.dart
-├── app.dart
-├── localization
-│   ├── app_localizations.dart
-│   └── languages
-│       ├── en.json
-│       └── es.json
-├── models
-│   ├── category_model.dart
-│   ├── transaction_model.dart
-│   └── wallet_model.dart
-├── providers
-│   ├── app_provider.dart
-│   ├── transaction_provider.dart
-│   ├── theme_provider.dart
-│   └── wallet_provider.dart
-└── screens
-    ├── add_transaction_screen.dart
-    ├── add_wallet_screen.dart
-    ├── currency_selection_screen.dart
-    ├── home_screen.dart
-    ├── language_selection_screen.dart
-    ├── settings_screen.dart
-    ├── statistics_screen.dart
-    ├── wallet_detail_screen.dart
-    └── wallet_screen.dart
-```
-
-## Current Plan
-
-*   **Implement Transaction Management:**
-    1.  Design and build the `add_transaction_screen.dart` UI to allow users to input transaction details (amount, type (income/expense), category, wallet, date, description).
-    2.  Implement the logic in `transaction_provider.dart` to add new transactions and update the corresponding wallet balance.
-    3.  Display the list of transactions in the `WalletDetailScreen`.
-    4.  Display recent transactions on the `HomeScreen`.
-
-## Future Ideas
-
-*   **Improve `SettingsScreen`:**
-    *   Restructure the UI using `Card` widgets.
-    *   Add icons to each setting.
-    *   Add "Notifications" and "Security" settings.
-    *   Add a "Help & Support" section.
+1.  **Add Dependency:** Add the `get` package to `pubspec.yaml`.
+2.  **Create Controller Directory:** Create a new directory `lib/controllers` to store all GetX controllers.
+3.  **Migrate Providers to Controllers:**
+    *   `lib/providers/app_provider.dart` -> `lib/controllers/app_controller.dart`
+    *   `lib/providers/theme_provider.dart` -> `lib/controllers/theme_controller.dart`
+    *   `lib/providers/transaction_provider.dart` -> `lib/controllers/transaction_controller.dart`
+    *   `lib/providers/wallet_provider.dart` -> `lib/controllers/wallet_controller.dart`
+4.  **Update `main.dart`:**
+    *   Initialize all `GetxController`s using `Get.put()`.
+    *   Replace `ChangeNotifierProvider` with the GetX dependency injection setup.
+    *   Change `MaterialApp` to `GetMaterialApp`.
+5.  **Refactor UI Screens:**
+    *   Update all screens (`home_screen.dart`, `record_screen.dart`, `settings_screen.dart`, etc.) to use `Get.find()` instead of `Provider.of`.
+    *   Replace `Consumer` widgets with `GetBuilder`.
+    *   Update all `Navigator.push` calls to `Get.to()`.
+6.  **Cleanup:**
+    *   Delete the now-unused `lib/providers` directory.
+    *   Run `flutter format` to ensure consistent code style.
+7.  **Verification:** Thoroughly test the application to ensure all features work as expected after the refactoring.
