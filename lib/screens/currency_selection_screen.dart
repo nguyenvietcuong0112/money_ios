@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
-import 'package:money_manager/main.dart';
+import 'package:money_manager/screens/my_home_page.dart';
 
 class CurrencySelectionScreen extends StatefulWidget {
   final bool isInitialSetup;
@@ -26,10 +26,11 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
     _filteredCurrencies = _allCurrencies;
     final appController = Get.find<AppController>();
     if (appController.currency.isNotEmpty) {
-      _selectedCurrency = _allCurrencies.firstWhere(
-        (c) => c.code == appController.currency,
-        orElse: () => _allCurrencies.first,
-      );
+      try {
+        _selectedCurrency = _allCurrencies.firstWhere((c) => c.code == appController.currency);
+      } catch (e) {
+        _selectedCurrency = null;
+      }
     }
     _searchController.addListener(_filterCurrencies);
   }
@@ -66,13 +67,13 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Select Currency', style: AppTextStyles.title),
+        title: Text('select_currency'.tr, style: AppTextStyles.title), // Dịch
         automaticallyImplyLeading: !widget.isInitialSetup,
         actions: [
           TextButton(
             onPressed: _selectedCurrency == null ? null : _onConfirm,
             child: Text(
-              'Next',
+              'next'.tr, // Dịch
               style: AppTextStyles.button.copyWith(
                 color: _selectedCurrency == null
                     ? Colors.grey
@@ -90,9 +91,9 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
               controller: _searchController,
               style: AppTextStyles.body,
               decoration: InputDecoration(
-                labelText: 'Search',
+                labelText: 'search'.tr, // Dịch
                 labelStyle: AppTextStyles.body,
-                hintText: 'Search by currency name or code',
+                hintText: 'search_by_currency'.tr, // Dịch
                 hintStyle: AppTextStyles.body.copyWith(color: Colors.grey),
                 prefixIcon: const Icon(Icons.search),
                 border: const OutlineInputBorder(

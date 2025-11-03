@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
-import 'package:money_manager/localization/app_localizations.dart';
 import 'package:money_manager/screens/add_wallet_screen.dart';
 import 'package:money_manager/screens/wallet_detail_screen.dart';
 
@@ -12,14 +11,13 @@ class WalletScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
     final WalletController walletController = Get.find();
     final AppController appController = Get.find();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6FEF7), // Light green-ish background
+      backgroundColor: const Color(0xFFF6FEF7),
       appBar: AppBar(
-        title: Text(localizations?.translate('my_wallet') ?? 'My Wallet', style: AppTextStyles.title),
+        title: Text('my_wallet'.tr, style: AppTextStyles.title), // Dịch
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.black,
@@ -29,10 +27,9 @@ class WalletScreen extends StatelessWidget {
         child: Column(
           children: [
             Obx(() {
-              return _buildTotalBalanceCard(context, walletController.totalBalance, localizations, appController);
+              return _buildTotalBalanceCard(context, walletController.totalBalance, appController);
             }),
             const SizedBox(height: 24.0),
-
             Expanded(
               child: Obx(() {
                 return ListView.builder(
@@ -73,13 +70,12 @@ class WalletScreen extends StatelessWidget {
               }),
             ),
             const SizedBox(height: 16.0),
-
             ElevatedButton(
               onPressed: () {
                 Get.to(() => const AddWalletScreen());
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1E9E54), // Dark green
+                backgroundColor: const Color(0xFF1E9E54),
                 foregroundColor: Colors.white,
                 minimumSize: const Size(double.infinity, 56),
                 shape: RoundedRectangleBorder(
@@ -87,7 +83,7 @@ class WalletScreen extends StatelessWidget {
                 ),
               ),
               child: Text(
-                '+ ${localizations?.translate('add_wallet') ?? 'Add Wallet'}',
+                '+ ${('add_wallet'.tr)}',
                 style: AppTextStyles.button.copyWith(fontSize: 18),
               ),
             ),
@@ -98,7 +94,7 @@ class WalletScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTotalBalanceCard(BuildContext context, double totalBalance, AppLocalizations? localizations, AppController appController) {
+  Widget _buildTotalBalanceCard(BuildContext context, double totalBalance, AppController appController) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
@@ -108,7 +104,7 @@ class WalletScreen extends StatelessWidget {
           children: [
             const CircleAvatar(
               radius: 30,
-              backgroundColor: Color(0xFFD7F5DD), // Light green
+              backgroundColor: Color(0xFFD7F5DD),
               child: Icon(Icons.account_balance, size: 30, color: Colors.green),
             ),
             const SizedBox(width: 16.0),
@@ -116,16 +112,16 @@ class WalletScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  localizations?.translate('total_balance') ?? 'Total Balance',
+                  'total_balance'.tr, // Dịch
                   style: AppTextStyles.subtitle.copyWith(color: Colors.grey.shade600),
                 ),
                 const SizedBox(height: 4.0),
                 Text(
                   '${totalBalance.toStringAsFixed(0)} ${appController.currencySymbol}',
                   style: AppTextStyles.heading2.copyWith(
-                        color: totalBalance < 0 ? Colors.red : Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: totalBalance < 0 ? Colors.red : Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),

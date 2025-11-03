@@ -37,13 +37,11 @@ class _RecordScreenState extends State<RecordScreen> {
 
   List<DateTime> _getMonths() {
     final now = DateTime.now();
-    // Go back 24 months and forward 12 months
     final firstMonth = DateTime(now.year - 2, now.month);
     final lastMonth = DateTime(now.year + 1, now.month);
     final months = <DateTime>[];
     DateTime currentMonth = firstMonth;
-    while (currentMonth.isBefore(lastMonth) ||
-        currentMonth.isAtSameMomentAs(lastMonth)) {
+    while (currentMonth.isBefore(lastMonth) || currentMonth.isAtSameMomentAs(lastMonth)) {
       months.add(currentMonth);
       currentMonth = DateTime(currentMonth.year, currentMonth.month + 1);
     }
@@ -60,8 +58,7 @@ class _RecordScreenState extends State<RecordScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text('Record',
-            style: AppTextStyles.title.copyWith(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: Text('record'.tr, style: AppTextStyles.title.copyWith(color: Colors.black, fontWeight: FontWeight.bold)), // Dịch
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: Colors.black54),
@@ -71,65 +68,50 @@ class _RecordScreenState extends State<RecordScreen> {
           ),
         ],
       ),
-      body: Obx(
-        () {
-          final allTransactions = transactionController.transactions;
+      body: Obx(() {
+        final allTransactions = transactionController.transactions;
 
-          final monthlyTransactions = allTransactions.where((tx) {
-            final walletMatch =
-                _selectedWallet == 'Total' || tx.walletId == _selectedWallet;
-            final monthMatch = tx.date.year == _focusedDay.year &&
-                tx.date.month == _focusedDay.month;
-            return walletMatch && monthMatch;
-          }).toList();
+        final monthlyTransactions = allTransactions.where((tx) {
+          final walletMatch = _selectedWallet == 'Total' || tx.walletId == _selectedWallet;
+          final monthMatch = tx.date.year == _focusedDay.year && tx.date.month == _focusedDay.month;
+          return walletMatch && monthMatch;
+        }).toList();
 
-          final dailyTotals = groupBy(
-                  allTransactions,
-                  (Transaction tx) =>
-                      DateTime(tx.date.year, tx.date.month, tx.date.day))
-              .map((date, txs) {
-            final income = txs
-                .where((tx) => tx.type == TransactionType.income)
-                .fold(0.0, (sum, item) => sum + item.amount);
-            final expense = txs
-                .where((tx) => tx.type == TransactionType.expense)
-                .fold(0.0, (sum, item) => sum + item.amount);
-            return MapEntry(date, {'income': income, 'expense': expense});
-          });
+        final dailyTotals = groupBy(
+          allTransactions,
+          (Transaction tx) => DateTime(tx.date.year, tx.date.month, tx.date.day),
+        ).map((date, txs) {
+          final income = txs.where((tx) => tx.type == TransactionType.income).fold(0.0, (sum, item) => sum + item.amount);
+          final expense = txs.where((tx) => tx.type == TransactionType.expense).fold(0.0, (sum, item) => sum + item.amount);
+          return MapEntry(date, {'income': income, 'expense': expense});
+        });
 
-          final groupedTransactions = groupBy(
-            monthlyTransactions,
-            (Transaction tx) =>
-                DateTime(tx.date.year, tx.date.month, tx.date.day),
-          );
-          final sortedDates = groupedTransactions.keys.toList()
-            ..sort((a, b) => b.compareTo(a));
+        final groupedTransactions = groupBy(
+          monthlyTransactions,
+          (Transaction tx) => DateTime(tx.date.year, tx.date.month, tx.date.day),
+        );
+        final sortedDates = groupedTransactions.keys.toList()..sort((a, b) => b.compareTo(a));
 
-          final totalIncome = monthlyTransactions
-              .where((tx) => tx.type == TransactionType.income)
-              .fold(0.0, (sum, item) => sum + item.amount);
-          final totalExpense = monthlyTransactions
-              .where((tx) => tx.type == TransactionType.expense)
-              .fold(0.0, (sum, item) => sum + item.amount);
+        final totalIncome = monthlyTransactions.where((tx) => tx.type == TransactionType.income).fold(0.0, (sum, item) => sum + item.amount);
+        final totalExpense = monthlyTransactions.where((tx) => tx.type == TransactionType.expense).fold(0.0, (sum, item) => sum + item.amount);
 
-          return SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                GetBuilder<WalletController>(
-                  builder: (walletController) {
-                    return _buildHeader(walletController);
-                  },
-                ),
-                _buildCalendar(dailyTotals, appController),
-                const SizedBox(height: 16),
-                _buildSummary(totalIncome, totalExpense),
-                _buildTransactionList(sortedDates, groupedTransactions, appController),
-              ],
-            ),
-          );
-        },
-      ),
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GetBuilder<WalletController>(
+                builder: (walletController) {
+                  return _buildHeader(walletController);
+                },
+              ),
+              _buildCalendar(dailyTotals, appController),
+              const SizedBox(height: 16),
+              _buildSummary(totalIncome, totalExpense),
+              _buildTransactionList(sortedDates, groupedTransactions, appController),
+            ],
+          ),
+        );
+      }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Get.to(() => const AddTransactionScreen());
@@ -142,22 +124,19 @@ class _RecordScreenState extends State<RecordScreen> {
 
   Widget _buildHeader(WalletController walletController) {
     List<DropdownMenuItem<String>> walletItems = [
-      DropdownMenuItem(value: 'Total', child: Text('Total', style: AppTextStyles.body,)),
+      DropdownMenuItem(value: 'Total', child: Text('total'.tr, style: AppTextStyles.body)), // Dịch
       ...walletController.wallets.map((wallet) {
         return DropdownMenuItem(
           value: wallet.id,
-          child: Text(wallet.name, style: AppTextStyles.body,),
+          child: Text(wallet.name, style: AppTextStyles.body),
         );
       }),
     ];
 
     DateTime selectedMonth = _months.firstWhere(
-        (month) =>
-            month.year == _focusedDay.year && month.month == _focusedDay.month,
+        (month) => month.year == _focusedDay.year && month.month == _focusedDay.month,
         orElse: () => _months.firstWhere(
-            (m) =>
-                m.year == DateTime.now().year &&
-                m.month == DateTime.now().month,
+            (m) => m.year == DateTime.now().year && m.month == DateTime.now().month,
             orElse: () => _months.first));
 
     return Padding(
@@ -166,8 +145,7 @@ class _RecordScreenState extends State<RecordScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20.0),
@@ -179,15 +157,14 @@ class _RecordScreenState extends State<RecordScreen> {
                 items: _months.map((DateTime month) {
                   return DropdownMenuItem<DateTime>(
                     value: month,
-                    child: Text(DateFormat('MMMM yyyy').format(month), style: AppTextStyles.body,),
+                    child: Text(DateFormat('MMMM yyyy').format(month), style: AppTextStyles.body),
                   );
                 }).toList(),
                 onChanged: (DateTime? newValue) {
                   if (newValue != null) {
                     setState(() {
                       _focusedDay = newValue;
-                      _selectedDay =
-                          null; // Reset day selection when month changes
+                      _selectedDay = null;
                     });
                   }
                 },
@@ -195,8 +172,7 @@ class _RecordScreenState extends State<RecordScreen> {
             ),
           ),
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20.0),
@@ -224,8 +200,7 @@ class _RecordScreenState extends State<RecordScreen> {
   Widget _buildCalendar(Map<DateTime, Map<String, double>> dailyTotals, AppController appController) {
     return Container(
       margin: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(12.0)),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12.0)),
       child: TableCalendar(
         headerVisible: false,
         firstDay: _months.first,
@@ -249,14 +224,12 @@ class _RecordScreenState extends State<RecordScreen> {
         onPageChanged: (focusedDay) {
           setState(() {
             _focusedDay = focusedDay;
-            _selectedDay = null; // Reset day selection when page changes
+            _selectedDay = null;
           });
         },
         daysOfWeekStyle: DaysOfWeekStyle(
-          weekdayStyle:
-              AppTextStyles.body.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
-          weekendStyle:
-              AppTextStyles.body.copyWith(color: Colors.red, fontWeight: FontWeight.bold),
+          weekdayStyle: AppTextStyles.body.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+          weekendStyle: AppTextStyles.body.copyWith(color: Colors.red, fontWeight: FontWeight.bold),
         ),
         calendarBuilders: CalendarBuilders(
           defaultBuilder: (context, day, focusedDay) {
@@ -269,12 +242,8 @@ class _RecordScreenState extends State<RecordScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text('${day.day}', style: AppTextStyles.caption.copyWith(fontSize: 12)),
-                  if (income > 0)
-                    Text('+${appController.currencySymbol}${income.toStringAsFixed(0)}',
-                        style: AppTextStyles.caption.copyWith(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
-                  if (expense > 0)
-                    Text('-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
-                        style: AppTextStyles.caption.copyWith(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold)),
+                  if (income > 0) Text('+${appController.currencySymbol}${income.toStringAsFixed(0)}', style: AppTextStyles.caption.copyWith(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
+                  if (expense > 0) Text('-${appController.currencySymbol}${expense.toStringAsFixed(0)}', style: AppTextStyles.caption.copyWith(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold)),
                 ],
               ),
             );
@@ -292,14 +261,9 @@ class _RecordScreenState extends State<RecordScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('${day.day}',
-                      style: AppTextStyles.caption.copyWith(fontSize: 12, fontWeight: FontWeight.bold)),
-                  if (income > 0)
-                    Text('+${appController.currencySymbol}${income.toStringAsFixed(0)}',
-                        style: AppTextStyles.caption.copyWith(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
-                  if (expense > 0)
-                    Text('-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
-                        style: AppTextStyles.caption.copyWith(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold)),
+                  Text('${day.day}', style: AppTextStyles.caption.copyWith(fontSize: 12, fontWeight: FontWeight.bold)),
+                  if (income > 0) Text('+${appController.currencySymbol}${income.toStringAsFixed(0)}', style: AppTextStyles.caption.copyWith(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
+                  if (expense > 0) Text('-${appController.currencySymbol}${expense.toStringAsFixed(0)}', style: AppTextStyles.caption.copyWith(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold)),
                 ],
               ),
             );
@@ -317,14 +281,9 @@ class _RecordScreenState extends State<RecordScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('${day.day}',
-                      style: AppTextStyles.caption.copyWith(fontSize: 12, fontWeight: FontWeight.bold)),
-                  if (income > 0)
-                    Text('+${appController.currencySymbol}${income.toStringAsFixed(0)}',
-                        style: AppTextStyles.caption.copyWith(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
-                  if (expense > 0)
-                    Text('-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
-                        style: AppTextStyles.caption.copyWith(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold)),
+                  Text('${day.day}', style: AppTextStyles.caption.copyWith(fontSize: 12, fontWeight: FontWeight.bold)),
+                  if (income > 0) Text('+${appController.currencySymbol}${income.toStringAsFixed(0)}', style: AppTextStyles.caption.copyWith(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
+                  if (expense > 0) Text('-${appController.currencySymbol}${expense.toStringAsFixed(0)}', style: AppTextStyles.caption.copyWith(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold)),
                 ],
               ),
             );
@@ -341,10 +300,9 @@ class _RecordScreenState extends State<RecordScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildSummaryItem('Income', income, Colors.blue),
-          _buildSummaryItem('Expenses', expense, Colors.red),
-          _buildSummaryItem(
-              'Total', total, total >= 0 ? Colors.green : Colors.orange),
+          _buildSummaryItem('income'.tr, income, Colors.blue), // Dịch
+          _buildSummaryItem('expenses'.tr, expense, Colors.red), // Dịch
+          _buildSummaryItem('total'.tr, total, total >= 0 ? Colors.green : Colors.orange), // Dịch
         ],
       ),
     );
@@ -356,7 +314,7 @@ class _RecordScreenState extends State<RecordScreen> {
         Text(title, style: AppTextStyles.body.copyWith(color: Colors.grey[600], fontSize: 16)),
         const SizedBox(height: 4.0),
         Obx(() {
-           final appController = Get.find<AppController>();
+          final appController = Get.find<AppController>();
           return Text(
             '${appController.currencySymbol}${amount.toStringAsFixed(2)}',
             style: AppTextStyles.body.copyWith(color: color, fontWeight: FontWeight.bold, fontSize: 18),
@@ -368,20 +326,17 @@ class _RecordScreenState extends State<RecordScreen> {
 
   Widget _buildTransactionList(List<DateTime> sortedDates,
       Map<DateTime, List<Transaction>> groupedTransactions, AppController appController) {
-    // If a specific day is selected, show only its transactions
     if (_selectedDay != null) {
-      final selectedDayKey =
-          DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
+      final selectedDayKey = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
       final selectedDayTransactions = groupedTransactions[selectedDayKey] ?? [];
 
       if (selectedDayTransactions.isEmpty) {
         return Center(
             child: Padding(
                 padding: const EdgeInsets.all(20.0),
-                child: Text('No transactions on this day.', style: AppTextStyles.body,)));
+                child: Text('no_transactions_on_this_day'.tr, style: AppTextStyles.body))); // Dịch
       }
 
-      // Create a mini-list for the single selected day
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -392,17 +347,15 @@ class _RecordScreenState extends State<RecordScreen> {
               style: AppTextStyles.title.copyWith(fontSize: 18, color: Colors.grey[700]),
             ),
           ),
-          ...selectedDayTransactions
-              .map((tx) => _buildTransactionItem(context, tx))
+          ...selectedDayTransactions.map((tx) => _buildTransactionItem(context, tx))
         ],
       );
     } else {
-      // Otherwise, show all transactions for the month, grouped by day
       if (groupedTransactions.isEmpty) {
         return Center(
             child: Padding(
                 padding: const EdgeInsets.all(30.0),
-                child: Text('No transactions in this month.', style: AppTextStyles.body,)));
+                child: Text('no_transactions_in_this_month'.tr, style: AppTextStyles.body))); // Dịch
       }
       return ListView.builder(
         shrinkWrap: true,
@@ -412,8 +365,7 @@ class _RecordScreenState extends State<RecordScreen> {
           final date = sortedDates[index];
           final dailyTransactions = groupedTransactions[date]!;
           final dailyTotal = dailyTransactions.fold(0.0, (sum, tx) {
-            return sum +
-                (tx.type == TransactionType.income ? tx.amount : -tx.amount);
+            return sum + (tx.type == TransactionType.income ? tx.amount : -tx.amount);
           });
 
           return Column(
@@ -435,8 +387,7 @@ class _RecordScreenState extends State<RecordScreen> {
                   ],
                 ),
               ),
-              ...dailyTransactions
-                  .map((tx) => _buildTransactionItem(context, tx)),
+              ...dailyTransactions.map((tx) => _buildTransactionItem(context, tx)),
               const SizedBox(height: 10),
             ],
           );
@@ -457,19 +408,17 @@ class _RecordScreenState extends State<RecordScreen> {
           backgroundColor: Color(transaction.colorValue).withAlpha(25),
           child: Image.asset(transaction.iconPath, width: 22, height: 22),
         ),
-        title: Text(transaction.categoryName, // Corrected to show category name
-            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
-        subtitle: transaction.title.isNotEmpty ? Text(transaction.title, style: AppTextStyles.caption,) : null, // Show note if it exists
+        title: Text(transaction.categoryName, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
+        subtitle: transaction.title.isNotEmpty ? Text(transaction.title, style: AppTextStyles.caption) : null,
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Obx(() {
-               final appController = Get.find<AppController>();
+              final appController = Get.find<AppController>();
               return Text(
                 '${transaction.type == TransactionType.income ? '+' : '-'}${appController.currencySymbol}${transaction.amount.toStringAsFixed(2)}',
-                style: AppTextStyles.body.copyWith(color: transaction.type == TransactionType.income
-                        ? Colors.blue
-                        : Colors.red,
+                style: AppTextStyles.body.copyWith(
+                    color: transaction.type == TransactionType.income ? Colors.blue : Colors.red,
                     fontWeight: FontWeight.bold,
                     fontSize: 16),
               );

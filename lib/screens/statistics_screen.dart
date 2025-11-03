@@ -1,4 +1,3 @@
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +32,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     Category(name: 'Household', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.blue.value),
     Category(name: 'Shopping', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.purple.value),
     Category(name: 'House', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.green.value),
-    // ... add other categories if needed
   ];
 
   @override
@@ -42,7 +40,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       backgroundColor: const Color(0xFFF6F7F7),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('Report', style: AppTextStyles.title),
+        title: Text('report'.tr, style: AppTextStyles.title), // Dịch
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -54,7 +52,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        // Bọc nội dung chính bằng Obx để lắng nghe thay đổi
         child: Obx(() {
           return Column(
             children: [
@@ -80,8 +77,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildFilters() {
     final WalletController walletController = Get.find();
-    
-    // Create a list with "Total" (null) and all other wallets
     final List<Wallet?> walletItems = [null, ...walletController.wallets];
 
     return Row(
@@ -94,7 +89,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _isMonthSelected 
+                    _isMonthSelected
                         ? DateFormat('MM/yyyy').format(_selectedDate)
                         : DateFormat('yyyy').format(_selectedDate),
                     style: AppTextStyles.body,
@@ -119,7 +114,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     child: Icon(Icons.account_balance_wallet, size: 20, color: Colors.black),
                   ),
                   const SizedBox(width: 8),
-                  Text('Total', style: AppTextStyles.body),
+                  Text('total'.tr, style: AppTextStyles.body), // Dịch
                 ],
               ),
               items: walletItems.map((wallet) {
@@ -134,7 +129,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                             : Image.asset(wallet.iconPath, width: 24, height: 24),
                       ),
                       const SizedBox(width: 8),
-                      Text(wallet?.name ?? 'Total', style: AppTextStyles.body),
+                      Text(wallet?.name ?? 'total'.tr, style: AppTextStyles.body), // Dịch
                     ],
                   ),
                 );
@@ -162,8 +157,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextButton(onPressed: () => Get.back(), child: Text('Cancel', style: AppTextStyles.button.copyWith(color: Colors.red))),
-                    TextButton(onPressed: () => Get.back(), child: Text('Done', style: AppTextStyles.button.copyWith(color: Colors.green))),
+                    TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr, style: AppTextStyles.button.copyWith(color: Colors.red))), // Dịch
+                    TextButton(onPressed: () => Get.back(), child: Text('done'.tr, style: AppTextStyles.button.copyWith(color: Colors.green))), // Dịch
                   ],
                 ),
               ),
@@ -186,7 +181,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   void _showYearPicker() {
-     showModalBottomSheet(
+    showModalBottomSheet(
       context: context,
       builder: (BuildContext builder) {
         int tempYear = _selectedDate.year;
@@ -194,12 +189,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           height: 250,
           child: Column(
             children: [
-               SizedBox(
+              SizedBox(
                 height: 40,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextButton(onPressed: () => Get.back(), child: Text('Cancel', style: AppTextStyles.button.copyWith(color: Colors.red))),
+                    TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr, style: AppTextStyles.button.copyWith(color: Colors.red))), // Dịch
                     TextButton(
                       onPressed: () {
                         setState(() {
@@ -207,7 +202,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         });
                         Get.back();
                       },
-                      child: Text('OK', style: AppTextStyles.button.copyWith(color: Colors.green)),
+                      child: Text('ok'.tr, style: AppTextStyles.button.copyWith(color: Colors.green)), // Dịch
                     ),
                   ],
                 ),
@@ -220,7 +215,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     tempYear = 2018 + index;
                   },
                   children: List<Widget>.generate(12, (int index) {
-                    return Center(child: Text((2018 + index).toString(), style: AppTextStyles.body,));
+                    return Center(child: Text((2018 + index).toString(), style: AppTextStyles.body));
                   }),
                 ),
               ),
@@ -246,12 +241,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     final TransactionController transactionController = Get.find();
     final transactions = _getFilteredTransactions(transactionController.transactions);
 
-    final double totalIncome = transactions
-        .where((tx) => tx.type == TransactionType.income)
-        .fold(0, (sum, item) => sum + item.amount);
-    final double totalExpense = transactions
-        .where((tx) => tx.type == TransactionType.expense)
-        .fold(0, (sum, item) => sum + item.amount);
+    final double totalIncome = transactions.where((tx) => tx.type == TransactionType.income).fold(0, (sum, item) => sum + item.amount);
+    final double totalExpense = transactions.where((tx) => tx.type == TransactionType.expense).fold(0, (sum, item) => sum + item.amount);
     final double total = totalIncome - totalExpense;
 
     return Container(
@@ -262,10 +253,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       ),
       child: Column(
         children: [
-          _buildSummaryRow('Expense', totalExpense, Colors.red),
-          _buildSummaryRow('Income', totalIncome, Colors.green),
+          _buildSummaryRow('expense'.tr, totalExpense, Colors.red), // Dịch
+          _buildSummaryRow('income'.tr, totalIncome, Colors.green), // Dịch
           const Divider(),
-          _buildSummaryRow('Total', total, Colors.black, isTotal: true),
+          _buildSummaryRow('total'.tr, total, Colors.black, isTotal: true), // Dịch
         ],
       ),
     );
@@ -277,7 +268,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     if (isTotal) {
       displayText = '${amount.toStringAsFixed(2)} ${appController.currencySymbol}';
     } else {
-      final sign = title == 'Income' ? '+' : '-';
+      final sign = title == 'income'.tr ? '+' : '-'; // Dịch
       displayText = '$sign${amount.toStringAsFixed(2)} ${appController.currencySymbol}';
     }
 
@@ -289,7 +280,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           Text(title, style: AppTextStyles.body.copyWith(color: Colors.grey[600])),
           Text(
             displayText,
-            style: (isTotal ? AppTextStyles.title : AppTextStyles.subtitle).copyWith(color: color)
+            style: (isTotal ? AppTextStyles.title : AppTextStyles.subtitle).copyWith(color: color),
           ),
         ],
       ),
@@ -304,8 +295,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       ),
       child: Row(
         children: [
-          _buildTabItem(0, "Total Expense"),
-          _buildTabItem(1, "Total Income"),
+          _buildTabItem(0, "total_expense".tr), // Dịch
+          _buildTabItem(1, "total_income".tr), // Dịch
         ],
       ),
     );
@@ -329,7 +320,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           child: Text(
             title,
             textAlign: TextAlign.center,
-            style: AppTextStyles.body.copyWith(color: isSelected ? Colors.green : Colors.grey, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,)
+            style: AppTextStyles.body.copyWith(color: isSelected ? Colors.green : Colors.grey, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
           ),
         ),
       ),
@@ -340,7 +331,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     final AppController appController = Get.find();
     final TransactionController transactionController = Get.find();
     final allTransactions = _getFilteredTransactions(transactionController.transactions);
-    
+
     final TransactionType selectedType = _selectedChartTabIndex == 0 ? TransactionType.expense : TransactionType.income;
 
     final relevantTransactions = allTransactions.where((tx) => tx.type == selectedType).toList();
@@ -350,11 +341,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     for (var tx in relevantTransactions) {
       categoryValue.update(tx.categoryName, (value) => value + tx.amount, ifAbsent: () => tx.amount);
     }
-    
+
     final List<PieChartSectionData> sections = categoryValue.entries.map((entry) {
       final category = _categories.firstWhere(
         (cat) => cat.name == entry.key,
-        orElse: () => Category(name: 'Other', iconPath: '', colorValue: Colors.grey.value),
+        orElse: () => Category(name: 'other'.tr, iconPath: '', colorValue: Colors.grey.value), // Dịch
       );
       final percentage = totalValue > 0 ? (entry.value / totalValue) * 100 : 0.0;
 
@@ -367,7 +358,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       );
     }).toList();
 
-
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -379,8 +369,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                   Text(
-                    'Total\n${totalValue.toStringAsFixed(2)} ${appController.currencySymbol}',
+                  Text(
+                    '${('total'.tr)}\n${totalValue.toStringAsFixed(2)} ${appController.currencySymbol}', // Dịch
                     textAlign: TextAlign.center,
                     style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
                   ),
@@ -393,8 +383,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               ),
             ),
           ),
-        if (relevantTransactions.isNotEmpty)
-           const SizedBox(width: 24),
+        if (relevantTransactions.isNotEmpty) const SizedBox(width: 24),
         Expanded(
           flex: 1,
           child: SizedBox(
@@ -405,7 +394,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 final entry = categoryValue.entries.elementAt(index);
                 final category = _categories.firstWhere(
                   (cat) => cat.name == entry.key,
-                  orElse: () => Category(name: 'Other', iconPath: '', colorValue: Colors.grey.value),
+                  orElse: () => Category(name: 'other'.tr, iconPath: '', colorValue: Colors.grey.value), // Dịch
                 );
                 return _buildLegendItem(Color(category.colorValue), entry.key, entry.value);
               },

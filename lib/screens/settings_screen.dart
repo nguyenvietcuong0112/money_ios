@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/controllers/theme_controller.dart';
-import 'package:money_manager/localization/app_localizations.dart';
 import 'package:money_manager/screens/currency_selection_screen.dart';
 import 'package:money_manager/screens/language_selection_screen.dart';
 
@@ -12,29 +11,20 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
-
-    if (localizations == null) {
-      return Scaffold(
-        appBar: AppBar(title: Text('Settings', style: AppTextStyles.title)),
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.translate('settings') ?? 'Settings', style: AppTextStyles.title),
+        title: Text('settings'.tr, style: AppTextStyles.title), // Dịch
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          _buildSectionTitle(context, 'Appearance'),
+          _buildSectionTitle(context, 'appearance'.tr), // Dịch
           Card(
             child: Column(
               children: [
                 GetX<ThemeController>(
                   builder: (themeController) => SwitchListTile(
-                    title: Text(localizations.translate('dark_mode') ?? 'Dark Mode', style: AppTextStyles.body),
+                    title: Text('dark_mode'.tr, style: AppTextStyles.body), // Dịch
                     value: themeController.themeMode == ThemeMode.dark,
                     onChanged: (value) {
                       themeController.toggleTheme();
@@ -45,13 +35,13 @@ class SettingsScreen extends StatelessWidget {
               ],
             ),
           ),
-          _buildSectionTitle(context, 'General'),
+          _buildSectionTitle(context, 'general'.tr), // Dịch
           Card(
             child: GetX<AppController>(
               builder: (appController) => Column(
                 children: [
                   ListTile(
-                    title: Text(localizations.translate('language') ?? 'Language', style: AppTextStyles.body),
+                    title: Text('language'.tr, style: AppTextStyles.body), // Dịch
                     trailing: Text(appController.locale?.languageCode ?? '', style: AppTextStyles.body.copyWith(color: Colors.grey)),
                     leading: const Icon(Icons.language),
                     onTap: () {
@@ -60,7 +50,7 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   const Divider(),
                   ListTile(
-                    title: Text(localizations.translate('currency') ?? 'Currency', style: AppTextStyles.body),
+                    title: Text('currency'.tr, style: AppTextStyles.body), // Dịch
                     trailing: Text(appController.currencySymbol, style: AppTextStyles.body.copyWith(color: Colors.grey)),
                     leading: const Icon(Icons.monetization_on),
                     onTap: () {
@@ -71,12 +61,12 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
           ),
-          _buildSectionTitle(context, 'Notifications'),
+          _buildSectionTitle(context, 'notifications'.tr), // Dịch
           Card(
             child: Column(
               children: [
                 SwitchListTile(
-                  title: Text('Enable Notifications', style: AppTextStyles.body),
+                  title: Text('enable_notifications'.tr, style: AppTextStyles.body), // Dịch
                   value: false, // Replace with actual value
                   onChanged: (value) {
                     // Handle notification setting change
@@ -86,12 +76,12 @@ class SettingsScreen extends StatelessWidget {
               ],
             ),
           ),
-          _buildSectionTitle(context, 'Security'),
+          _buildSectionTitle(context, 'security'.tr), // Dịch
           Card(
             child: Column(
               children: [
                 ListTile(
-                  title: Text('Set Passcode', style: AppTextStyles.body),
+                  title: Text('set_passcode'.tr, style: AppTextStyles.body), // Dịch
                   leading: const Icon(Icons.lock),
                   onTap: () {
                     // Navigate to passcode screen
@@ -99,7 +89,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 const Divider(),
                 SwitchListTile(
-                  title: Text('Enable Fingerprint', style: AppTextStyles.body),
+                  title: Text('enable_fingerprint'.tr, style: AppTextStyles.body), // Dịch
                   value: false, // Replace with actual value
                   onChanged: (value) {
                     // Handle fingerprint setting change
@@ -109,12 +99,12 @@ class SettingsScreen extends StatelessWidget {
               ],
             ),
           ),
-          _buildSectionTitle(context, 'Help & Support'),
+          _buildSectionTitle(context, 'help_and_support'.tr), // Dịch
           Card(
             child: Column(
               children: [
                 ListTile(
-                  title: Text('Contact Support', style: AppTextStyles.body),
+                  title: Text('contact_support'.tr, style: AppTextStyles.body), // Dịch
                   leading: const Icon(Icons.contact_support),
                   onTap: () {
                     // Handle contact support
@@ -122,7 +112,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 const Divider(),
                 ListTile(
-                  title: Text('FAQs', style: AppTextStyles.body),
+                  title: Text('faqs'.tr, style: AppTextStyles.body), // Dịch
                   leading: const Icon(Icons.question_answer),
                   onTap: () {
                     // Navigate to FAQs screen
@@ -130,7 +120,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 const Divider(),
                 ListTile(
-                  title: Text('Terms of Service', style: AppTextStyles.body),
+                  title: Text('terms_of_service'.tr, style: AppTextStyles.body), // Dịch
                   leading: const Icon(Icons.description),
                   onTap: () {
                     // Show terms of service
@@ -138,7 +128,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 const Divider(),
                 ListTile(
-                  title: Text('Privacy Policy', style: AppTextStyles.body),
+                  title: Text('privacy_policy'.tr, style: AppTextStyles.body), // Dịch
                   leading: const Icon(Icons.privacy_tip),
                   onTap: () {
                     // Show privacy policy

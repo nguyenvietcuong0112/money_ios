@@ -23,9 +23,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Category? _selectedCategory;
   Wallet? _selectedWallet;
 
-  // Updated categories list with iconPath and colorValue
+  // Dùng tên tiếng Anh làm key để dịch
   final List<Category> _categories = [
-    Category(name: 'Food & Dr...', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.orange.value),
+    Category(name: 'Food & Drink', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.orange.value),
     Category(name: 'Household', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.blue.value),
     Category(name: 'Shopping', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.purple.value),
     Category(name: 'House', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.green.value),
@@ -43,15 +43,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final double enteredAmount = double.tryParse(_amountController.text) ?? 0.0;
 
     if (enteredAmount <= 0) {
-      Get.snackbar('Invalid Input', 'Amount must be greater than zero.', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('invalid_input'.tr, 'amount_must_be_positive'.tr, snackPosition: SnackPosition.BOTTOM);
       return;
     }
     if (_selectedCategory == null) {
-      Get.snackbar('Invalid Input', 'Please select a category.', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('invalid_input'.tr, 'please_select_category'.tr, snackPosition: SnackPosition.BOTTOM);
       return;
     }
     if (_selectedWallet == null) {
-      Get.snackbar('Invalid Input', 'Please select a wallet.', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('invalid_input'.tr, 'please_select_wallet'.tr, snackPosition: SnackPosition.BOTTOM);
       return;
     }
 
@@ -59,11 +59,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final walletController = Get.find<WalletController>();
 
     transactionController.addTransaction(
-      note: _noteController.text, // Correctly pass the note
+      note: _noteController.text,
       amount: enteredAmount,
       date: _selectedDate,
       type: _selectedType,
-      categoryName: _selectedCategory!.name, // Correctly pass the category name
+      categoryName: _selectedCategory!.name, // Lưu key (tên tiếng Anh)
       iconPath: _selectedCategory!.iconPath,
       colorValue: _selectedCategory!.colorValue,
       walletId: _selectedWallet!.id,
@@ -81,14 +81,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget build(BuildContext context) {
     final walletController = Get.find<WalletController>();
 
-    // Set a default wallet if none is selected
     if (_selectedWallet == null && walletController.wallets.isNotEmpty) {
       _selectedWallet = walletController.wallets.first;
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Transaction', style: AppTextStyles.title),
+        title: Text('add_transaction'.tr, style: AppTextStyles.title),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -113,11 +112,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 backgroundColor: Colors.green,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0)
-                )
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
               ),
-              child: Text('Add Transaction', style: AppTextStyles.button),
+              child: Text('add_transaction'.tr, style: AppTextStyles.button),
             ),
           ],
         ),
@@ -135,8 +132,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildTypeButton('Expense', TransactionType.expense),
-            _buildTypeButton('Income', TransactionType.income),
+            _buildTypeButton('expense'.tr, TransactionType.expense),
+            _buildTypeButton('income'.tr, TransactionType.income),
           ],
         ),
       ),
@@ -165,7 +162,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
-  Widget _buildAmountField() {
+    Widget _buildAmountField() {
+    final AppController appController = Get.find();
     return Row(
       children: [
         const Icon(Icons.attach_money, size: 30, color: Colors.green),
@@ -182,7 +180,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             ),
           ),
         ),
-        Text('\$', style: AppTextStyles.heading1.copyWith(color: Colors.grey)),
+        Text(appController.currencySymbol, style: AppTextStyles.heading1.copyWith(color: Colors.grey)),
       ],
     );
   }
@@ -213,11 +211,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: const Icon(Icons.account_balance_wallet, color: Colors.grey),
-      title: Text(_selectedWallet?.name ?? 'Choose wallet', style: AppTextStyles.body),
+      title: Text(_selectedWallet?.name ?? 'choose_wallet'.tr, style: AppTextStyles.body),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: () {
         if (wallets.isEmpty) {
-            Get.snackbar('No Wallets', 'Please add a wallet first.', snackPosition: SnackPosition.BOTTOM);
+            Get.snackbar('no_wallets'.tr, 'please_add_wallet_first'.tr, snackPosition: SnackPosition.BOTTOM);
             return;
         }
         showModalBottomSheet(
@@ -254,7 +252,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         style: AppTextStyles.body,
         decoration: InputDecoration(
           border: InputBorder.none,
-          hintText: 'Note something...',
+          hintText: 'note_something'.tr,
           hintStyle: AppTextStyles.body.copyWith(color: Colors.grey)
         ),
       ),
@@ -265,7 +263,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Category', style: AppTextStyles.title),
+        Text('category'.tr, style: AppTextStyles.title),
         const SizedBox(height: 10),
         GridView.builder(
           shrinkWrap: true,
@@ -297,7 +295,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   children: [
                     Image.asset(category.iconPath, width: 30, height: 30, color: categoryColor),
                     const SizedBox(height: 5),
-                    Text(category.name, textAlign: TextAlign.center, style: AppTextStyles.caption),
+                    Text(category.name.tr, textAlign: TextAlign.center, style: AppTextStyles.caption), // Dịch tên danh mục
                   ],
                 ),
               ),

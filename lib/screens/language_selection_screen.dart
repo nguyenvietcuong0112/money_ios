@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
@@ -125,11 +124,26 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
 
   void _onNext() async {
     if (_selectedLanguageCode != null && !_isAnimating) {
-      final locale = Locale(_selectedLanguageCode!);
-      Get.find<AppController>().setLocale(locale);
+      String langCode = _selectedLanguageCode!;
+      String? countryCode;
+      if (langCode.contains('_')) {
+          final parts = langCode.split('_');
+          langCode = parts[0];
+          countryCode = parts[1];
+      }
+      final locale = Locale(langCode, countryCode);
 
+      // Sử dụng hàm mới để cập nhật UI ngay lập tức
+      Get.find<AppController>().changeLocale(locale);
+      
+      // Lưu vào SharedPreferences (đã có trong hàm changeLocale nhưng để đây cho chắc chắn)
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('languageCode', _selectedLanguageCode!);
+      await prefs.setString('languageCode', langCode);
+      if (countryCode != null) {
+        await prefs.setString('countryCode', countryCode);
+      } else {
+        await prefs.remove('countryCode');
+      }
 
       if (!mounted) return;
       if (widget.isInitialSetup) {
@@ -148,7 +162,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
       children: [
         Scaffold(
           appBar: AppBar(
-            title: Text('Language', style: AppTextStyles.title),
+            title: Text('language'.tr, style: AppTextStyles.title), // Sử dụng .tr
             automaticallyImplyLeading: !widget.isInitialSetup,
             actions: [
               Padding(
@@ -173,7 +187,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Please select language to continue',
+                  'select_language_to_continue'.tr, // Sử dụng .tr
                   style: AppTextStyles.subtitle,
                 ),
                 const SizedBox(height: 20),

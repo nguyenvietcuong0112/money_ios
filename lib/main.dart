@@ -3,27 +3,24 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:money_manager/common/app_translations.dart';
 import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/controllers/theme_controller.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
-import 'package:money_manager/localization/app_localizations.dart';
 import 'package:money_manager/models/budget_model.dart';
 import 'package:money_manager/models/category_model.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/models/wallet_model.dart';
-import 'package:money_manager/screens/home_screen.dart';
 import 'package:money_manager/screens/language_selection_screen.dart';
-import 'package:money_manager/screens/more_screen.dart';
-import 'package:money_manager/screens/record_screen.dart';
-import 'package:money_manager/screens/statistics_screen.dart';
-import 'package:money_manager/screens/wallet_screen.dart';
+import 'package:money_manager/screens/my_home_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:developer' as developer;
 import 'package:path_provider/path_provider.dart' as path_provider;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final translations = await loadTranslations();
 
   final appDocumentDir = await path_provider.getApplicationDocumentsDirectory();
   await Hive.initFlutter(appDocumentDir.path);
@@ -41,11 +38,17 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
   final String? languageCode = prefs.getString('languageCode');
+  final String? countryCode = prefs.getString('countryCode');
   final String? currencyCode = prefs.getString('currencyCode');
   final String? currencySymbol = prefs.getString('currencySymbol');
 
+  Locale? initialLocale;
+  if (languageCode != null) {
+    initialLocale = Locale(languageCode, countryCode);
+  }
+
   Get.put(AppController(
-    initialLocale: languageCode != null ? Locale(languageCode) : null,
+    initialLocale: initialLocale,
     initialCurrencyCode: currencyCode,
     initialCurrencySymbol: currencySymbol,
   ));
@@ -53,47 +56,54 @@ void main() async {
   Get.put(WalletController());
   Get.put(TransactionController());
 
-  runApp(MyApp(isFirstTime: isFirstTime));
+  runApp(MyApp(
+    isFirstTime: isFirstTime,
+    translations: translations,
+  ));
 }
 
 class MyApp extends StatelessWidget {
   final bool isFirstTime;
+  final Map<String, Map<String, String>> translations;
 
-  const MyApp({super.key, required this.isFirstTime});
+  const MyApp({super.key, required this.isFirstTime, required this.translations});
 
   @override
   Widget build(BuildContext context) {
-    return GetX<AppController>(
-      builder: (appController) {
-        final themeController = Get.find<ThemeController>();
-        final currentLocale = appController.locale;
-        final currentTheme = themeController.themeMode;
+    final appController = Get.find<AppController>();
+    final themeController = Get.find<ThemeController>();
 
-        return GetMaterialApp(
-          title: 'Money Manager',
-          theme: lightTheme,
-          darkTheme: darkTheme,
-          themeMode: currentTheme,
-          locale: currentLocale,
-          supportedLocales: const [
-            Locale('en', ''),
-            Locale('fr', ''),
-            Locale('vi', '')
-          ],
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          home: isFirstTime
-              ? const LanguageSelectionScreen(isInitialSetup: true)
-              : const MyHomePage(),
-        );
-      },
+    return GetMaterialApp(
+      title: 'Money Manager',
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: themeController.themeMode,
+      locale: appController.locale ?? const Locale('vi', 'VN'), // Ngôn ngữ mặc định
+      fallbackLocale: const Locale('en', 'US'), // Ngôn ngữ dự phòng
+      translations: AppTranslations(translations),
+      supportedLocales: const [
+        Locale('en', 'US'),
+        Locale('vi', 'VN'),
+        Locale('fr', 'FR'),
+        Locale('zh', 'CN'),
+        Locale('zh', 'TW'),
+        Locale('hi', 'IN'),
+        Locale('es', 'ES'),
+        Locale('pt', 'BR'),
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: isFirstTime
+          ? const LanguageSelectionScreen(isInitialSetup: true)
+          : const MyHomePage(),
     );
   }
 }
+
+// --- Themes --- (Giữ nguyên không đổi)
 
 final TextTheme appTextTheme = TextTheme(
   displayLarge: GoogleFonts.oswald(fontSize: 57, fontWeight: FontWeight.bold),
@@ -146,80 +156,3 @@ final ThemeData darkTheme = ThemeData(
     ),
   ),
 );
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _selectedIndex = 0;
-  late final List<Widget> _widgetOptions;
-
-  @override
-  void initState() {
-    super.initState();
-    _widgetOptions = <Widget>[
-      HomeScreen(onScreenChanged: _onItemTapped),
-      RecordScreen(onScreenChanged: _onItemTapped),
-      const WalletScreen(),
-      StatisticsScreen(onScreenChanged: _onItemTapped),
-      const MoreScreen(),
-    ];
-
-    // Setup initial wallets after the first frame is rendered
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Get.find<WalletController>().setupInitialWallets(context);
-    });
-  }
-
-  void _onItemTapped(int index) {
-    developer.log('Tapped index: $index', name: 'MyHomePage');
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    developer.log('Building with selected index: $_selectedIndex',
-        name: 'MyHomePage');
-    final localizations = AppLocalizations.of(context);
-    return Scaffold(
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home),
-            label: localizations?.translate('home') ?? 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.edit_calendar_outlined),
-            label: localizations?.translate('transactions') ?? 'Record',
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.account_balance_wallet),
-            label: localizations?.translate('my_wallet') ?? 'My Wallet',
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.bar_chart),
-            label: localizations?.translate('statistics') ?? 'Statistics',
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.more_horiz),
-            label: localizations?.translate('more') ?? 'More',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
-        showUnselectedLabels: true,
-      ),
-    );
-  }
-}

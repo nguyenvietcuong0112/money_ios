@@ -22,28 +22,27 @@ class AppController extends GetxController {
     }
     if (initialCurrencyCode != null) {
       _currencyCode.value = initialCurrencyCode;
-      // If the symbol is provided, use it. Otherwise, try to find it using the code.
-      // This provides backward compatibility for users who only had the code stored.
       _currencySymbol.value = initialCurrencySymbol ??
           CurrencyService().findByCode(initialCurrencyCode)?.symbol ??
           '\$';
     }
   }
 
-  void setLocale(Locale locale) async {
-    _locale.value = locale;
+  // Hàm mới để thay đổi ngôn ngữ
+  void changeLocale(Locale newLocale) async {
+    _locale.value = newLocale;
+    Get.updateLocale(newLocale);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('languageCode', locale.languageCode);
+    await prefs.setString('languageCode', newLocale.languageCode);
+    await prefs.setString('countryCode', newLocale.countryCode ?? '');
   }
 
   void setCurrency(String currencyCode, String currencySymbol) async {
     _currencyCode.value = currencyCode;
     _currencySymbol.value = currencySymbol;
     final prefs = await SharedPreferences.getInstance();
-    // Store both code and symbol for future sessions
     await prefs.setString('currencyCode', currencyCode);
     await prefs.setString('currencySymbol', currencySymbol);
-    // Remove the old key to avoid confusion
     await prefs.remove('currency');
   }
 }
