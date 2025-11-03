@@ -1,4 +1,6 @@
+
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
@@ -20,28 +22,16 @@ class StatisticsScreen extends StatefulWidget {
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
   bool _isMonthSelected = true;
-  String _selectedYear = DateFormat('yyyy').format(DateTime.now());
-  String _selectedMonth = DateFormat('MMMM').format(DateTime.now());
+  DateTime _selectedDate = DateTime.now();
   Wallet? _selectedWallet;
+  int _selectedChartTabIndex = 0; // 0 for Expense, 1 for Income
 
   final List<Category> _categories = [
-    Category(name: 'Food & Dr...', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.orange.value),
+    Category(name: 'Food & Drink', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.orange.value),
     Category(name: 'Household', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.blue.value),
     Category(name: 'Shopping', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.purple.value),
     Category(name: 'House', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.green.value),
-    Category(name: 'Travel', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.indigo.value),
-    Category(name: 'Sport', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.red.value),
-    Category(name: 'Cosmetics', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.pink.value),
-    Category(name: 'Water Bill', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.lightBlue.value),
-    Category(name: 'Electric Bill', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.yellow.value),
-    Category(name: 'Phone', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.grey.value),
-    Category(name: 'Education', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.brown.value),
-    Category(name: 'Medical', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.redAccent.value),
-  ];
-
-  final List<String> _months = [
-    'January', 'February', 'March', 'April', 'May', 'June', 
-    'July', 'August', 'September', 'October', 'November', 'December'
+    // ... add other categories if needed
   ];
 
   @override
@@ -74,9 +64,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             const SizedBox(height: 24.0),
             _buildSummary(),
             const SizedBox(height: 24.0),
+            _buildChartTabs(),
+            const SizedBox(height: 16.0),
             _buildChartAndLegend(),
-            const SizedBox(height: 24.0),
-            _buildTransactionList(),
           ],
         ),
       ),
@@ -85,74 +75,160 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildFilters() {
     final WalletController walletController = Get.find();
+    
+    // Create a list with "Total" (null) and all other wallets
+    final List<Wallet?> walletItems = [null, ...walletController.wallets];
 
     return Row(
       children: [
         Expanded(
-          child: _buildDropdownContainer(
-            child: DropdownButton<String>(
-              isExpanded: true,
-              underline: const SizedBox.shrink(),
-              value: _selectedYear,
-              items: ['2023', '2024', '2025'].map((year) => DropdownMenuItem(value: year, child: Text(year))).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _selectedYear = value);
-                }
-              },
+          child: GestureDetector(
+            onTap: _isMonthSelected ? _showMonthYearPicker : _showYearPicker,
+            child: _buildDropdownContainer(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _isMonthSelected 
+                        ? DateFormat('MM/yyyy').format(_selectedDate)
+                        : DateFormat('yyyy').format(_selectedDate),
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const Icon(Icons.arrow_drop_down),
+                ],
+              ),
             ),
           ),
         ),
         const SizedBox(width: 16),
-        if (_isMonthSelected)
-          Expanded(
-            child: _buildDropdownContainer(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                underline: const SizedBox.shrink(),
-                value: _selectedMonth,
-                items: _months.map((month) => DropdownMenuItem(value: month, child: Text(month))).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => _selectedMonth = value);
-                  }
-                },
+        Expanded(
+          child: _buildDropdownContainer(
+            child: DropdownButton<Wallet>(
+              isExpanded: true,
+              underline: const SizedBox.shrink(),
+              value: _selectedWallet,
+              hint: const Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Color(0xFFE8E8E8),
+                    child: Icon(Icons.account_balance_wallet, size: 20, color: Colors.black),
+                  ),
+                  SizedBox(width: 8),
+                  Text('Total'),
+                ],
               ),
-            ),
-          )
-        else
-          Expanded(
-            child: _buildDropdownContainer(
-              child: DropdownButton<Wallet>(
-                isExpanded: true,
-                underline: const SizedBox.shrink(),
-                hint: const Text('Total'),
-                value: _selectedWallet,
-                items: walletController.wallets.map((wallet) {
-                  return DropdownMenuItem(
-                    value: wallet,
-                    child: Row(
-                      children: [
-                        Image.asset(wallet.iconPath, width: 24, height: 24),
-                        const SizedBox(width: 8),
-                        Text(wallet.name),
-                      ],
-                    ),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() => _selectedWallet = value);
-                },
-              ),
+              items: walletItems.map((wallet) {
+                return DropdownMenuItem<Wallet>(
+                  value: wallet,
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: const Color(0xFFE8E8E8),
+                        child: wallet == null
+                            ? const Icon(Icons.account_balance_wallet, size: 20, color: Colors.black)
+                            : Image.asset(wallet.iconPath, width: 24, height: 24),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(wallet?.name ?? 'Total'),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() => _selectedWallet = value);
+              },
             ),
           ),
+        ),
       ],
+    );
+  }
+
+  void _showMonthYearPicker() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext builder) {
+        return SizedBox(
+          height: 250,
+          child: Column(
+            children: [
+              SizedBox(
+                height: 40,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+                    TextButton(onPressed: () => Get.back(), child: const Text('Done')),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  initialDateTime: _selectedDate,
+                  onDateTimeChanged: (DateTime newDate) {
+                    setState(() {
+                      _selectedDate = newDate;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showYearPicker() {
+     showModalBottomSheet(
+      context: context,
+      builder: (BuildContext builder) {
+        int tempYear = _selectedDate.year;
+        return SizedBox(
+          height: 250,
+          child: Column(
+            children: [
+               SizedBox(
+                height: 40,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _selectedDate = DateTime(tempYear);
+                        });
+                        Get.back();
+                      },
+                      child: const Text('OK'),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: CupertinoPicker(
+                  itemExtent: 40,
+                  scrollController: FixedExtentScrollController(initialItem: _selectedDate.year - 2018),
+                  onSelectedItemChanged: (int index) {
+                    tempYear = 2018 + index;
+                  },
+                  children: List<Widget>.generate(12, (int index) {
+                    return Center(child: Text((2018 + index).toString()));
+                  }),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   Widget _buildDropdownContainer({required Widget child}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.0),
@@ -184,7 +260,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           _buildSummaryRow('Expense', totalExpense, Colors.red),
           _buildSummaryRow('Income', totalIncome, Colors.green),
           const Divider(),
-          _buildSummaryRow('Total', total, total >= 0 ? Colors.green : Colors.red, isTotal: true),
+          _buildSummaryRow('Total', total, Colors.black, isTotal: true),
         ],
       ),
     );
@@ -192,7 +268,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildSummaryRow(String title, double amount, Color color, {bool isTotal = false}) {
     final format = NumberFormat.simpleCurrency(locale: 'en_GB');
-    final formattedAmount = (amount >= 0 ? '+' : '-') + format.format(amount.abs());
+    final formattedAmount = (title == 'Income' ? '+' : '') + format.format(amount);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -201,7 +277,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         children: [
           Text(title, style: TextStyle(fontSize: 16, color: Colors.grey[600])),
           Text(
-            formattedAmount,
+            isTotal ? format.format(amount) : formattedAmount,
             style: TextStyle(
               fontSize: isTotal ? 20 : 18,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
@@ -213,75 +289,121 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  Widget _buildChartAndLegend() {
-    final TransactionController transactionController = Get.find();
-    final expenseTransactions = _getFilteredTransactions(transactionController.transactions)
-        .where((tx) => tx.type == TransactionType.expense)
-        .toList();
+  Widget _buildChartTabs() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          _buildTabItem(0, "Total Expense"),
+          _buildTabItem(1, "Total Income"),
+        ],
+      ),
+    );
+  }
 
-    final totalExpense = expenseTransactions.fold(0.0, (sum, item) => sum + item.amount);
-
-    final Map<String, double> categorySpending = {};
-    for (var tx in expenseTransactions) {
-      categorySpending.update(tx.title, (value) => value + tx.amount, ifAbsent: () => tx.amount);
-    }
-
-    final List<PieChartSectionData> sections = categorySpending.entries.map((entry) {
-      final category = _categories.firstWhere(
-        (cat) => cat.name == entry.key,
-        orElse: () => Category(name: 'Other', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.grey.value),
-      );
-      return PieChartSectionData(
-        color: Color(category.colorValue),
-        value: entry.value,
-        title: '',
-        radius: 40,
-      );
-    }).toList();
-
-    return Row(
-      children: [
-        Expanded(
-          flex: 2,
-          child: Container(
-            height: 200,
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16.0),
+  Widget _buildTabItem(int index, String title) {
+    bool isSelected = _selectedChartTabIndex == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedChartTabIndex = index),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: isSelected ? Colors.green : Colors.transparent,
+                width: 2,
+              ),
             ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Text(
-                  'Total Expense\n${NumberFormat.simpleCurrency(locale: 'en_GB').format(totalExpense)}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                PieChart(PieChartData(sections: sections, centerSpaceRadius: 60)),
-              ],
+          ),
+          child: Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected ? Colors.green : Colors.grey,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
           ),
         ),
-        const SizedBox(width: 16),
+      ),
+    );
+  }
+
+  Widget _buildChartAndLegend() {
+    final TransactionController transactionController = Get.find();
+    final allTransactions = _getFilteredTransactions(transactionController.transactions);
+    
+    final TransactionType selectedType = _selectedChartTabIndex == 0 ? TransactionType.expense : TransactionType.income;
+    final Color chartColor = _selectedChartTabIndex == 0 ? Colors.red : Colors.green;
+
+    final relevantTransactions = allTransactions.where((tx) => tx.type == selectedType).toList();
+    final totalValue = relevantTransactions.fold(0.0, (sum, item) => sum + item.amount);
+
+    final Map<String, double> categoryValue = {};
+    for (var tx in relevantTransactions) {
+      categoryValue.update(tx.title, (value) => value + tx.amount, ifAbsent: () => tx.amount);
+    }
+    
+    final List<PieChartSectionData> sections = categoryValue.entries.map((entry) {
+      final category = _categories.firstWhere(
+        (cat) => cat.name == entry.key,
+        orElse: () => Category(name: 'Other', iconPath: '', colorValue: Colors.grey.value),
+      );
+      final percentage = (entry.value / totalValue) * 100;
+
+      return PieChartSectionData(
+        color: Color(category.colorValue),
+        value: entry.value,
+        title: '${percentage.toStringAsFixed(1)}%',
+        radius: 60,
+        titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+      );
+    }).toList();
+
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (relevantTransactions.isNotEmpty)
+          Expanded(
+            flex: 1,
+            child: SizedBox(
+              height: 200,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                   Text(
+                    'Total\n${NumberFormat.simpleCurrency(locale: 'en_GB').format(totalValue)}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  PieChart(PieChartData(
+                    sections: sections,
+                    centerSpaceRadius: 50,
+                    sectionsSpace: 2,
+                  )),
+                ],
+              ),
+            ),
+          ),
+        if (relevantTransactions.isNotEmpty)
+           const SizedBox(width: 24),
         Expanded(
           flex: 1,
-          child: Container(
+          child: SizedBox(
             height: 200,
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16.0),
-            ),
             child: ListView.builder(
-              itemCount: categorySpending.length,
+              itemCount: categoryValue.length,
               itemBuilder: (context, index) {
-                final entry = categorySpending.entries.elementAt(index);
-                 final category = _categories.firstWhere(
+                final entry = categoryValue.entries.elementAt(index);
+                final category = _categories.firstWhere(
                   (cat) => cat.name == entry.key,
-                  orElse: () => Category(name: 'Other', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.grey.value),
+                  orElse: () => Category(name: 'Other', iconPath: '', colorValue: Colors.grey.value),
                 );
-                return _buildLegendItem(Color(category.colorValue), entry.key);
+                return _buildLegendItem(Color(category.colorValue), entry.key, entry.value);
               },
             ),
           ),
@@ -290,62 +412,23 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  Widget _buildLegendItem(Color color, String name) {
+  Widget _buildLegendItem(Color color, String name, double amount) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         children: [
           Container(width: 12, height: 12, color: color),
           const SizedBox(width: 8),
-          Text(name, style: const TextStyle(fontSize: 12)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(NumberFormat.simpleCurrency(locale: 'en_GB').format(amount), style: const TextStyle(fontSize: 12)),
+              ],
+            ),
+          ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildTransactionList() {
-    final TransactionController transactionController = Get.find();
-    final transactions = _getFilteredTransactions(transactionController.transactions);
-
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      child: ListView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: transactions.length,
-        itemBuilder: (context, index) {
-          final transaction = transactions[index];
-          return _buildTransactionItem(transaction);
-        },
-      ),
-    );
-  }
-
-  Widget _buildTransactionItem(Transaction transaction) {
-    final category = _categories.firstWhere(
-      (cat) => cat.name == transaction.title,
-      orElse: () => Category(name: 'Other', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.grey.value),
-    );
-
-    final color = Color(transaction.colorValue);
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: color.withAlpha(50),
-        child: Image.asset(transaction.iconPath, width: 24, height: 24, color: color),
-      ),
-      title: Text(transaction.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text(DateFormat.yMMMd().format(transaction.date)),
-      trailing: Text(
-        (transaction.type == TransactionType.income ? '+' : '-') + 
-        NumberFormat.simpleCurrency(locale: 'en_GB').format(transaction.amount),
-        style: TextStyle(
-          color: transaction.type == TransactionType.income ? Colors.green : Colors.red,
-          fontWeight: FontWeight.bold,
-        ),
       ),
     );
   }
@@ -353,16 +436,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   List<Transaction> _getFilteredTransactions(List<Transaction> transactions) {
     return transactions.where((tx) {
       final txDate = tx.date;
-      final monthAsNumber = _months.indexOf(_selectedMonth) + 1;
-
-      bool yearMatch = txDate.year.toString() == _selectedYear;
-      bool walletMatch = _selectedWallet == null || tx.walletId == _selectedWallet!.id;
-      bool monthMatch = txDate.month == monthAsNumber;
-
+      bool dateMatch;
       if (_isMonthSelected) {
-        return yearMatch && monthMatch && walletMatch;
+        dateMatch = txDate.year == _selectedDate.year && txDate.month == _selectedDate.month;
+      } else {
+        dateMatch = txDate.year == _selectedDate.year;
       }
-      return yearMatch && walletMatch;
+      final walletMatch = _selectedWallet == null || tx.walletId == _selectedWallet!.id;
+      return dateMatch && walletMatch;
     }).toList();
   }
 }
