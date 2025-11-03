@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
@@ -41,7 +42,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       backgroundColor: const Color(0xFFF6F7F7),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Report', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+        title: Text('Report', style: AppTextStyles.title),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -96,7 +97,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     _isMonthSelected 
                         ? DateFormat('MM/yyyy').format(_selectedDate)
                         : DateFormat('yyyy').format(_selectedDate),
-                    style: const TextStyle(fontSize: 16),
+                    style: AppTextStyles.body,
                   ),
                   const Icon(Icons.arrow_drop_down),
                 ],
@@ -111,14 +112,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               isExpanded: true,
               underline: const SizedBox.shrink(),
               value: _selectedWallet,
-              hint: const Row(
+              hint: Row(
                 children: [
-                  CircleAvatar(
+                  const CircleAvatar(
                     backgroundColor: Color(0xFFE8E8E8),
                     child: Icon(Icons.account_balance_wallet, size: 20, color: Colors.black),
                   ),
-                  SizedBox(width: 8),
-                  Text('Total'),
+                  const SizedBox(width: 8),
+                  Text('Total', style: AppTextStyles.body),
                 ],
               ),
               items: walletItems.map((wallet) {
@@ -133,7 +134,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                             : Image.asset(wallet.iconPath, width: 24, height: 24),
                       ),
                       const SizedBox(width: 8),
-                      Text(wallet?.name ?? 'Total'),
+                      Text(wallet?.name ?? 'Total', style: AppTextStyles.body),
                     ],
                   ),
                 );
@@ -161,8 +162,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-                    TextButton(onPressed: () => Get.back(), child: const Text('Done')),
+                    TextButton(onPressed: () => Get.back(), child: Text('Cancel', style: AppTextStyles.button.copyWith(color: Colors.red))),
+                    TextButton(onPressed: () => Get.back(), child: Text('Done', style: AppTextStyles.button.copyWith(color: Colors.green))),
                   ],
                 ),
               ),
@@ -198,7 +199,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+                    TextButton(onPressed: () => Get.back(), child: Text('Cancel', style: AppTextStyles.button.copyWith(color: Colors.red))),
                     TextButton(
                       onPressed: () {
                         setState(() {
@@ -206,7 +207,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         });
                         Get.back();
                       },
-                      child: const Text('OK'),
+                      child: Text('OK', style: AppTextStyles.button.copyWith(color: Colors.green)),
                     ),
                   ],
                 ),
@@ -219,7 +220,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     tempYear = 2018 + index;
                   },
                   children: List<Widget>.generate(12, (int index) {
-                    return Center(child: Text((2018 + index).toString()));
+                    return Center(child: Text((2018 + index).toString(), style: AppTextStyles.body,));
                   }),
                 ),
               ),
@@ -285,14 +286,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+          Text(title, style: AppTextStyles.body.copyWith(color: Colors.grey[600])),
           Text(
             displayText,
-            style: TextStyle(
-              fontSize: isTotal ? 20 : 18,
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              color: color,
-            ),
+            style: (isTotal ? AppTextStyles.title : AppTextStyles.subtitle).copyWith(color: color)
           ),
         ],
       ),
@@ -332,10 +329,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           child: Text(
             title,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: isSelected ? Colors.green : Colors.grey,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
+            style: AppTextStyles.body.copyWith(color: isSelected ? Colors.green : Colors.grey, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,)
           ),
         ),
       ),
@@ -369,7 +363,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         value: entry.value,
         title: '${percentage.toStringAsFixed(1)}%',
         radius: 60,
-        titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+        titleStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
       );
     }).toList();
 
@@ -388,7 +382,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                    Text(
                     'Total\n${totalValue.toStringAsFixed(2)} ${appController.currencySymbol}',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
                   ),
                   PieChart(PieChartData(
                     sections: sections,
@@ -434,8 +428,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                Text('${amount.toStringAsFixed(2)} ${appController.currencySymbol}', style: const TextStyle(fontSize: 12)),
+                Text(name, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
+                Text('${amount.toStringAsFixed(2)} ${appController.currencySymbol}', style: AppTextStyles.caption),
               ],
             ),
           ),

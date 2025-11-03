@@ -1,40 +1,44 @@
+# Blueprint: Money Manager App
 
-# Blueprint: Money Manager App Refactoring
+## I. Tổng quan
 
-## Overview
+Money Manager là một ứng dụng di động đa nền tảng giúp người dùng quản lý tài chính cá nhân một cách hiệu quả. Ứng dụng cho phép theo dõi các giao dịch thu chi, quản lý nhiều ví tiền, đặt ngân sách và xem báo cáo thống kê chi tiết.
 
-This document outlines the plan to refactor the Money Manager application from using the `provider` package for state management to `GetX`. This change will professionalize the codebase, making it more concise, organized, and performant.
+### Chức năng cốt lõi:
+- **Quản lý giao dịch:** Ghi chép các khoản thu, chi, vay và cho vay.
+- **Quản lý ví:** Hỗ trợ nhiều loại ví khác nhau (tiền mặt, ngân hàng, ví điện tử).
+- **Quản lý ngân sách:** Thiết lập ngân sách cho các hạng mục chi tiêu cụ thể.
+- **Báo cáo và Thống kê:** Cung cấp biểu đồ trực quan về tình hình tài chính.
+- **Đa ngôn ngữ & Đa tiền tệ:** Hỗ trợ nhiều ngôn ngữ và loại tiền tệ.
 
-## Current Architecture (Provider)
+### Công nghệ sử dụng:
+- **Framework:** Flutter
+- **Quản lý trạng thái:** GetX
+- **Lưu trữ cục bộ:** SharedPreferences
+- **Fonts:** Google Fonts
 
-*   **State Management:** `ChangeNotifierProvider`, `ChangeNotifier`, `Consumer`, and `Provider.of` are used throughout the app.
-*   **Dependencies:** Providers are injected at the top of the widget tree in `main.dart`.
-*   **Navigation:** Standard `Navigator.push` and `MaterialPageRoute` are used for routing.
+---
 
-## Proposed Architecture (GetX)
+## II. Thiết kế & Phong cách
 
-*   **State Management:** We will replace `ChangeNotifier` with `GetxController`. Widgets will be updated using `GetBuilder`.
-*   **Dependency Injection:** Dependencies will be managed using `Get.put()` and accessed with `Get.find()`.
-*   **Navigation:** We will replace `Navigator` calls with `Get.to()`, `Get.back()`, etc., and use `GetMaterialApp`.
+- **UI/UX:** Giao diện sạch sẽ, hiện đại và trực quan, tập trung vào trải nghiệm người dùng mượt mà.
+- **Màu sắc:** Sử dụng màu xanh lá cây làm màu chủ đạo, tạo cảm giác tích cực và liên quan đến tài chính.
+- **Typography:** Sử dụng font "Lato" từ Google Fonts để đảm bảo tính nhất quán và dễ đọc.
 
-## Refactoring Plan
+---
 
-1.  **Add Dependency:** Add the `get` package to `pubspec.yaml`.
-2.  **Create Controller Directory:** Create a new directory `lib/controllers` to store all GetX controllers.
-3.  **Migrate Providers to Controllers:**
-    *   `lib/providers/app_provider.dart` -> `lib/controllers/app_controller.dart`
-    *   `lib/providers/theme_provider.dart` -> `lib/controllers/theme_controller.dart`
-    *   `lib/providers/transaction_provider.dart` -> `lib/controllers/transaction_controller.dart`
-    *   `lib/providers/wallet_provider.dart` -> `lib/controllers/wallet_controller.dart`
-4.  **Update `main.dart`:**
-    *   Initialize all `GetxController`s using `Get.put()`.
-    *   Replace `ChangeNotifierProvider` with the GetX dependency injection setup.
-    *   Change `MaterialApp` to `GetMaterialApp`.
-5.  **Refactor UI Screens:**
-    *   Update all screens (`home_screen.dart`, `record_screen.dart`, `settings_screen.dart`, etc.) to use `Get.find()` instead of `Provider.of`.
-    *   Replace `Consumer` widgets with `GetBuilder`.
-    *   Update all `Navigator.push` calls to `Get.to()`.
-6.  **Cleanup:**
-    *   Delete the now-unused `lib/providers` directory.
-    *   Run `flutter format` to ensure consistent code style.
-7.  **Verification:** Thoroughly test the application to ensure all features work as expected after the refactoring.
+## III. Kế hoạch hiện tại: Tái cấu trúc TextStyle với Google Fonts
+
+**Mục tiêu:** Tạo một hệ thống TextStyle tập trung sử dụng Google Fonts để đảm bảo tính nhất quán trong toàn bộ ứng dụng và dễ dàng cho việc bảo trì, cập nhật sau này.
+
+**Các bước thực hiện:**
+
+1.  **Thêm package `google_fonts`:** Tích hợp thư viện Google Fonts vào dự án.
+2.  **Tạo file `text_styles.dart`:** Tạo một file mới tại `lib/common/text_styles.dart`.
+3.  **Định nghĩa các TextStyle với font Lato:**
+    - Trong lớp `AppTextStyles`, định nghĩa các `TextStyle` tĩnh sử dụng `GoogleFonts.lato()`.
+    - Các style bao gồm: `heading1`, `heading2`, `title`, `subtitle`, `body`, `button`, `incomeAmount`, `expenseAmount`, v.v.
+4.  **Tái cấu trúc (Refactor) mã nguồn:**
+    - Bắt đầu với `home_screen.dart`.
+    - Thay thế các `TextStyle` inline bằng cách tham chiếu đến style trong `AppTextStyles`.
+5.  **Kiểm tra và xác nhận:** Đảm bảo giao diện hiển thị đúng font chữ Lato và không bị lỗi.

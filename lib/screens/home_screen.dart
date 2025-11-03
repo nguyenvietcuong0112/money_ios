@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
@@ -46,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Home', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24)),
+        title: Text('Home', style: AppTextStyles.heading1),
         actions: [
           Obx(() {
             final walletController = Get.find<WalletController>();
@@ -56,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               children: [
                 Text(
                   _isBalanceVisible ? '${appController.currencySymbol}${totalBalance.toStringAsFixed(2)}' : '*********',
-                  style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
+                  style: AppTextStyles.title,
                 ),
                 IconButton(
                   icon: Icon(_isBalanceVisible ? Icons.visibility_off : Icons.visibility, color: Colors.grey[600]),
@@ -104,10 +105,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('My Wallets', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text('My Wallets', style: AppTextStyles.heading2),
             TextButton(
               onPressed: () { widget.onScreenChanged(2); },
-              child: const Text('See all', style: TextStyle(color: Colors.green, fontSize: 16)),
+              child: Text('See all', style: AppTextStyles.subtitle.copyWith(color: Colors.green)),
             ),
           ],
         ),
@@ -178,12 +179,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(wallet.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                Text(wallet.name, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
                 Obx(() {
                   final appController = Get.find<AppController>();
                   return Text(
                     _isBalanceVisible ? '${appController.currencySymbol}${wallet.balance.toStringAsFixed(2)}' : '***',
-                    style: TextStyle(fontSize: 12, color: wallet.balance < 0 ? Colors.red : Colors.black),
+                    style: AppTextStyles.caption.copyWith(color: wallet.balance < 0 ? Colors.red : Colors.black87),
                   );
                 }),
               ],
@@ -199,7 +200,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Report this month', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        Text('Report this month', style: AppTextStyles.heading2),
         const SizedBox(height: 15),
         Container(
           padding: const EdgeInsets.all(12),
@@ -225,6 +226,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 labelColor: Colors.green,
                 unselectedLabelColor: Colors.grey[600],
+                labelStyle: AppTextStyles.body,
                 tabs: const [
                   Tab(text: 'Total Expense'),
                   Tab(text: 'Total Income'),
@@ -253,15 +255,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           alignment: Alignment.centerLeft,
                            child: Text(
                               '${_tabController.index == 0 ? '-' : '+'}${appController.currencySymbol}${totalAmount.toStringAsFixed(2)}',
-                              style: TextStyle(
-                                fontSize: 24, 
-                                fontWeight: FontWeight.bold, 
-                                color: _tabController.index == 0 ? Colors.red : Colors.blue
-                              ),
+                              style: AppTextStyles.totalAmount.copyWith(
+                                color: _tabController.index == 0 ? AppTextStyles.expenseAmount.color : AppTextStyles.incomeAmount.color,
+                              )
                             ), 
                          ),
                         const SizedBox(height: 10),
-                        Expanded(child: _buildLineChart(chartData, _tabController.index == 0 ? Colors.red : Colors.blue)),
+                        Expanded(child: _buildLineChart(chartData, _tabController.index == 0 ? Colors.red : Colors.green)),
                       ],
                     );
                 }),
@@ -383,10 +383,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-                const Text('Recent Transactions', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                Text('Recent Transactions', style: AppTextStyles.heading2),
                 TextButton(
                     onPressed: () { widget.onScreenChanged(1); },
-                    child: const Text('See all', style: TextStyle(color: Colors.green, fontSize: 16)),
+                    child: Text('See all', style: AppTextStyles.subtitle.copyWith(color: Colors.green)),
                 ),
             ],
         ),
@@ -425,17 +425,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           backgroundColor: Color(transaction.colorValue).withAlpha(25),
           child: Image.asset(transaction.iconPath, width: 28, height: 28, color: Color(transaction.colorValue)),
         ),
-        title: Text(transaction.categoryName, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(transaction.title.isNotEmpty ? transaction.title : DateFormat('d MMMM yyyy').format(transaction.date)),
+        title: Text(transaction.categoryName, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
+        subtitle: Text(transaction.title.isNotEmpty ? transaction.title : DateFormat('d MMMM yyyy').format(transaction.date), style: AppTextStyles.caption),
         trailing: Obx(() {
           final appController = Get.find<AppController>();
           return Text(
             '${transaction.type == TransactionType.income ? '+' : '-'}${appController.currencySymbol}${transaction.amount.toStringAsFixed(2)}',
-            style: TextStyle(
-              color: transaction.type == TransactionType.income ? Colors.blue : Colors.red,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+            style: transaction.type == TransactionType.income 
+                ? AppTextStyles.incomeAmount 
+                : AppTextStyles.expenseAmount,
           );
         }),
         onTap: () {

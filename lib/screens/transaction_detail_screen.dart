@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/models/category_model.dart';
@@ -69,7 +70,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
    void _confirmDelete() {
     Get.defaultDialog(
       title: "Delete Transaction",
+      titleStyle: AppTextStyles.title.copyWith(color: Get.isDarkMode ? Colors.white : Colors.black),
       middleText: "Are you sure you want to delete this transaction?",
+      middleTextStyle: AppTextStyles.body.copyWith(color: Get.isDarkMode ? Colors.white : Colors.black),
       textConfirm: "Delete",
       textCancel: "Cancel",
       confirmTextColor: Colors.white,
@@ -159,7 +162,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transaction Detail'),
+        title: Text('Transaction Detail', style: AppTextStyles.title),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete, color: Colors.red),
@@ -195,7 +198,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   borderRadius: BorderRadius.circular(12.0)
                 )
               ),
-              child: const Text('Save Changes', style: TextStyle(color: Colors.white, fontSize: 18)),
+              child: Text('Save Changes', style: AppTextStyles.button),
             ),
           ],
         ),
@@ -239,10 +242,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         ),
         child: Text(
           title,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTextStyles.body.copyWith(color: isSelected ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -257,14 +257,15 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           child: TextField(
             controller: _amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            decoration: const InputDecoration(
+            style: AppTextStyles.heading1,
+            decoration: InputDecoration(
               border: InputBorder.none,
               hintText: '0',
+              hintStyle: AppTextStyles.heading1.copyWith(color: Colors.grey)
             ),
           ),
         ),
-        const Text('\$', style: TextStyle(fontSize: 24, color: Colors.grey)),
+        Text('\$', style: AppTextStyles.heading1.copyWith(color: Colors.grey)),
       ],
     );
   }
@@ -273,7 +274,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: const Icon(Icons.calendar_today, color: Colors.grey),
-      title: Text(DateFormat.yMMMd().format(_selectedDate)),
+      title: Text(DateFormat.yMMMd().format(_selectedDate), style: AppTextStyles.body),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: () async {
         final DateTime? picked = await showDatePicker(
@@ -295,7 +296,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: const Icon(Icons.account_balance_wallet, color: Colors.grey),
-      title: Text(_selectedWallet.name),
+      title: Text(_selectedWallet.name, style: AppTextStyles.body),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: () {
         showModalBottomSheet(
@@ -307,7 +308,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 final wallet = wallets[index];
                 return ListTile(
                   leading: Image.asset(wallet.iconPath, width: 24, height: 24),
-                  title: Text(wallet.name),
+                  title: Text(wallet.name, style: AppTextStyles.body),
                   onTap: () {
                     setState(() {
                       _selectedWallet = wallet;
@@ -329,9 +330,11 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       leading: const Icon(Icons.note, color: Colors.grey),
       title: TextField(
         controller: _noteController,
-        decoration: const InputDecoration(
+        style: AppTextStyles.body,
+        decoration: InputDecoration(
           border: InputBorder.none,
           hintText: 'Note something...',
+          hintStyle: AppTextStyles.body.copyWith(color: Colors.grey)
         ),
       ),
     );
@@ -341,7 +344,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Category', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text('Category', style: AppTextStyles.title),
         const SizedBox(height: 10),
         GridView.builder(
           shrinkWrap: true,
@@ -373,7 +376,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   children: [
                     Image.asset(category.iconPath, width: 30, height: 30, color: categoryColor),
                     const SizedBox(height: 5),
-                    Text(category.name, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12)),
+                    Text(category.name, textAlign: TextAlign.center, style: AppTextStyles.caption),
                   ],
                 ),
               ),

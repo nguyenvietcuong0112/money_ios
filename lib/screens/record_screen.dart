@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:get/get.dart';
@@ -59,8 +60,8 @@ class _RecordScreenState extends State<RecordScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Record',
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: Text('Record',
+            style: AppTextStyles.title.copyWith(color: Colors.black, fontWeight: FontWeight.bold)),
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: Colors.black54),
@@ -141,11 +142,11 @@ class _RecordScreenState extends State<RecordScreen> {
 
   Widget _buildHeader(WalletController walletController) {
     List<DropdownMenuItem<String>> walletItems = [
-      const DropdownMenuItem(value: 'Total', child: Text('Total')),
+      DropdownMenuItem(value: 'Total', child: Text('Total', style: AppTextStyles.body,)),
       ...walletController.wallets.map((wallet) {
         return DropdownMenuItem(
           value: wallet.id,
-          child: Text(wallet.name),
+          child: Text(wallet.name, style: AppTextStyles.body,),
         );
       }),
     ];
@@ -178,7 +179,7 @@ class _RecordScreenState extends State<RecordScreen> {
                 items: _months.map((DateTime month) {
                   return DropdownMenuItem<DateTime>(
                     value: month,
-                    child: Text(DateFormat('MMMM yyyy').format(month)),
+                    child: Text(DateFormat('MMMM yyyy').format(month), style: AppTextStyles.body,),
                   );
                 }).toList(),
                 onChanged: (DateTime? newValue) {
@@ -251,11 +252,11 @@ class _RecordScreenState extends State<RecordScreen> {
             _selectedDay = null; // Reset day selection when page changes
           });
         },
-        daysOfWeekStyle: const DaysOfWeekStyle(
+        daysOfWeekStyle: DaysOfWeekStyle(
           weekdayStyle:
-              TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              AppTextStyles.body.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
           weekendStyle:
-              TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              AppTextStyles.body.copyWith(color: Colors.red, fontWeight: FontWeight.bold),
         ),
         calendarBuilders: CalendarBuilders(
           defaultBuilder: (context, day, focusedDay) {
@@ -267,19 +268,13 @@ class _RecordScreenState extends State<RecordScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('${day.day}', style: const TextStyle(fontSize: 12)),
+                  Text('${day.day}', style: AppTextStyles.caption.copyWith(fontSize: 12)),
                   if (income > 0)
                     Text('+${appController.currencySymbol}${income.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                            color: Colors.blue,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold)),
+                        style: AppTextStyles.caption.copyWith(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
                   if (expense > 0)
                     Text('-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold)),
+                        style: AppTextStyles.caption.copyWith(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold)),
                 ],
               ),
             );
@@ -298,20 +293,13 @@ class _RecordScreenState extends State<RecordScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text('${day.day}',
-                      style: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.bold)),
+                      style: AppTextStyles.caption.copyWith(fontSize: 12, fontWeight: FontWeight.bold)),
                   if (income > 0)
                     Text('+${appController.currencySymbol}${income.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                            color: Colors.blue,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold)),
+                        style: AppTextStyles.caption.copyWith(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
                   if (expense > 0)
                     Text('-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold)),
+                        style: AppTextStyles.caption.copyWith(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold)),
                 ],
               ),
             );
@@ -330,20 +318,13 @@ class _RecordScreenState extends State<RecordScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text('${day.day}',
-                      style: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.bold)),
+                      style: AppTextStyles.caption.copyWith(fontSize: 12, fontWeight: FontWeight.bold)),
                   if (income > 0)
                     Text('+${appController.currencySymbol}${income.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                            color: Colors.blue,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold)),
+                        style: AppTextStyles.caption.copyWith(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
                   if (expense > 0)
                     Text('-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold)),
+                        style: AppTextStyles.caption.copyWith(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold)),
                 ],
               ),
             );
@@ -372,14 +353,13 @@ class _RecordScreenState extends State<RecordScreen> {
   Widget _buildSummaryItem(String title, double amount, Color color) {
     return Column(
       children: [
-        Text(title, style: TextStyle(color: Colors.grey[600], fontSize: 16)),
+        Text(title, style: AppTextStyles.body.copyWith(color: Colors.grey[600], fontSize: 16)),
         const SizedBox(height: 4.0),
         Obx(() {
            final appController = Get.find<AppController>();
           return Text(
             '${appController.currencySymbol}${amount.toStringAsFixed(2)}',
-            style: TextStyle(
-                color: color, fontWeight: FontWeight.bold, fontSize: 18),
+            style: AppTextStyles.body.copyWith(color: color, fontWeight: FontWeight.bold, fontSize: 18),
           );
         }),
       ],
@@ -395,10 +375,10 @@ class _RecordScreenState extends State<RecordScreen> {
       final selectedDayTransactions = groupedTransactions[selectedDayKey] ?? [];
 
       if (selectedDayTransactions.isEmpty) {
-        return const Center(
+        return Center(
             child: Padding(
-                padding: EdgeInsets.all(20.0),
-                child: Text('No transactions on this day.')));
+                padding: const EdgeInsets.all(20.0),
+                child: Text('No transactions on this day.', style: AppTextStyles.body,)));
       }
 
       // Create a mini-list for the single selected day
@@ -409,10 +389,7 @@ class _RecordScreenState extends State<RecordScreen> {
             padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 8.0),
             child: Text(
               DateFormat('dd/MM/yyyy').format(selectedDayKey),
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Colors.grey[700]),
+              style: AppTextStyles.title.copyWith(fontSize: 18, color: Colors.grey[700]),
             ),
           ),
           ...selectedDayTransactions
@@ -422,10 +399,10 @@ class _RecordScreenState extends State<RecordScreen> {
     } else {
       // Otherwise, show all transactions for the month, grouped by day
       if (groupedTransactions.isEmpty) {
-        return const Center(
+        return Center(
             child: Padding(
-                padding: EdgeInsets.all(30.0),
-                child: Text('No transactions in this month.')));
+                padding: const EdgeInsets.all(30.0),
+                child: Text('No transactions in this month.', style: AppTextStyles.body,)));
       }
       return ListView.builder(
         shrinkWrap: true,
@@ -449,17 +426,11 @@ class _RecordScreenState extends State<RecordScreen> {
                   children: [
                     Text(
                       DateFormat('dd/MM/yyyy').format(date),
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.grey[700]),
+                      style: AppTextStyles.title.copyWith(fontSize: 18, color: Colors.grey[700]),
                     ),
                     Text(
                       '${dailyTotal >= 0 ? '+' : ''}${appController.currencySymbol}${dailyTotal.abs().toStringAsFixed(2)}',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.grey[700]),
+                      style: AppTextStyles.title.copyWith(fontSize: 18, color: Colors.grey[700]),
                     ),
                   ],
                 ),
@@ -487,8 +458,8 @@ class _RecordScreenState extends State<RecordScreen> {
           child: Image.asset(transaction.iconPath, width: 22, height: 22),
         ),
         title: Text(transaction.categoryName, // Corrected to show category name
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: transaction.title.isNotEmpty ? Text(transaction.title) : null, // Show note if it exists
+            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
+        subtitle: transaction.title.isNotEmpty ? Text(transaction.title, style: AppTextStyles.caption,) : null, // Show note if it exists
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -496,8 +467,7 @@ class _RecordScreenState extends State<RecordScreen> {
                final appController = Get.find<AppController>();
               return Text(
                 '${transaction.type == TransactionType.income ? '+' : '-'}${appController.currencySymbol}${transaction.amount.toStringAsFixed(2)}',
-                style: TextStyle(
-                    color: transaction.type == TransactionType.income
+                style: AppTextStyles.body.copyWith(color: transaction.type == TransactionType.income
                         ? Colors.blue
                         : Colors.red,
                     fontWeight: FontWeight.bold,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/localization/app_localizations.dart';
 
@@ -27,7 +28,7 @@ class _AddWalletScreenState extends State<AddWalletScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations?.translate('add_wallet') ?? 'Add Wallet'),
+        title: Text(localizations?.translate('add_wallet') ?? 'Add Wallet', style: AppTextStyles.title),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
@@ -51,9 +52,11 @@ class _AddWalletScreenState extends State<AddWalletScreen> {
             children: [
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
+                style: AppTextStyles.body,
+                decoration: InputDecoration(
                   labelText: 'Wallet Name',
-                  border: OutlineInputBorder(),
+                  labelStyle: AppTextStyles.body,
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -63,7 +66,7 @@ class _AddWalletScreenState extends State<AddWalletScreen> {
                 },
               ),
               const SizedBox(height: 24.0),
-              Text('Icon', style: Theme.of(context).textTheme.titleLarge),
+              Text('Icon', style: AppTextStyles.title),
               const SizedBox(height: 16.0),
               Expanded(
                 child: GridView.builder(

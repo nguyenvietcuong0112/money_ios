@@ -1,6 +1,7 @@
 import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/main.dart';
 
@@ -65,18 +66,17 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Select Currency'),
+        title: Text('Select Currency', style: AppTextStyles.title),
         automaticallyImplyLeading: !widget.isInitialSetup,
         actions: [
           TextButton(
             onPressed: _selectedCurrency == null ? null : _onConfirm,
             child: Text(
               'Next',
-              style: TextStyle(
+              style: AppTextStyles.button.copyWith(
                 color: _selectedCurrency == null
                     ? Colors.grey
                     : (Theme.of(context).brightness == Brightness.dark ? Colors.white : Theme.of(context).primaryColor),
-                fontSize: 18,
               ),
             ),
           ),
@@ -88,11 +88,14 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
+              style: AppTextStyles.body,
+              decoration: InputDecoration(
                 labelText: 'Search',
+                labelStyle: AppTextStyles.body,
                 hintText: 'Search by currency name or code',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
+                hintStyle: AppTextStyles.body.copyWith(color: Colors.grey),
+                prefixIcon: const Icon(Icons.search),
+                border: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(25.0)),
                 ),
               ),
@@ -105,9 +108,9 @@ class _CurrencySelectionScreenState extends State<CurrencySelectionScreen> {
                 final currency = _filteredCurrencies[index];
                 final isSelected = _selectedCurrency?.code == currency.code;
                 return ListTile(
-                  title: Text(currency.name),
-                  subtitle: Text(currency.code),
-                  trailing: isSelected ? const Icon(Icons.check_circle, color: Colors.green) : Text(currency.symbol, style: const TextStyle(fontSize: 18)),
+                  title: Text(currency.name, style: AppTextStyles.body),
+                  subtitle: Text(currency.code, style: AppTextStyles.caption),
+                  trailing: isSelected ? const Icon(Icons.check_circle, color: Colors.green) : Text(currency.symbol, style: AppTextStyles.body.copyWith(fontSize: 18)),
                   tileColor: isSelected ? Colors.green.withOpacity(0.1) : null,
                   onTap: () {
                     setState(() {

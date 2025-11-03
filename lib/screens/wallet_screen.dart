@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/localization/app_localizations.dart';
@@ -18,7 +19,7 @@ class WalletScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF6FEF7), // Light green-ish background
       appBar: AppBar(
-        title: Text(localizations?.translate('my_wallet') ?? 'My Wallet'),
+        title: Text(localizations?.translate('my_wallet') ?? 'My Wallet', style: AppTextStyles.title),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.black,
@@ -53,10 +54,10 @@ class WalletScreen extends StatelessWidget {
                             child: Image.asset(wallet.iconPath),
                           ),
                         ),
-                        title: Text(wallet.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        title: Text(wallet.name, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
                         subtitle: Text(
                           '${wallet.balance.toStringAsFixed(0)} ${appController.currencySymbol}',
-                          style: TextStyle(
+                          style: AppTextStyles.body.copyWith(
                             color: wallet.balance < 0 ? Colors.red : Colors.black54,
                             fontWeight: FontWeight.w600,
                           ),
@@ -87,7 +88,7 @@ class WalletScreen extends StatelessWidget {
               ),
               child: Text(
                 '+ ${localizations?.translate('add_wallet') ?? 'Add Wallet'}',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: AppTextStyles.button.copyWith(fontSize: 18),
               ),
             ),
             const SizedBox(height: 16.0),
@@ -116,12 +117,12 @@ class WalletScreen extends StatelessWidget {
               children: [
                 Text(
                   localizations?.translate('total_balance') ?? 'Total Balance',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey.shade600),
+                  style: AppTextStyles.subtitle.copyWith(color: Colors.grey.shade600),
                 ),
                 const SizedBox(height: 4.0),
                 Text(
                   '${totalBalance.toStringAsFixed(0)} ${appController.currencySymbol}',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  style: AppTextStyles.heading2.copyWith(
                         color: totalBalance < 0 ? Colors.red : Colors.black,
                         fontWeight: FontWeight.bold,
                       ),

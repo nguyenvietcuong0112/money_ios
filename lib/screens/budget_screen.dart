@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:money_manager/common/text_styles.dart';
 
 class BudgetScreen extends StatelessWidget {
   const BudgetScreen({super.key});
@@ -7,10 +8,10 @@ class BudgetScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Budget'),
+        title: Text('Budget', style: AppTextStyles.title),
       ),
-      body: const Center(
-        child: Text('Budget Screen'),
+      body: Center(
+        child: Text('Budget Screen', style: AppTextStyles.body),
       ),
     );
   }

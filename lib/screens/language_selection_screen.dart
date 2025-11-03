@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:money_manager/common/text_styles.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/screens/currency_selection_screen.dart';
@@ -147,7 +148,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
       children: [
         Scaffold(
           appBar: AppBar(
-            title: const Text('Language'),
+            title: Text('Language', style: AppTextStyles.title),
             automaticallyImplyLeading: !widget.isInitialSetup,
             actions: [
               Padding(
@@ -171,9 +172,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Please select language to continue',
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                  style: AppTextStyles.subtitle,
                 ),
                 const SizedBox(height: 20),
                 Expanded(

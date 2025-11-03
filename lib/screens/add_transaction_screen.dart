@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/models/category_model.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/models/wallet_model.dart';
@@ -87,7 +88,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Transaction'),
+        title: Text('Add Transaction', style: AppTextStyles.title),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -116,7 +117,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   borderRadius: BorderRadius.circular(12.0)
                 )
               ),
-              child: const Text('Add Transaction', style: TextStyle(color: Colors.white, fontSize: 18)),
+              child: Text('Add Transaction', style: AppTextStyles.button),
             ),
           ],
         ),
@@ -158,10 +159,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         ),
         child: Text(
           title,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTextStyles.body.copyWith(color: isSelected ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -176,14 +174,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           child: TextField(
             controller: _amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            decoration: const InputDecoration(
+            style: AppTextStyles.heading1,
+            decoration: InputDecoration(
               border: InputBorder.none,
               hintText: '0',
+              hintStyle: AppTextStyles.heading1.copyWith(color: Colors.grey)
             ),
           ),
         ),
-        const Text('\$', style: TextStyle(fontSize: 24, color: Colors.grey)),
+        Text('\$', style: AppTextStyles.heading1.copyWith(color: Colors.grey)),
       ],
     );
   }
@@ -192,7 +191,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: const Icon(Icons.calendar_today, color: Colors.grey),
-      title: Text(DateFormat.yMMMd().format(_selectedDate)),
+      title: Text(DateFormat.yMMMd().format(_selectedDate), style: AppTextStyles.body),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: () async {
         final DateTime? picked = await showDatePicker(
@@ -214,7 +213,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: const Icon(Icons.account_balance_wallet, color: Colors.grey),
-      title: Text(_selectedWallet?.name ?? 'Choose wallet'),
+      title: Text(_selectedWallet?.name ?? 'Choose wallet', style: AppTextStyles.body),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: () {
         if (wallets.isEmpty) {
@@ -230,7 +229,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 final wallet = wallets[index];
                 return ListTile(
                   leading: Image.asset(wallet.iconPath, width: 24, height: 24),
-                  title: Text(wallet.name),
+                  title: Text(wallet.name, style: AppTextStyles.body),
                   onTap: () {
                     setState(() {
                       _selectedWallet = wallet;
@@ -252,9 +251,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       leading: const Icon(Icons.note, color: Colors.grey),
       title: TextField(
         controller: _noteController,
-        decoration: const InputDecoration(
+        style: AppTextStyles.body,
+        decoration: InputDecoration(
           border: InputBorder.none,
           hintText: 'Note something...',
+          hintStyle: AppTextStyles.body.copyWith(color: Colors.grey)
         ),
       ),
     );
@@ -264,7 +265,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Category', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text('Category', style: AppTextStyles.title),
         const SizedBox(height: 10),
         GridView.builder(
           shrinkWrap: true,
@@ -296,7 +297,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   children: [
                     Image.asset(category.iconPath, width: 30, height: 30, color: categoryColor),
                     const SizedBox(height: 5),
-                    Text(category.name, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12)),
+                    Text(category.name, textAlign: TextAlign.center, style: AppTextStyles.caption),
                   ],
                 ),
               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/controllers/theme_controller.dart';
 import 'package:money_manager/localization/app_localizations.dart';
@@ -15,14 +16,14 @@ class SettingsScreen extends StatelessWidget {
 
     if (localizations == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Settings')),
+        appBar: AppBar(title: Text('Settings', style: AppTextStyles.title)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.translate('settings') ?? 'Settings'),
+        title: Text(localizations.translate('settings') ?? 'Settings', style: AppTextStyles.title),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -33,7 +34,7 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 GetX<ThemeController>(
                   builder: (themeController) => SwitchListTile(
-                    title: Text(localizations.translate('dark_mode') ?? 'Dark Mode'),
+                    title: Text(localizations.translate('dark_mode') ?? 'Dark Mode', style: AppTextStyles.body),
                     value: themeController.themeMode == ThemeMode.dark,
                     onChanged: (value) {
                       themeController.toggleTheme();
@@ -50,8 +51,8 @@ class SettingsScreen extends StatelessWidget {
               builder: (appController) => Column(
                 children: [
                   ListTile(
-                    title: Text(localizations.translate('language') ?? 'Language'),
-                    trailing: Text(appController.locale?.languageCode ?? ''),
+                    title: Text(localizations.translate('language') ?? 'Language', style: AppTextStyles.body),
+                    trailing: Text(appController.locale?.languageCode ?? '', style: AppTextStyles.body.copyWith(color: Colors.grey)),
                     leading: const Icon(Icons.language),
                     onTap: () {
                       Get.to(() => const LanguageSelectionScreen());
@@ -59,8 +60,8 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   const Divider(),
                   ListTile(
-                    title: Text(localizations.translate('currency') ?? 'Currency'),
-                    trailing: Text(appController.currencySymbol),
+                    title: Text(localizations.translate('currency') ?? 'Currency', style: AppTextStyles.body),
+                    trailing: Text(appController.currencySymbol, style: AppTextStyles.body.copyWith(color: Colors.grey)),
                     leading: const Icon(Icons.monetization_on),
                     onTap: () {
                       Get.to(() => const CurrencySelectionScreen());
@@ -75,7 +76,7 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               children: [
                 SwitchListTile(
-                  title: const Text('Enable Notifications'),
+                  title: Text('Enable Notifications', style: AppTextStyles.body),
                   value: false, // Replace with actual value
                   onChanged: (value) {
                     // Handle notification setting change
@@ -90,7 +91,7 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               children: [
                 ListTile(
-                  title: const Text('Set Passcode'),
+                  title: Text('Set Passcode', style: AppTextStyles.body),
                   leading: const Icon(Icons.lock),
                   onTap: () {
                     // Navigate to passcode screen
@@ -98,7 +99,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 const Divider(),
                 SwitchListTile(
-                  title: const Text('Enable Fingerprint'),
+                  title: Text('Enable Fingerprint', style: AppTextStyles.body),
                   value: false, // Replace with actual value
                   onChanged: (value) {
                     // Handle fingerprint setting change
@@ -113,7 +114,7 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               children: [
                 ListTile(
-                  title: const Text('Contact Support'),
+                  title: Text('Contact Support', style: AppTextStyles.body),
                   leading: const Icon(Icons.contact_support),
                   onTap: () {
                     // Handle contact support
@@ -121,7 +122,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 const Divider(),
                 ListTile(
-                  title: const Text('FAQs'),
+                  title: Text('FAQs', style: AppTextStyles.body),
                   leading: const Icon(Icons.question_answer),
                   onTap: () {
                     // Navigate to FAQs screen
@@ -129,7 +130,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 const Divider(),
                 ListTile(
-                  title: const Text('Terms of Service'),
+                  title: Text('Terms of Service', style: AppTextStyles.body),
                   leading: const Icon(Icons.description),
                   onTap: () {
                     // Show terms of service
@@ -137,7 +138,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 const Divider(),
                 ListTile(
-                  title: const Text('Privacy Policy'),
+                  title: Text('Privacy Policy', style: AppTextStyles.body),
                   leading: const Icon(Icons.privacy_tip),
                   onTap: () {
                     // Show privacy policy
@@ -156,7 +157,7 @@ class SettingsScreen extends StatelessWidget {
       padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        style: AppTextStyles.title,
       ),
     );
   }

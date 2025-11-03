@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/screens/settings_screen.dart';
 
 class MoreScreen extends StatelessWidget {
@@ -10,13 +11,9 @@ class MoreScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F8F7),
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'More Tools',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-          ),
+          style: AppTextStyles.title.copyWith(color: Colors.black),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -54,10 +51,10 @@ class MoreScreen extends StatelessWidget {
                 color: Colors.grey[200],
                 borderRadius: BorderRadius.circular(15.0),
               ),
-              child: const Center(
+              child: Center(
                 child: Text(
                   'Ad Banner Placeholder',
-                  style: TextStyle(color: Colors.grey),
+                  style: AppTextStyles.body.copyWith(color: Colors.grey),
                 ),
               ),
             ),
@@ -110,19 +107,12 @@ class MoreScreen extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: Colors.black,
-                    ),
+                    style: AppTextStyles.title.copyWith(color: Colors.black),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.black54,
-                    ),
+                    style: AppTextStyles.body.copyWith(color: Colors.black54),
                   ),
                 ],
               ),
