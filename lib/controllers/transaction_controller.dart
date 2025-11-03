@@ -4,8 +4,7 @@ import 'package:money_manager/models/transaction_model.dart';
 import 'package:uuid/uuid.dart';
 
 class TransactionController extends GetxController {
-  final Box<Transaction> _transactionsBox = Hive.box<Transaction>('transactions');
-  // Sử dụng RxList để GetX có thể "lắng nghe" sự thay đổi
+  final Box<Transaction> _transactionBox = Hive.box<Transaction>('transactions');
   final RxList<Transaction> transactions = <Transaction>[].obs;
 
   @override
@@ -23,37 +22,52 @@ class TransactionController extends GetxController {
       .fold(0, (sum, item) => sum + item.amount);
 
   void _loadTransactions() {
-    // Gán giá trị cho RxList, nó sẽ tự động thông báo cho các listener (như Obx)
-    transactions.value = _transactionsBox.values.toList();
+    // Lắng nghe các thay đổi từ box để cập nhật UI tự động
+    _transactionBox.watch().listen((event) {
+      // Chạy lại _loadTransactions bất cứ khi nào có thay đổi
+      final allTransactions = _transactionBox.values.toList();
+      // Sắp xếp theo ngày, giao dịch mới nhất lên đầu
+      allTransactions.sort((a, b) => b.date.compareTo(a.date));
+      transactions.assignAll(allTransactions);
+    });
+    // Tải dữ liệu lần đầu
+    final initialTransactions = _transactionBox.values.toList();
+    initialTransactions.sort((a, b) => b.date.compareTo(a.date));
+    transactions.assignAll(initialTransactions);
   }
 
-  void addTransaction(
-    String title,
-    double amount,
-    DateTime date,
-    TransactionType type,
-    String iconPath,
-    int colorValue,
-    String walletId,
-  ) {
+  void addTransaction({
+    required String note,
+    required double amount,
+    required DateTime date,
+    required TransactionType type,
+    required String categoryName,
+    required String iconPath,
+    required int colorValue,
+    required String walletId,
+  }) {
     final newTransaction = Transaction(
       id: const Uuid().v4(),
-      title: title,
+      title: note, // title is now the note
       amount: amount,
       date: date,
       type: type,
+      categoryName: categoryName,
       iconPath: iconPath,
       colorValue: colorValue,
       walletId: walletId,
     );
-    _transactionsBox.put(newTransaction.id, newTransaction);
-    // Chỉ cần thêm vào RxList, Obx sẽ tự động cập nhật UI
-    transactions.add(newTransaction);
+    _transactionBox.put(newTransaction.id, newTransaction);
+    // Không cần .add() nữa vì watch() sẽ tự cập nhật
+  }
+
+  void updateTransaction(Transaction transaction) {
+    _transactionBox.put(transaction.id, transaction);
+    // Không cần cập nhật list thủ công nữa
   }
 
   void deleteTransaction(String transactionId) {
-    _transactionsBox.delete(transactionId);
-    // Chỉ cần xóa khỏi RxList, Obx sẽ tự động cập nhật UI
-    transactions.removeWhere((transaction) => transaction.id == transactionId);
+    _transactionBox.delete(transactionId);
+    // Không cần .removeWhere() nữa
   }
 }

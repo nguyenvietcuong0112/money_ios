@@ -4,6 +4,7 @@ import 'package:money_manager/models/transaction_model.dart';
 import 'package:get/get.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
+import 'package:money_manager/screens/transaction_detail_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:collection/collection.dart';
 
@@ -485,8 +486,9 @@ class _RecordScreenState extends State<RecordScreen> {
           backgroundColor: Color(transaction.colorValue).withAlpha(25),
           child: Image.asset(transaction.iconPath, width: 22, height: 22),
         ),
-        title: Text(transaction.title,
+        title: Text(transaction.categoryName, // Corrected to show category name
             style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: transaction.title.isNotEmpty ? Text(transaction.title) : null, // Show note if it exists
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -504,7 +506,7 @@ class _RecordScreenState extends State<RecordScreen> {
           ],
         ),
         onTap: () {
-          // TODO: Implement transaction details navigation
+          Get.to(() => TransactionDetailScreen(transaction: transaction));
         },
       ),
     );

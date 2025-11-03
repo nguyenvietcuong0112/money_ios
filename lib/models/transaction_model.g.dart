@@ -25,13 +25,14 @@ class TransactionAdapter extends TypeAdapter<Transaction> {
       iconPath: fields[5] as String,
       colorValue: fields[6] as int,
       walletId: fields[7] as String,
+      categoryName: fields[8] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Transaction obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class TransactionAdapter extends TypeAdapter<Transaction> {
       ..writeByte(6)
       ..write(obj.colorValue)
       ..writeByte(7)
-      ..write(obj.walletId);
+      ..write(obj.walletId)
+      ..writeByte(8)
+      ..write(obj.categoryName);
   }
 
   @override

@@ -1,28 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:money_manager/controllers/transaction_controller.dart';
+import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/models/category_model.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/models/wallet_model.dart';
-import 'package:get/get.dart';
-import 'package:money_manager/controllers/transaction_controller.dart';
-import 'package:money_manager/controllers/wallet_controller.dart';
 
-class AddTransactionScreen extends StatefulWidget {
-  const AddTransactionScreen({super.key});
+class TransactionDetailScreen extends StatefulWidget {
+  final Transaction transaction;
+
+  const TransactionDetailScreen({super.key, required this.transaction});
 
   @override
-  State<AddTransactionScreen> createState() => _AddTransactionScreenState();
+  State<TransactionDetailScreen> createState() =>
+      _TransactionDetailScreenState();
 }
 
-class _AddTransactionScreenState extends State<AddTransactionScreen> {
-  final _amountController = TextEditingController(text: '0');
-  final _noteController = TextEditingController();
-  DateTime _selectedDate = DateTime.now();
-  TransactionType _selectedType = TransactionType.expense;
-  Category? _selectedCategory;
-  Wallet? _selectedWallet;
+class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
+  late TextEditingController _amountController;
+  late TextEditingController _noteController;
+  late DateTime _selectedDate;
+  late TransactionType _selectedType;
+  late Category _selectedCategory;
+  late Wallet _selectedWallet;
 
-  // Updated categories list with iconPath and colorValue
   final List<Category> _categories = [
     Category(name: 'Food & Dr...', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.orange.value),
     Category(name: 'Household', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.blue.value),
@@ -38,56 +40,133 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     Category(name: 'Medical', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.redAccent.value),
   ];
 
-  void _submitData() {
+  @override
+  void initState() {
+    super.initState();
+    final transaction = widget.transaction;
+
+    _amountController = TextEditingController(text: transaction.amount.toString());
+    // Correct: `title` is now the note field.
+    _noteController = TextEditingController(text: transaction.title);
+    _selectedDate = transaction.date;
+    _selectedType = transaction.type;
+
+    // Correct: Find category by `categoryName`
+    _selectedCategory = _categories.firstWhere(
+      (cat) => cat.name == transaction.categoryName,
+      orElse: () => _categories[0], // Fallback to the first category
+    );
+
+    final walletController = Get.find<WalletController>();
+    _selectedWallet = walletController.wallets.firstWhere(
+      (wallet) => wallet.id == transaction.walletId,
+      orElse: () => walletController.wallets.isNotEmpty
+          ? walletController.wallets[0]
+          : Wallet(id: 'fallback', name: 'Unknown', iconPath: '', balance: 0),
+    );
+  }
+
+   void _confirmDelete() {
+    Get.defaultDialog(
+      title: "Delete Transaction",
+      middleText: "Are you sure you want to delete this transaction?",
+      textConfirm: "Delete",
+      textCancel: "Cancel",
+      confirmTextColor: Colors.white,
+      buttonColor: Colors.red,
+      onConfirm: () {
+        final transactionController = Get.find<TransactionController>();
+        final walletController = Get.find<WalletController>();
+        final transaction = widget.transaction;
+
+        // 1. Calculate amount to revert from wallet balance
+        final amountToRevert = transaction.type == TransactionType.income 
+            ? -transaction.amount 
+            : transaction.amount;
+        
+        walletController.updateBalance(transaction.walletId, amountToRevert);
+
+        // 2. Delete the transaction from Hive
+        transactionController.deleteTransaction(transaction.id);
+
+        Get.back(); // Close dialog
+        Get.back(); // Go back from detail screen
+      },
+    );
+  }
+
+  void _updateTransaction() {
     final double enteredAmount = double.tryParse(_amountController.text) ?? 0.0;
 
     if (enteredAmount <= 0) {
-      Get.snackbar('Invalid Input', 'Amount must be greater than zero.', snackPosition: SnackPosition.BOTTOM);
-      return;
-    }
-    if (_selectedCategory == null) {
-      Get.snackbar('Invalid Input', 'Please select a category.', snackPosition: SnackPosition.BOTTOM);
-      return;
-    }
-    if (_selectedWallet == null) {
-      Get.snackbar('Invalid Input', 'Please select a wallet.', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar("Invalid Amount", "Please enter a valid amount.", snackPosition: SnackPosition.BOTTOM);
       return;
     }
 
     final transactionController = Get.find<TransactionController>();
     final walletController = Get.find<WalletController>();
+    final originalTransaction = widget.transaction;
 
-    transactionController.addTransaction(
-      note: _noteController.text, // Correctly pass the note
+    // --- Wallet Balance Update Logic ---
+    // 1. Calculate the impact of the *original* transaction
+    final originalImpact = originalTransaction.type == TransactionType.income 
+        ? originalTransaction.amount 
+        : -originalTransaction.amount;
+
+    // 2. Calculate the impact of the *new* transaction
+    final newImpact = _selectedType == TransactionType.income 
+        ? enteredAmount 
+        : -enteredAmount;
+
+    // 3. Find the difference to apply to the wallet
+    // This handles changes in amount, type (income/expense), and even wallet
+    final balanceChange = newImpact - originalImpact;
+
+    // If the wallet itself has changed, we need two updates
+    if (_selectedWallet.id != originalTransaction.walletId) {
+        // Revert from old wallet
+        walletController.updateBalance(originalTransaction.walletId, -originalImpact);
+        // Apply to new wallet
+        walletController.updateBalance(_selectedWallet.id, newImpact);
+    } else {
+        // If same wallet, just apply the net change
+        walletController.updateBalance(_selectedWallet.id, balanceChange);
+    }
+
+    // Create the updated transaction using copyWith
+    final updatedTransaction = originalTransaction.copyWith(
+      title: _noteController.text.trim(),
       amount: enteredAmount,
       date: _selectedDate,
       type: _selectedType,
-      categoryName: _selectedCategory!.name, // Correctly pass the category name
-      iconPath: _selectedCategory!.iconPath,
-      colorValue: _selectedCategory!.colorValue,
-      walletId: _selectedWallet!.id,
+      categoryName: _selectedCategory.name,
+      iconPath: _selectedCategory.iconPath,
+      colorValue: _selectedCategory.colorValue,
+      walletId: _selectedWallet.id,
     );
 
-    walletController.updateBalance(
-      _selectedWallet!.id,
-      _selectedType == TransactionType.income ? enteredAmount : -enteredAmount,
-    );
+    // Update the transaction in the controller
+    transactionController.updateTransaction(updatedTransaction);
 
-    Get.back();
+    Get.back(); // Go back from detail screen
+    Get.snackbar("Success", "Transaction updated successfully.", snackPosition: SnackPosition.BOTTOM);
   }
+
 
   @override
   Widget build(BuildContext context) {
     final walletController = Get.find<WalletController>();
 
-    // Set a default wallet if none is selected
-    if (_selectedWallet == null && walletController.wallets.isNotEmpty) {
-      _selectedWallet = walletController.wallets.first;
-    }
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Transaction'),
+        title: const Text('Transaction Detail'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: _confirmDelete,
+            tooltip: 'Delete Transaction',
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -108,7 +187,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             _buildCategoryGrid(),
             const SizedBox(height: 40),
             ElevatedButton(
-              onPressed: _submitData,
+              onPressed: _updateTransaction,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 backgroundColor: Colors.green,
@@ -116,13 +195,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   borderRadius: BorderRadius.circular(12.0)
                 )
               ),
-              child: const Text('Add Transaction', style: TextStyle(color: Colors.white, fontSize: 18)),
+              child: const Text('Save Changes', style: TextStyle(color: Colors.white, fontSize: 18)),
             ),
           ],
         ),
       ),
     );
   }
+
+  // --- Re-used Widgets from AddTransactionScreen ---
 
   Widget _buildTypeToggle() {
     return Center(
@@ -214,13 +295,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: const Icon(Icons.account_balance_wallet, color: Colors.grey),
-      title: Text(_selectedWallet?.name ?? 'Choose wallet'),
+      title: Text(_selectedWallet.name),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: () {
-        if (wallets.isEmpty) {
-            Get.snackbar('No Wallets', 'Please add a wallet first.', snackPosition: SnackPosition.BOTTOM);
-            return;
-        }
         showModalBottomSheet(
           context: context,
           builder: (context) {
@@ -277,7 +354,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           itemCount: _categories.length,
           itemBuilder: (context, index) {
             final category = _categories[index];
-            final isSelected = _selectedCategory?.name == category.name;
+            final isSelected = _selectedCategory.name == category.name;
             final categoryColor = Color(category.colorValue);
             return GestureDetector(
               onTap: () {

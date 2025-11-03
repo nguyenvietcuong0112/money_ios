@@ -9,6 +9,7 @@ import 'package:money_manager/controllers/transaction_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/models/wallet_model.dart';
+import 'package:money_manager/screens/transaction_detail_screen.dart';
 
 import 'add_transaction_screen.dart';
 
@@ -390,9 +391,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         // Thay GetBuilder bằng Obx để tự động cập nhật giao dịch gần đây
         Obx(() {
           final transactionController = Get.find<TransactionController>();
-          final recentTransactions = transactionController.transactions.sortedBy((t) => t.date).reversed.take(5).toList();
+          // The list is now pre-sorted in the controller
+          final recentTransactions = transactionController.transactions.take(5).toList();
           if (recentTransactions.isEmpty) {
-            return const Text("No recent transactions.");
+            return const Center(child: Padding(padding: EdgeInsets.all(20), child: Text("No recent transactions.")));
           }
           return ListView.builder(
             shrinkWrap: true,
@@ -409,23 +411,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildTransactionItem(Transaction transaction) {
-    final walletController = Get.find<WalletController>();
-    final wallet = walletController.getWalletById(transaction.walletId);
-    final color = wallet != null ? _getWalletColor(wallet.name) : Colors.grey;
-
     return Card(
       elevation: 0,
       margin: const EdgeInsets.symmetric(vertical: 6.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+      color: Colors.white,
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
         leading: CircleAvatar(
           radius: 25,
-          backgroundColor: color.withOpacity(0.1),
-          child: Image.asset(transaction.iconPath, width: 28, height: 28),
+          backgroundColor: Color(transaction.colorValue).withAlpha(25),
+          child: Image.asset(transaction.iconPath, width: 28, height: 28, color: Color(transaction.colorValue)),
         ),
-        title: Text(transaction.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(DateFormat('d MMMM yyyy').format(transaction.date)),
+        title: Text(transaction.categoryName, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(transaction.title.isNotEmpty ? transaction.title : DateFormat('d MMMM yyyy').format(transaction.date)),
         trailing: Text(
           '${transaction.type == TransactionType.income ? '+' : '-'}\$${transaction.amount.toStringAsFixed(2)}',
           style: TextStyle(
@@ -435,7 +434,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
         onTap: () {
-          // TODO: Navigate to transaction details
+          Get.to(() => TransactionDetailScreen(transaction: transaction));
         },
       ),
     );
