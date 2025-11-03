@@ -58,32 +58,32 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetX<ThemeController>(
-      builder: (themeController) {
-        return GetX<AppController>(
-          builder: (appController) {
-            return GetMaterialApp(
-              title: 'Money Manager',
-              theme: lightTheme,
-              darkTheme: darkTheme,
-              themeMode: themeController.themeMode,
-              locale: appController.locale,
-              supportedLocales: const [
-                Locale('en', ''),
-                Locale('fr', ''),
-                Locale('vi', '')
-              ],
-              localizationsDelegates: const [
-                AppLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              home: isFirstTime
-                  ? const LanguageSelectionScreen(isInitialSetup: true)
-                  : const MyHomePage(),
-            );
-          },
+    return GetX<AppController>(
+      builder: (appController) {
+        final themeController = Get.find<ThemeController>();
+        final currentLocale = appController.locale;
+        final currentTheme = themeController.themeMode;
+
+        return GetMaterialApp(
+          title: 'Money Manager',
+          theme: lightTheme,
+          darkTheme: darkTheme,
+          themeMode: currentTheme,
+          locale: currentLocale,
+          supportedLocales: const [
+            Locale('en', ''),
+            Locale('fr', ''),
+            Locale('vi', '')
+          ],
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: isFirstTime
+              ? const LanguageSelectionScreen(isInitialSetup: true)
+              : const MyHomePage(),
         );
       },
     );
