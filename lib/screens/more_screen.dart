@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:money_manager/common/text_styles.dart';
+import 'package:money_manager/screens/personal_loan_screen.dart';
 import 'package:money_manager/screens/settings_screen.dart';
 
 class MoreScreen extends StatelessWidget {
@@ -44,21 +45,6 @@ class MoreScreen extends StatelessWidget {
               },
             ),
             const SizedBox(height: 16),
-            // Placeholder for the ad banner
-            Container(
-              height: 150,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              child: Center(
-                child: Text(
-                  'Ad Banner Placeholder',
-                  style: AppTextStyles.body.copyWith(color: Colors.grey),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
             _buildToolCard(
               context,
               title: 'Personal Loan',
@@ -66,19 +52,7 @@ class MoreScreen extends StatelessWidget {
               iconData: Icons.real_estate_agent,
               color: Colors.pink,
               onTap: () {
-                // TODO: Get.to(() => PersonalLoanScreen());
-                Get.snackbar('Coming Soon', 'Personal Loan feature is under development.');
-              },
-            ),
-            const SizedBox(height: 16),
-             _buildToolCard(
-              context,
-              title: 'Credit Card',
-              subtitle: 'Calculate your card repayments',
-              iconData: Icons.credit_card,
-              color: Colors.red,
-              onTap: () {
-                 Get.snackbar('Coming Soon', 'Credit Card feature is under development.');
+                Get.to(() => const PersonalLoanScreen());
               },
             ),
           ],
