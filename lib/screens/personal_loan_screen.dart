@@ -2,23 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
-
-// Helper class for amortization schedule entries
-class AmortizationEntry {
-  final int month;
-  final double payment;
-  final double interest;
-  final double principal;
-  final double remainingBalance;
-
-  AmortizationEntry({
-    required this.month,
-    required this.payment,
-    required this.interest,
-    required this.principal,
-    required this.remainingBalance,
-  });
-}
+import 'package:get/get.dart';
+import 'package:money_manager/screens/personal_loan_result_screen.dart';
 
 class PersonalLoanScreen extends StatefulWidget {
   const PersonalLoanScreen({super.key});
@@ -34,22 +19,15 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
   double _loanTermInYears = 0;
   DateTime _startDate = DateTime.now();
 
-  // Results
-  double? _monthlyPayment;
-  double? _totalInterest;
-  double? _totalPayment;
-  List<AmortizationEntry> _amortizationSchedule = [];
-
   final Color _primaryColor = const Color(0xFF4CAF50); // Neutral Green
   final Color _backgroundColor = const Color(0xFFF6F8F7);
 
-  void _calculateLoan() {
+  void _calculateAndNavigate() {
     final double? loanAmount = double.tryParse(_loanAmountController.text);
     final double? annualRate = double.tryParse(_interestRateController.text);
     final int termInMonths = (_loanTermInYears * 12).round();
 
     if (loanAmount == null || loanAmount <= 0 || annualRate == null || annualRate < 0 || termInMonths <= 0) {
-      // Show an error or handle invalid input
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter valid loan details.')),
       );
@@ -71,31 +49,18 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
     totalPayment = monthlyPayment * termInMonths;
     totalInterest = totalPayment - loanAmount;
 
-    // Generate amortization schedule
-    List<AmortizationEntry> schedule = [];
-    double remainingBalance = loanAmount;
-    for (int i = 1; i <= termInMonths; i++) {
-      double interest = remainingBalance * monthlyRate;
-      double principal = monthlyPayment - interest;
-      remainingBalance -= principal;
+    DateTime payOffDate = DateTime(_startDate.year, _startDate.month + termInMonths, _startDate.day);
 
-      if (remainingBalance < 0) remainingBalance = 0; // handle rounding errors
-
-      schedule.add(AmortizationEntry(
-        month: i,
-        payment: monthlyPayment,
-        interest: interest,
-        principal: principal,
-        remainingBalance: remainingBalance,
-      ));
-    }
-    
-    setState(() {
-      _monthlyPayment = monthlyPayment;
-      _totalInterest = totalInterest;
-      _totalPayment = totalPayment;
-      _amortizationSchedule = schedule;
-    });
+    Get.to(() => PersonalLoanResultScreen(
+      loanAmount: loanAmount,
+      interestRate: annualRate,
+      loanTermInYears: _loanTermInYears,
+      startDate: _startDate,
+      monthlyPayment: monthlyPayment,
+      totalInterest: totalInterest,
+      totalPayment: totalPayment,
+      payOffDate: payOffDate,
+    ));
   }
 
   void _resetFields() {
@@ -104,10 +69,6 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
     setState(() {
       _loanTermInYears = 0;
       _startDate = DateTime.now();
-      _monthlyPayment = null;
-      _totalInterest = null;
-      _totalPayment = null;
-      _amortizationSchedule = [];
     });
   }
 
@@ -127,7 +88,6 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(locale: 'en_US', symbol: '\$');
     int termInMonths = (_loanTermInYears * 12).round();
 
     return Scaffold(
@@ -160,12 +120,6 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
             _buildDatePicker(),
             const SizedBox(height: 32),
             _buildActionButtons(),
-            if (_monthlyPayment != null) ...[
-              const SizedBox(height: 32),
-              _buildResultsSection(currencyFormat),
-              const SizedBox(height: 24),
-              _buildAmortizationTable(currencyFormat),
-            ]
           ],
         ),
       ),
@@ -304,7 +258,7 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: _calculateLoan,
+            onPressed: _calculateAndNavigate,
             style: ElevatedButton.styleFrom(
               backgroundColor: _primaryColor,
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -333,73 +287,4 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
       ],
     );
   }
-
-  Widget _buildResultsSection(NumberFormat currencyFormat) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Column(
-        children: [
-          _buildResultRow('Monthly Payment', currencyFormat.format(_monthlyPayment)),
-          const Divider(height: 24),
-          _buildResultRow('Total Interest', currencyFormat.format(_totalInterest)),
-           const Divider(height: 24),
-          _buildResultRow('Total Payment', currencyFormat.format(_totalPayment), isTotal: true),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildResultRow(String title, String value, {bool isTotal = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(title, style: TextStyle(fontSize: 16, color: isTotal ? Colors.black : Colors.black54)),
-        Text(value, style: TextStyle(fontSize: 18, fontWeight: isTotal ? FontWeight.bold : FontWeight.normal)),
-      ],
-    );
-  }
-  
-  Widget _buildAmortizationTable(NumberFormat currencyFormat) {
-     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Amortization Schedule', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-        const SizedBox(height: 16),
-        Container(
-          constraints: const BoxConstraints(maxHeight: 400),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          child: SingleChildScrollView(
-            child: DataTable(
-              columnSpacing: 10,
-              columns: const [
-                DataColumn(label: Text('Month')),
-                DataColumn(label: Text('Interest'), numeric: true),
-                DataColumn(label: Text('Principal'), numeric: true),
-                DataColumn(label: Text('Balance'), numeric: true),
-              ],
-              rows: _amortizationSchedule.map((entry) {
-                return DataRow(
-                  cells: [
-                    DataCell(Text(entry.month.toString())),
-                    DataCell(Text(currencyFormat.format(entry.interest))),
-                    DataCell(Text(currencyFormat.format(entry.principal))),
-                    DataCell(Text(currencyFormat.format(entry.remainingBalance))),
-                  ],
-                );
-              }).toList(),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
 }
-
