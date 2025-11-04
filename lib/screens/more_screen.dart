@@ -1,6 +1,8 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:money_manager/common/text_styles.dart';
+import 'package:money_manager/screens/exchange_rate_screen.dart';
 import 'package:money_manager/screens/personal_loan_screen.dart';
 import 'package:money_manager/screens/settings_screen.dart';
 
@@ -40,8 +42,7 @@ class MoreScreen extends StatelessWidget {
               iconData: Icons.currency_exchange,
               color: Colors.orange,
               onTap: () {
-                // TODO: Get.to(() => ExchangeRateScreen());
-                 Get.snackbar('Coming Soon', 'Exchange Rate feature is under development.');
+                Get.to(() => const ExchangeRateScreen());
               },
             ),
             const SizedBox(height: 16),
