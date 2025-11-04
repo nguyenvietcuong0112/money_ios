@@ -2,6 +2,7 @@
 import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/services/exchange_rate_service.dart';
 import 'package:money_manager/common/utils.dart'; // For flag emoji
 
@@ -120,7 +121,7 @@ class _ExchangeRateScreenState extends State<ExchangeRateScreen> {
     return Scaffold(
       backgroundColor: _backgroundColor,
       appBar: AppBar(
-        title: Text('exchange_rate'.tr),
+        title: Text('exchange_rate'.tr, style: AppTextStyles.title),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.black87,
@@ -159,7 +160,7 @@ class _ExchangeRateScreenState extends State<ExchangeRateScreen> {
                         borderRadius: BorderRadius.circular(30.0),
                       ),
                     ),
-                    child: const Text('Calculate', style: TextStyle(fontSize: 18, color: Colors.white)),
+                    child: Text('calculate'.tr, style: AppTextStyles.button),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -174,7 +175,7 @@ class _ExchangeRateScreenState extends State<ExchangeRateScreen> {
                         borderRadius: BorderRadius.circular(30.0),
                       ),
                     ),
-                    child: Text('Reset', style: TextStyle(fontSize: 18, color: _primaryColor)),
+                    child: Text('reset'.tr, style: AppTextStyles.button.copyWith(color: _primaryColor)),
                   ),
                 ),
               ],
@@ -217,10 +218,11 @@ class _ExchangeRateScreenState extends State<ExchangeRateScreen> {
             child: TextFormField(
               controller: controller,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              decoration: const InputDecoration(
+              style: AppTextStyles.body.copyWith(fontSize: 20, fontWeight: FontWeight.bold),
+              decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: '0',
+                hintStyle: AppTextStyles.body.copyWith(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey),
               ),
               onChanged: (_) => _calculateExchange(),
             ),
@@ -233,13 +235,13 @@ class _ExchangeRateScreenState extends State<ExchangeRateScreen> {
               onTap: onTap,
               child: Row(
                 children: [
-                  Text(Utils.currencyToEmoji(selectedCurrency), style: const TextStyle(fontSize: 24)),
+                  Text(Utils.currencyToEmoji(selectedCurrency), style: AppTextStyles.body.copyWith(fontSize: 24)),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       '${selectedCurrency.code} - ${selectedCurrency.symbol}',
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                      style: AppTextStyles.body.copyWith(fontSize: 14, fontWeight: FontWeight.w500),
                     ),
                   ),
                   const Icon(Icons.arrow_drop_down, color: Colors.grey),

@@ -316,13 +316,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               getTitlesWidget: (double value, TitleMeta meta) {
                 Widget text;
                 switch (value.toInt()) {
-                  case 1: text = const Text('1'); break;
-                  case 5: text = const Text('5'); break;
-                  case 10: text = const Text('10'); break;
-                  case 15: text = const Text('15'); break;
-                  case 20: text = const Text('20'); break;
-                  case 25: text = const Text('25'); break;
-                  case 30: text = const Text('30'); break;
+                  case 1: text = Text('1', style: AppTextStyles.caption); break;
+                  case 5: text = Text('5', style: AppTextStyles.caption); break;
+                  case 10: text = Text('10', style: AppTextStyles.caption); break;
+                  case 15: text = Text('15', style: AppTextStyles.caption); break;
+                  case 20: text = Text('20', style: AppTextStyles.caption); break;
+                  case 25: text = Text('25', style: AppTextStyles.caption); break;
+                  case 30: text = Text('30', style: AppTextStyles.caption); break;
                   default: text = const Text(''); break;
                 }
                 return SideTitleWidget(meta: meta, child: text);

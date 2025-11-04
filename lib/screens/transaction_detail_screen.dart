@@ -4,9 +4,12 @@ import 'package:intl/intl.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
+import 'package:money_manager/models/category_data.dart';
 import 'package:money_manager/models/category_model.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/models/wallet_model.dart';
+
+import '../controllers/app_controller.dart';
 
 class TransactionDetailScreen extends StatefulWidget {
   final Transaction transaction;
@@ -26,36 +29,19 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   late Category _selectedCategory;
   late Wallet _selectedWallet;
 
-  final List<Category> _categories = [
-    Category(name: 'Food & Dr...', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.orange.value),
-    Category(name: 'Household', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.blue.value),
-    Category(name: 'Shopping', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.purple.value),
-    Category(name: 'House', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.green.value),
-    Category(name: 'Travel', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.indigo.value),
-    Category(name: 'Sport', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.red.value),
-    Category(name: 'Cosmetics', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.pink.value),
-    Category(name: 'Water Bill', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.lightBlue.value),
-    Category(name: 'Electric Bill', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.yellow.value),
-    Category(name: 'Phone', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.grey.value),
-    Category(name: 'Education', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.brown.value),
-    Category(name: 'Medical', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.redAccent.value),
-  ];
-
   @override
   void initState() {
     super.initState();
     final transaction = widget.transaction;
 
     _amountController = TextEditingController(text: transaction.amount.toString());
-    // Correct: `title` is now the note field.
     _noteController = TextEditingController(text: transaction.title);
     _selectedDate = transaction.date;
     _selectedType = transaction.type;
 
-    // Correct: Find category by `categoryName`
-    _selectedCategory = _categories.firstWhere(
+    _selectedCategory = defaultCategories.firstWhere(
       (cat) => cat.name == transaction.categoryName,
-      orElse: () => _categories[0], // Fallback to the first category
+      orElse: () => defaultCategories[0],
     );
 
     final walletController = Get.find<WalletController>();
@@ -69,12 +55,12 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
    void _confirmDelete() {
     Get.defaultDialog(
-      title: "Delete Transaction",
+      title: "delete_transaction".tr,
       titleStyle: AppTextStyles.title.copyWith(color: Get.isDarkMode ? Colors.white : Colors.black),
-      middleText: "Are you sure you want to delete this transaction?",
+      middleText: "are_you_sure_delete".tr,
       middleTextStyle: AppTextStyles.body.copyWith(color: Get.isDarkMode ? Colors.white : Colors.black),
-      textConfirm: "Delete",
-      textCancel: "Cancel",
+      textConfirm: "delete".tr,
+      textCancel: "cancel".tr,
       confirmTextColor: Colors.white,
       buttonColor: Colors.red,
       onConfirm: () {
@@ -82,18 +68,16 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         final walletController = Get.find<WalletController>();
         final transaction = widget.transaction;
 
-        // 1. Calculate amount to revert from wallet balance
         final amountToRevert = transaction.type == TransactionType.income 
             ? -transaction.amount 
             : transaction.amount;
         
         walletController.updateBalance(transaction.walletId, amountToRevert);
 
-        // 2. Delete the transaction from Hive
         transactionController.deleteTransaction(transaction.id);
 
-        Get.back(); // Close dialog
-        Get.back(); // Go back from detail screen
+        Get.back();
+        Get.back();
       },
     );
   }
@@ -102,7 +86,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     final double enteredAmount = double.tryParse(_amountController.text) ?? 0.0;
 
     if (enteredAmount <= 0) {
-      Get.snackbar("Invalid Amount", "Please enter a valid amount.", snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar("invalid_amount".tr, "please_enter_valid_amount".tr, snackPosition: SnackPosition.BOTTOM);
       return;
     }
 
@@ -110,33 +94,23 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     final walletController = Get.find<WalletController>();
     final originalTransaction = widget.transaction;
 
-    // --- Wallet Balance Update Logic ---
-    // 1. Calculate the impact of the *original* transaction
     final originalImpact = originalTransaction.type == TransactionType.income 
         ? originalTransaction.amount 
         : -originalTransaction.amount;
 
-    // 2. Calculate the impact of the *new* transaction
     final newImpact = _selectedType == TransactionType.income 
         ? enteredAmount 
         : -enteredAmount;
 
-    // 3. Find the difference to apply to the wallet
-    // This handles changes in amount, type (income/expense), and even wallet
     final balanceChange = newImpact - originalImpact;
 
-    // If the wallet itself has changed, we need two updates
     if (_selectedWallet.id != originalTransaction.walletId) {
-        // Revert from old wallet
         walletController.updateBalance(originalTransaction.walletId, -originalImpact);
-        // Apply to new wallet
         walletController.updateBalance(_selectedWallet.id, newImpact);
     } else {
-        // If same wallet, just apply the net change
         walletController.updateBalance(_selectedWallet.id, balanceChange);
     }
 
-    // Create the updated transaction using copyWith
     final updatedTransaction = originalTransaction.copyWith(
       title: _noteController.text.trim(),
       amount: enteredAmount,
@@ -148,11 +122,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       walletId: _selectedWallet.id,
     );
 
-    // Update the transaction in the controller
     transactionController.updateTransaction(updatedTransaction);
 
-    Get.back(); // Go back from detail screen
-    Get.snackbar("Success", "Transaction updated successfully.", snackPosition: SnackPosition.BOTTOM);
+    Get.back();
+    Get.snackbar("Success", "success_update".tr, snackPosition: SnackPosition.BOTTOM);
   }
 
 
@@ -162,12 +135,12 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Transaction Detail', style: AppTextStyles.title),
+        title: Text('transaction_detail'.tr, style: AppTextStyles.title),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete, color: Colors.red),
             onPressed: _confirmDelete,
-            tooltip: 'Delete Transaction',
+            tooltip: 'delete_transaction'.tr,
           ),
         ],
       ),
@@ -198,7 +171,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   borderRadius: BorderRadius.circular(12.0)
                 )
               ),
-              child: Text('Save Changes', style: AppTextStyles.button),
+              child: Text('save_changes'.tr, style: AppTextStyles.button),
             ),
           ],
         ),
@@ -206,7 +179,6 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     );
   }
 
-  // --- Re-used Widgets from AddTransactionScreen ---
 
   Widget _buildTypeToggle() {
     return Center(
@@ -218,8 +190,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildTypeButton('Expense', TransactionType.expense),
-            _buildTypeButton('Income', TransactionType.income),
+            _buildTypeButton('expense'.tr, TransactionType.expense),
+            _buildTypeButton('income'.tr, TransactionType.income),
           ],
         ),
       ),
@@ -249,6 +221,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   }
 
   Widget _buildAmountField() {
+    final AppController appController = Get.find();
     return Row(
       children: [
         const Icon(Icons.attach_money, size: 30, color: Colors.green),
@@ -265,7 +238,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             ),
           ),
         ),
-        Text('\$', style: AppTextStyles.heading1.copyWith(color: Colors.grey)),
+        Text(appController.currencySymbol, style: AppTextStyles.heading1.copyWith(color: Colors.grey)),
       ],
     );
   }
@@ -333,7 +306,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         style: AppTextStyles.body,
         decoration: InputDecoration(
           border: InputBorder.none,
-          hintText: 'Note something...',
+          hintText: 'note_something'.tr,
           hintStyle: AppTextStyles.body.copyWith(color: Colors.grey)
         ),
       ),
@@ -344,7 +317,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Category', style: AppTextStyles.title),
+        Text('category'.tr, style: AppTextStyles.title),
         const SizedBox(height: 10),
         GridView.builder(
           shrinkWrap: true,
@@ -354,9 +327,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
           ),
-          itemCount: _categories.length,
+          itemCount: defaultCategories.length,
           itemBuilder: (context, index) {
-            final category = _categories[index];
+            final category = defaultCategories[index];
             final isSelected = _selectedCategory.name == category.name;
             final categoryColor = Color(category.colorValue);
             return GestureDetector(
@@ -376,7 +349,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   children: [
                     Image.asset(category.iconPath, width: 30, height: 30, color: categoryColor),
                     const SizedBox(height: 5),
-                    Text(category.name, textAlign: TextAlign.center, style: AppTextStyles.caption),
+                    Text(category.name.tr, textAlign: TextAlign.center, style: AppTextStyles.caption),
                   ],
                 ),
               ),

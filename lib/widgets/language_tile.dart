@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/widgets/custom_radio_button.dart';
 
 class LanguageTile extends StatelessWidget {
@@ -45,14 +46,14 @@ class LanguageTile extends StatelessWidget {
               backgroundColor: Colors.grey.shade200,
               child: Text(
                 icon,
-                style: const TextStyle(fontSize: 20),
+                style: AppTextStyles.body,
               ),
             ),
             const SizedBox(width: 16.0),
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                style: AppTextStyles.body,
               ),
             ),
             CustomRadioButton(isSelected: isSelected),

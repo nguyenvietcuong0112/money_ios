@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
 import 'package:get/get.dart';
+import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/screens/personal_loan_result_screen.dart';
 
 class PersonalLoanScreen extends StatefulWidget {
@@ -29,7 +30,7 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
 
     if (loanAmount == null || loanAmount <= 0 || annualRate == null || annualRate < 0 || termInMonths <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter valid loan details.')),
+        SnackBar(content: Text('please_enter_valid_loan_details'.tr)),
       );
       return;
     }
@@ -93,7 +94,7 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
     return Scaffold(
       backgroundColor: _backgroundColor,
       appBar: AppBar(
-        title: const Text('Personal Loan'),
+        title: Text('personal_loan'.tr, style: AppTextStyles.title),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.black87,
@@ -104,13 +105,13 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildInputField(
-              label: 'Loan Amount',
+              label: 'loan_amount'.tr,
               controller: _loanAmountController,
               suffixText: '\$',
             ),
             const SizedBox(height: 16),
             _buildInputField(
-              label: 'Interest Rate',
+              label: 'interest_rate'.tr,
               controller: _interestRateController,
               suffixText: '%',
             ),
@@ -130,7 +131,7 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text(label, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
@@ -155,7 +156,7 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
     return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Loan Term', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text('loan_term'.tr, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(12),
@@ -168,8 +169,8 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
                  Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('$termInMonths months', style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold)),
-                    Text('$termInMonths installments', style: const TextStyle(color: Colors.black54)),
+                    Text('$termInMonths months', style: AppTextStyles.body.copyWith(color: _primaryColor, fontWeight: FontWeight.bold)),
+                    Text('$termInMonths installments', style: AppTextStyles.body.copyWith(color: Colors.black54)),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -211,8 +212,8 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
                  Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                     Text('${_loanTermInYears.floor()} years', style: const TextStyle(color: Colors.black54)),
-                     const Text('30 years', style: TextStyle(color: Colors.black54)),
+                     Text('${_loanTermInYears.floor()} years', style: AppTextStyles.body.copyWith(color: Colors.black54)),
+                     Text('30 years', style: AppTextStyles.body.copyWith(color: Colors.black54)),
                   ],
                 )
               ],
@@ -226,7 +227,7 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Start Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text('start_date'.tr, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         GestureDetector(
           onTap: _selectStartDate,
@@ -241,7 +242,7 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
               children: [
                 Text(
                   DateFormat.yMMMd().format(_startDate),
-                  style: const TextStyle(fontSize: 16),
+                  style: AppTextStyles.body,
                 ),
                 Icon(Icons.calendar_today, color: _primaryColor),
               ],
@@ -266,7 +267,7 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
                 borderRadius: BorderRadius.circular(30.0),
               ),
             ),
-            child: const Text('Calculate', style: TextStyle(fontSize: 18, color: Colors.white)),
+            child: Text('calculate'.tr, style: AppTextStyles.button),
           ),
         ),
         const SizedBox(height: 12),
@@ -281,7 +282,7 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
                 borderRadius: BorderRadius.circular(30.0),
               ),
             ),
-            child: Text('Reset Fields', style: TextStyle(fontSize: 18, color: _primaryColor)),
+            child: Text('reset_fields'.tr, style: AppTextStyles.button.copyWith(color: _primaryColor)),
           ),
         ),
       ],

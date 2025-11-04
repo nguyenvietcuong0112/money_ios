@@ -7,6 +7,7 @@ import 'package:money_manager/models/wallet_model.dart';
 import 'package:get/get.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
+import 'package:money_manager/models/category_data.dart';
 
 import '../controllers/app_controller.dart';
 
@@ -24,22 +25,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   TransactionType _selectedType = TransactionType.expense;
   Category? _selectedCategory;
   Wallet? _selectedWallet;
-
-  // Dùng tên tiếng Anh làm key để dịch
-  final List<Category> _categories = [
-    Category(name: 'Food & Drink', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.orange.value),
-    Category(name: 'Household', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.blue.value),
-    Category(name: 'Shopping', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.purple.value),
-    Category(name: 'House', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.green.value),
-    Category(name: 'Travel', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.indigo.value),
-    Category(name: 'Sport', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.red.value),
-    Category(name: 'Cosmetics', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.pink.value),
-    Category(name: 'Water Bill', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.lightBlue.value),
-    Category(name: 'Electric Bill', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.yellow.value),
-    Category(name: 'Phone', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.grey.value),
-    Category(name: 'Education', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.brown.value),
-    Category(name: 'Medical', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.redAccent.value),
-  ];
 
   void _submitData() {
     final double enteredAmount = double.tryParse(_amountController.text) ?? 0.0;
@@ -65,7 +50,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       amount: enteredAmount,
       date: _selectedDate,
       type: _selectedType,
-      categoryName: _selectedCategory!.name, // Lưu key (tên tiếng Anh)
+      categoryName: _selectedCategory!.name,
       iconPath: _selectedCategory!.iconPath,
       colorValue: _selectedCategory!.colorValue,
       walletId: _selectedWallet!.id,
@@ -275,9 +260,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
           ),
-          itemCount: _categories.length,
+          itemCount: defaultCategories.length,
           itemBuilder: (context, index) {
-            final category = _categories[index];
+            final category = defaultCategories[index];
             final isSelected = _selectedCategory?.name == category.name;
             final categoryColor = Color(category.colorValue);
             return GestureDetector(
@@ -297,7 +282,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   children: [
                     Image.asset(category.iconPath, width: 30, height: 30, color: categoryColor),
                     const SizedBox(height: 5),
-                    Text(category.name.tr, textAlign: TextAlign.center, style: AppTextStyles.caption), // Dịch tên danh mục
+                    Text(category.name.tr, textAlign: TextAlign.center, style: AppTextStyles.caption),
                   ],
                 ),
               ),

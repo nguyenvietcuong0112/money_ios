@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
+import 'package:money_manager/common/text_styles.dart';
 
 class PersonalLoanResultScreen extends StatelessWidget {
   final double loanAmount;
@@ -27,7 +28,7 @@ class PersonalLoanResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(locale: 'en_GB', symbol: '£');
+    final currencyFormat = NumberFormat.currency(locale: 'en_GB', symbol: '\$');
     final numberFormat = NumberFormat("#,##0.00", "en_US");
     final dateFormat = DateFormat.yMMMd();
 
@@ -39,7 +40,7 @@ class PersonalLoanResultScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F8F7),
       appBar: AppBar(
-        title: const Text('Personal Loan'),
+        title: Text('personal_loan'.tr, style: AppTextStyles.title),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.black87,
@@ -49,31 +50,31 @@ class PersonalLoanResultScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Loan Information',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              'loan_information'.tr,
+              style: AppTextStyles.title.copyWith(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             _buildInfoCard(
               children: [
-                _buildInfoRow('Loan Amount', '${numberFormat.format(loanAmount)} \$'),
-                _buildInfoRow('Interest Rate', '${interestRate.toStringAsFixed(1)} %'),
-                _buildInfoRow('Loan Term', loanTermFormatted),
-                _buildInfoRow('Start Date', dateFormat.format(startDate)),
+                _buildInfoRow('loan_amount'.tr, '${numberFormat.format(loanAmount)} \$'),
+                _buildInfoRow('interest_rate'.tr, '${interestRate.toStringAsFixed(1)} %'),
+                _buildInfoRow('loan_term'.tr, loanTermFormatted),
+                _buildInfoRow('start_date'.tr, dateFormat.format(startDate)),
               ],
             ),
             const SizedBox(height: 32),
-            const Text(
-              'Result Calculator',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              'result_calculator'.tr,
+              style: AppTextStyles.title.copyWith(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             _buildInfoCard(
               children: [
-                _buildInfoRow('Monthly Payment', currencyFormat.format(monthlyPayment), isHighlighted: true),
-                _buildInfoRow('Total Interest', currencyFormat.format(totalInterest)),
-                _buildInfoRow('Total cost (Loan + Interest)', currencyFormat.format(totalPayment)),
-                _buildInfoRow('Pay-off Date', dateFormat.format(payOffDate)),
+                _buildInfoRow('monthly_payment'.tr, currencyFormat.format(monthlyPayment), isHighlighted: true),
+                _buildInfoRow('total_interest'.tr, currencyFormat.format(totalInterest)),
+                _buildInfoRow('total_cost_loan_interest'.tr, currencyFormat.format(totalPayment)),
+                _buildInfoRow('pay_off_date'.tr, dateFormat.format(payOffDate)),
               ],
             ),
             const Spacer(),
@@ -90,7 +91,7 @@ class PersonalLoanResultScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(30.0),
                   ),
                 ),
-                child: const Text('Back to Home', style: TextStyle(fontSize: 18, color: Color(0xFF4CAF50))),
+                child: Text('back_to_home'.tr, style: AppTextStyles.button.copyWith(color: const Color(0xFF4CAF50))),
               ),
             ),
              const SizedBox(height: 20),
@@ -125,11 +126,10 @@ class PersonalLoanResultScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: const TextStyle(fontSize: 16, color: Colors.black54)),
+          Text(title, style: AppTextStyles.body.copyWith(color: Colors.black54)),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 16,
+            style: AppTextStyles.body.copyWith(
               fontWeight: FontWeight.bold,
               color: isHighlighted ? const Color(0xFF4CAF50) : Colors.black87,
             ),

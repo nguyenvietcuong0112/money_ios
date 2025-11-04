@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:money_manager/common/text_styles.dart';
 
 class CustomToggleButton extends StatelessWidget {
   final bool isMonthSelected;
@@ -42,10 +44,9 @@ class CustomToggleButton extends StatelessWidget {
                   onTap: onMonthSelected,
                   child: Center(
                     child: Text(
-                      'Month',
-                      style: TextStyle(
+                      'month'.tr,
+                      style: AppTextStyles.button.copyWith(
                         color: isMonthSelected ? Colors.white : Colors.black,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -56,10 +57,9 @@ class CustomToggleButton extends StatelessWidget {
                   onTap: onYearSelected,
                   child: Center(
                     child: Text(
-                      'Year',
-                      style: TextStyle(
+                      'year'.tr,
+                      style: AppTextStyles.button.copyWith(
                         color: !isMonthSelected ? Colors.white : Colors.black,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),

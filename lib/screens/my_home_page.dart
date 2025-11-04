@@ -53,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: const Icon(Icons.home),
-            label: 'home'.tr, // Sử dụng GetX để dịch
+            label: 'home'.tr,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.edit_calendar_outlined),

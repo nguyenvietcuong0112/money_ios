@@ -15,7 +15,7 @@ class MoreScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF6F8F7),
       appBar: AppBar(
         title: Text(
-          'More Tools',
+          'more'.tr,
           style: AppTextStyles.title.copyWith(color: Colors.black),
         ),
         backgroundColor: Colors.transparent,
@@ -27,7 +27,7 @@ class MoreScreen extends StatelessWidget {
               // Navigate to the original settings screen
               Get.to(() => const SettingsScreen());
             },
-            tooltip: 'Settings',
+            tooltip: 'settings'.tr,
           ),
         ],
       ),
@@ -37,8 +37,8 @@ class MoreScreen extends StatelessWidget {
           children: [
             _buildToolCard(
               context,
-              title: 'Exchange Rate',
-              subtitle: 'Fast currency conversion calculator',
+              title: 'exchange_rate'.tr,
+              subtitle: 'fast_currency_conversion_calculator'.tr,
               iconData: Icons.currency_exchange,
               color: Colors.orange,
               onTap: () {
@@ -48,8 +48,8 @@ class MoreScreen extends StatelessWidget {
             const SizedBox(height: 16),
             _buildToolCard(
               context,
-              title: 'Personal Loan',
-              subtitle: 'Quick personal interest calculation',
+              title: 'personal_loan'.tr,
+              subtitle: 'quick_personal_interest_calculation'.tr,
               iconData: Icons.real_estate_agent,
               color: Colors.pink,
               onTap: () {

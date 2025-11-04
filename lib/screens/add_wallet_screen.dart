@@ -52,19 +52,19 @@ class _AddWalletScreenState extends State<AddWalletScreen> {
                 controller: _nameController,
                 style: AppTextStyles.body,
                 decoration: InputDecoration(
-                  labelText: 'Wallet Name',
+                  labelText: 'wallet_name'.tr,
                   labelStyle: AppTextStyles.body,
                   border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a wallet name';
+                    return 'please_enter_wallet_name'.tr;
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 24.0),
-              Text('Icon', style: AppTextStyles.title),
+              Text('icon'.tr, style: AppTextStyles.title),
               const SizedBox(height: 16.0),
               Expanded(
                 child: GridView.builder(

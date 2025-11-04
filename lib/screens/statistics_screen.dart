@@ -6,6 +6,7 @@ import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
+import 'package:money_manager/models/category_data.dart';
 import 'package:money_manager/models/category_model.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/models/wallet_model.dart';
@@ -27,20 +28,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Wallet? _selectedWallet;
   int _selectedChartTabIndex = 0; // 0 for Expense, 1 for Income
 
-  final List<Category> _categories = [
-    Category(name: 'Food & Drink', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.orange.value),
-    Category(name: 'Household', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.blue.value),
-    Category(name: 'Shopping', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.purple.value),
-    Category(name: 'House', iconPath: 'assets/icons/ic_food.png', colorValue: Colors.green.value),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7F7),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('report'.tr, style: AppTextStyles.title), // Dịch
+        title: Text('report'.tr, style: AppTextStyles.title),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -114,7 +108,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     child: Icon(Icons.account_balance_wallet, size: 20, color: Colors.black),
                   ),
                   const SizedBox(width: 8),
-                  Text('total'.tr, style: AppTextStyles.body), // Dịch
+                  Text('total'.tr, style: AppTextStyles.body),
                 ],
               ),
               items: walletItems.map((wallet) {
@@ -129,7 +123,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                             : Image.asset(wallet.iconPath, width: 24, height: 24),
                       ),
                       const SizedBox(width: 8),
-                      Text(wallet?.name ?? 'total'.tr, style: AppTextStyles.body), // Dịch
+                      Text(wallet?.name ?? 'total'.tr, style: AppTextStyles.body),
                     ],
                   ),
                 );
@@ -157,8 +151,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr, style: AppTextStyles.button.copyWith(color: Colors.red))), // Dịch
-                    TextButton(onPressed: () => Get.back(), child: Text('done'.tr, style: AppTextStyles.button.copyWith(color: Colors.green))), // Dịch
+                    TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr, style: AppTextStyles.button.copyWith(color: Colors.red))),
+                    TextButton(onPressed: () => Get.back(), child: Text('done'.tr, style: AppTextStyles.button.copyWith(color: Colors.green))),
                   ],
                 ),
               ),
@@ -194,7 +188,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr, style: AppTextStyles.button.copyWith(color: Colors.red))), // Dịch
+                    TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr, style: AppTextStyles.button.copyWith(color: Colors.red))),
                     TextButton(
                       onPressed: () {
                         setState(() {
@@ -202,7 +196,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         });
                         Get.back();
                       },
-                      child: Text('ok'.tr, style: AppTextStyles.button.copyWith(color: Colors.green)), // Dịch
+                      child: Text('ok'.tr, style: AppTextStyles.button.copyWith(color: Colors.green)),
                     ),
                   ],
                 ),
@@ -253,10 +247,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       ),
       child: Column(
         children: [
-          _buildSummaryRow('expense'.tr, totalExpense, Colors.red), // Dịch
-          _buildSummaryRow('income'.tr, totalIncome, Colors.green), // Dịch
+          _buildSummaryRow('expense'.tr, totalExpense, Colors.red),
+          _buildSummaryRow('income'.tr, totalIncome, Colors.green),
           const Divider(),
-          _buildSummaryRow('total'.tr, total, Colors.black, isTotal: true), // Dịch
+          _buildSummaryRow('total'.tr, total, Colors.black, isTotal: true),
         ],
       ),
     );
@@ -268,7 +262,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     if (isTotal) {
       displayText = '${amount.toStringAsFixed(2)} ${appController.currencySymbol}';
     } else {
-      final sign = title == 'income'.tr ? '+' : '-'; // Dịch
+      final sign = title == 'income'.tr ? '+' : '-';
       displayText = '$sign${amount.toStringAsFixed(2)} ${appController.currencySymbol}';
     }
 
@@ -295,8 +289,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       ),
       child: Row(
         children: [
-          _buildTabItem(0, "total_expense".tr), // Dịch
-          _buildTabItem(1, "total_income".tr), // Dịch
+          _buildTabItem(0, "total_expense".tr),
+          _buildTabItem(1, "total_income".tr),
         ],
       ),
     );
@@ -343,9 +337,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
 
     final List<PieChartSectionData> sections = categoryValue.entries.map((entry) {
-      final category = _categories.firstWhere(
+      final category = defaultCategories.firstWhere(
         (cat) => cat.name == entry.key,
-        orElse: () => Category(name: 'other'.tr, iconPath: '', colorValue: Colors.grey.value), // Dịch
+        orElse: () => Category(name: 'other'.tr, iconPath: '', colorValue: Colors.grey.value),
       );
       final percentage = totalValue > 0 ? (entry.value / totalValue) * 100 : 0.0;
 
@@ -370,7 +364,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 alignment: Alignment.center,
                 children: [
                   Text(
-                    '${('total'.tr)}\n${totalValue.toStringAsFixed(2)} ${appController.currencySymbol}', // Dịch
+                    '${('total'.tr)}\n${totalValue.toStringAsFixed(2)} ${appController.currencySymbol}',
                     textAlign: TextAlign.center,
                     style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
                   ),
@@ -392,11 +386,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               itemCount: categoryValue.length,
               itemBuilder: (context, index) {
                 final entry = categoryValue.entries.elementAt(index);
-                final category = _categories.firstWhere(
+                final category = defaultCategories.firstWhere(
                   (cat) => cat.name == entry.key,
-                  orElse: () => Category(name: 'other'.tr, iconPath: '', colorValue: Colors.grey.value), // Dịch
+                  orElse: () => Category(name: 'other'.tr, iconPath: '', colorValue: Colors.grey.value),
                 );
-                return _buildLegendItem(Color(category.colorValue), entry.key, entry.value);
+                return _buildLegendItem(Color(category.colorValue), entry.key.tr, entry.value);
               },
             ),
           ),

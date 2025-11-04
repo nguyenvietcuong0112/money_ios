@@ -408,7 +408,7 @@ class _RecordScreenState extends State<RecordScreen> {
           backgroundColor: Color(transaction.colorValue).withAlpha(25),
           child: Image.asset(transaction.iconPath, width: 22, height: 22),
         ),
-        title: Text(transaction.categoryName, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
+        title: Text(transaction.categoryName.tr, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
         subtitle: transaction.title.isNotEmpty ? Text(transaction.title, style: AppTextStyles.caption) : null,
         trailing: Row(
           mainAxisSize: MainAxisSize.min,

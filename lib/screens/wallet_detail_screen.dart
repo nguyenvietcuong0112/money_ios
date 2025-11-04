@@ -30,7 +30,7 @@ class WalletDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Current Balance',
+              'current_balance'.tr,
               style: AppTextStyles.subtitle,
             ),
             const SizedBox(height: 4),
@@ -48,7 +48,7 @@ class WalletDetailScreen extends StatelessWidget {
             }),
             const SizedBox(height: 24.0),
             Text(
-              'Transactions',
+              'transactions'.tr,
               style: AppTextStyles.title,
             ),
             const SizedBox(height: 16.0),
@@ -60,7 +60,7 @@ class WalletDetailScreen extends StatelessWidget {
 
                 if (walletTransactions.isEmpty) {
                   return Center(
-                      child: Text('No transactions for this wallet yet.',
+                      child: Text('no_transactions_for_wallet'.tr,
                           style: AppTextStyles.body));
                 }
 

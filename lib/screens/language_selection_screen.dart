@@ -26,12 +26,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
   final Map<String, Map<String, String>> _languages = {
     'en': {'name': 'English', 'icon': '🇬🇧'},
     'vi': {'name': 'Tiếng Việt', 'icon': '🇻🇳'},
-    'fr': {'name': 'Français', 'icon': '🇫🇷'},
     'zh_CN': {'name': '中文 (简体)', 'icon': '🇨🇳'},
-    'zh_TW': {'name': '中文 (繁體)', 'icon': '🇨🇳'},
     'hi': {'name': 'हिन्दी', 'icon': '🇮🇳'},
     'es': {'name': 'Español', 'icon': '🇪🇸'},
-    'pt_BR': {'name': 'Português (Brasil)', 'icon': '🇧🇷'},
   };
 
   AnimationController? _animationController;
