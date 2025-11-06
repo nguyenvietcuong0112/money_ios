@@ -57,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.edit_calendar_outlined),
-            label: 'transactions'.tr,
+            label: 'record'.tr,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.account_balance_wallet),
@@ -65,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.bar_chart),
-            label: 'statistics'.tr,
+            label: 'report'.tr,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.more_horiz),

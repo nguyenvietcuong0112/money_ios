@@ -32,9 +32,9 @@ class _ExchangeRateScreenState extends State<ExchangeRateScreen> {
   void initState() {
     super.initState();
     // Set default currencies from the package
-    _fromCurrency = CurrencyService().findByCode('GBP')!;
+    _fromCurrency = CurrencyService().findByCode('USD')!;
     _toCurrency = CurrencyService().findByCode('USD')!;
-    _amountController.text = '1';
+    _amountController.text = '0';
     _fetchRates();
   }
 
@@ -89,9 +89,9 @@ class _ExchangeRateScreenState extends State<ExchangeRateScreen> {
 
   void _resetFields() {
     setState(() {
-      _fromCurrency = CurrencyService().findByCode('GBP')!;
+      _fromCurrency = CurrencyService().findByCode('USD')!;
       _toCurrency = CurrencyService().findByCode('USD')!;
-      _amountController.text = '1';
+      _amountController.text = '0';
       _fetchRates();
     });
   }
