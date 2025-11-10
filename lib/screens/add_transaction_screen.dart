@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/models/category_model.dart';
@@ -8,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/models/category_data.dart';
+import 'package:money_manager/widgets/transaction_type_toggle.dart';
 
 import '../controllers/app_controller.dart';
 
@@ -26,19 +28,36 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Category? _selectedCategory;
   Wallet? _selectedWallet;
 
+  @override
+  void initState() {
+    super.initState();
+    final walletController = Get.find<WalletController>();
+    if (walletController.wallets.isNotEmpty) {
+      _selectedWallet = walletController.wallets.first;
+    }
+    // Set a default category for expense
+    if (_selectedType == TransactionType.expense) {
+      _selectedCategory = defaultCategories.first;
+    }
+  }
+
   void _submitData() {
-    final double enteredAmount = double.tryParse(_amountController.text) ?? 0.0;
+    final String amountText = _amountController.text.replaceAll(r'$', '');
+    final double enteredAmount = double.tryParse(amountText) ?? 0.0;
 
     if (enteredAmount <= 0) {
-      Get.snackbar('invalid_input'.tr, 'amount_must_be_positive'.tr, snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Invalid Input', 'Amount must be positive',
+          snackPosition: SnackPosition.BOTTOM);
       return;
     }
     if (_selectedCategory == null) {
-      Get.snackbar('invalid_input'.tr, 'please_select_category'.tr, snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Invalid Input', 'Please select a category',
+          snackPosition: SnackPosition.BOTTOM);
       return;
     }
     if (_selectedWallet == null) {
-      Get.snackbar('invalid_input'.tr, 'please_select_wallet'.tr, snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Invalid Input', 'Please select a wallet',
+          snackPosition: SnackPosition.BOTTOM);
       return;
     }
 
@@ -66,42 +85,62 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final walletController = Get.find<WalletController>();
-
-    if (_selectedWallet == null && walletController.wallets.isNotEmpty) {
-      _selectedWallet = walletController.wallets.first;
-    }
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('add_transaction'.tr, style: AppTextStyles.title),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.close, color: Colors.black),
+          onPressed: () => Get.back(),
+        ),
+        title: Text('add_transaction'.tr,
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildTypeToggle(),
-            const SizedBox(height: 20),
+            TransactionTypeToggle(
+              onChanged: (type) {
+                setState(() {
+                  _selectedType = type;
+                  // Reset category and set default for the new type
+                  if (type == TransactionType.expense) {
+                    _selectedCategory = defaultCategories.first;
+                  } else {
+                    _selectedCategory = defaultIncomeCategories.first;
+                  }
+                });
+              },
+            ),
+            const SizedBox(height: 24),
+            _buildSectionTitle('Amount'),
             _buildAmountField(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
+             _buildSectionTitle('Day Trading'),
             _buildDateField(),
-            const Divider(),
-            _buildWalletField(walletController.wallets),
-            const Divider(),
+            const SizedBox(height: 24),
+            _buildSectionTitle('Wallet'),
+            _buildWalletField(),
+            const SizedBox(height: 24),
+            _buildSectionTitle('Note'),
             _buildNoteField(),
-            const Divider(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
+            _buildSectionTitle('Category'),
+            const SizedBox(height: 10),
             _buildCategoryGrid(),
             const SizedBox(height: 40),
             ElevatedButton(
               onPressed: _submitData,
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-                backgroundColor: Colors.green,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                minimumSize: const Size(double.infinity, 56),
+                backgroundColor: const Color(0xFF4A80F0),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0)),
               ),
-              child: Text('add_transaction'.tr, style: AppTextStyles.button),
+              child:
+                  Text('SAVE', style: AppTextStyles.button.copyWith(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
             ),
           ],
         ),
@@ -109,75 +148,61 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
-  Widget _buildTypeToggle() {
-    return Center(
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(25.0),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildTypeButton('expense'.tr, TransactionType.expense),
-            _buildTypeButton('income'.tr, TransactionType.income),
-          ],
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
+          color: Colors.grey[700],
         ),
       ),
     );
   }
 
-  Widget _buildTypeButton(String title, TransactionType type) {
-    final isSelected = _selectedType == type;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedType = type;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? (type == TransactionType.expense ? Colors.red : Colors.green) : Colors.transparent,
-          borderRadius: BorderRadius.circular(25.0),
-        ),
-        child: Text(
-          title,
-          style: AppTextStyles.body.copyWith(color: isSelected ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-
-    Widget _buildAmountField() {
+  Widget _buildAmountField() {
     final AppController appController = Get.find();
-    return Row(
-      children: [
-        const Icon(Icons.attach_money, size: 30, color: Colors.green),
-        const SizedBox(width: 10),
-        Expanded(
-          child: TextField(
-            controller: _amountController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: AppTextStyles.heading1,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: '0',
-              hintStyle: AppTextStyles.heading1.copyWith(color: Colors.grey)
-            ),
-          ),
+    return TextField(
+      controller: _amountController,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+      decoration: InputDecoration(
+        prefixText: appController.currencySymbol,
+        prefixStyle: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        hintText: '0',
+        hintStyle: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[400]),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
         ),
-        Text(appController.currencySymbol, style: AppTextStyles.heading1.copyWith(color: Colors.grey)),
-      ],
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide(color: const Color(0xFF4A80F0), width: 2),
+        ),
+      ),
+      onChanged: (value) {
+        // Simple currency formatting
+        String newText = '\$${value.replaceAll(r'$', '')}';
+        if (_amountController.text != newText) {
+          _amountController.value = TextEditingValue(
+            text: newText,
+            selection: TextSelection.fromPosition(TextPosition(offset: newText.length)),
+          );
+        }
+      },
     );
   }
 
   Widget _buildDateField() {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.calendar_today, color: Colors.grey),
-      title: Text(DateFormat.yMMMd().format(_selectedDate), style: AppTextStyles.body),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+    return InkWell(
       onTap: () async {
         final DateTime? picked = await showDatePicker(
           context: context,
@@ -191,29 +216,42 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           });
         }
       },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(DateFormat('EEEE, MMMM d, y').format(_selectedDate),
+                style: const TextStyle(fontSize: 16)),
+            const Icon(Icons.calendar_today_outlined, color: Color(0xFF4A80F0)),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildWalletField(List<Wallet> wallets) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.account_balance_wallet, color: Colors.grey),
-      title: Text(_selectedWallet?.name ?? 'choose_wallet'.tr, style: AppTextStyles.body),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+  Widget _buildWalletField() {
+    final walletController = Get.find<WalletController>();
+    return InkWell(
       onTap: () {
-        if (wallets.isEmpty) {
-            Get.snackbar('no_wallets'.tr, 'please_add_wallet_first'.tr, snackPosition: SnackPosition.BOTTOM);
-            return;
+        if (walletController.wallets.isEmpty) {
+          Get.snackbar('No Wallets', 'Please add a wallet first.',
+              snackPosition: SnackPosition.BOTTOM);
+          return;
         }
         showModalBottomSheet(
           context: context,
           builder: (context) {
             return ListView.builder(
-              itemCount: wallets.length,
+              itemCount: walletController.wallets.length,
               itemBuilder: (context, index) {
-                final wallet = wallets[index];
+                final wallet = walletController.wallets[index];
                 return ListTile(
-                  leading: Image.asset(wallet.iconPath, width: 24, height: 24),
+                  leading: Image.asset(wallet.iconPath, width: 30, height: 30),
                   title: Text(wallet.name, style: AppTextStyles.body),
                   onTap: () {
                     setState(() {
@@ -227,69 +265,117 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           },
         );
       },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: Row(
+          children: [
+            if (_selectedWallet != null)
+              Image.asset(_selectedWallet!.iconPath, width: 30, height: 30),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                _selectedWallet?.name ?? 'Choose Wallet',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ),
+             const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey)
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildNoteField() {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.note, color: Colors.grey),
-      title: TextField(
-        controller: _noteController,
-        style: AppTextStyles.body,
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          hintText: 'note_something'.tr,
-          hintStyle: AppTextStyles.body.copyWith(color: Colors.grey)
+    return TextField(
+      controller: _noteController,
+      style: AppTextStyles.body,
+      decoration: InputDecoration(
+        hintText: 'Enter transaction description',
+        hintStyle: AppTextStyles.body.copyWith(color: Colors.grey),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: const BorderSide(color: Color(0xFF4A80F0), width: 2),
         ),
       ),
     );
   }
 
   Widget _buildCategoryGrid() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('category'.tr, style: AppTextStyles.title),
-        const SizedBox(height: 10),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-          ),
-          itemCount: defaultCategories.length,
-          itemBuilder: (context, index) {
-            final category = defaultCategories[index];
-            final isSelected = _selectedCategory?.name == category.name;
-            final categoryColor = Color(category.colorValue);
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedCategory = category;
-                });
-              },
-              child: Container(
+    final categories = _selectedType == TransactionType.expense
+        ? defaultCategories
+        : defaultIncomeCategories;
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        crossAxisSpacing: 15,
+        mainAxisSpacing: 15,
+        childAspectRatio: 0.8,
+      ),
+      itemCount: categories.length,
+      itemBuilder: (context, index) {
+        final category = categories[index];
+        final isSelected = _selectedCategory?.name == category.name;
+        
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              _selectedCategory = category;
+            });
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isSelected ? categoryColor.withAlpha(77) : Colors.grey[200],
-                  borderRadius: BorderRadius.circular(10.0),
-                  border: isSelected ? Border.all(color: categoryColor, width: 2) : null,
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  border: Border.all(
+                    color: isSelected ? const Color(0xFF4A80F0) : Colors.grey[300]!,
+                    width: isSelected ? 3 : 1,
+                  ),
+                   boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(category.iconPath, width: 30, height: 30, color: categoryColor),
-                    const SizedBox(height: 5),
-                    Text(category.name.tr, textAlign: TextAlign.center, style: AppTextStyles.caption),
-                  ],
+                child: SvgPicture.asset(
+                  category.iconPath,
+                  width: 32, 
+                  height: 32,
+                  // The color of the SVG can be controlled via its properties or a ColorFilter
+                  // color: isSelected ? Colors.white : Color(category.colorValue),
                 ),
               ),
-            );
-          },
-        ),
-      ],
+              const SizedBox(height: 8),
+              Text(
+                category.name.tr,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

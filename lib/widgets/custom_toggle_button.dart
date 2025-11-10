@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:money_manager/common/text_styles.dart';
+import 'package:money_manager/models/transaction_model.dart';
 
 class CustomToggleButton extends StatelessWidget {
   final bool isMonthSelected;

@@ -17,7 +17,7 @@ dependencies:
   provider: ^6.1.1
   shared_preferences: ^2.2.2
   fl_chart: ^1.1.1
-  flutter_svg: ^2.0.9
+  flutter_svg: ^2.2.2
   lottie: ^3.1.2
   intl: ^0.20.2
   currency_picker: ^2.0.21
