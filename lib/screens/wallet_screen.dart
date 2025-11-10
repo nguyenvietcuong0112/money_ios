@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
@@ -48,7 +49,7 @@ class WalletScreen extends StatelessWidget {
                           backgroundColor: Colors.grey.shade100,
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Image.asset(wallet.iconPath),
+                            child: SvgPicture.asset(wallet.iconPath),
                           ),
                         ),
                         title: Text(wallet.name, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),

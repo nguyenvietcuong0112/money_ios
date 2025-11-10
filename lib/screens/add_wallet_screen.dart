@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
@@ -13,23 +14,26 @@ class AddWalletScreen extends StatefulWidget {
 class _AddWalletScreenState extends State<AddWalletScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  String _selectedIconPath = 'assets/icons/ic_food.png';
+  String _selectedIconPath = 'assets/icons/ic_saving.svg';
 
-  // This list should be populated with your actual icon assets
   final List<String> _iconPaths = [
-    'assets/icons/ic_food.png',
-    // Add more icon paths here as you add them to your assets
+    'assets/icons/ic_saving.svg',
+    'assets/icons/ic_cash.svg',
+    'assets/icons/ic_bank.svg',
+    'assets/icons/ic_credit.svg',
+    'assets/icons/ic_insurance.svg',
+    'assets/icons/ic_investment.svg',
+    'assets/icons/ic_loan.svg',
   ];
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text('add_wallet'.tr, style: AppTextStyles.title),
         actions: [
           IconButton(
-            icon: const Icon(Icons.save),
+            icon: const Icon(Icons.check),
             onPressed: () {
               if (_formKey.currentState!.validate()) {
                 final name = _nameController.text;
@@ -69,9 +73,9 @@ class _AddWalletScreenState extends State<AddWalletScreen> {
               Expanded(
                 child: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 5,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
+                    crossAxisCount: 4,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
                   ),
                   itemCount: _iconPaths.length,
                   itemBuilder: (context, index) {
@@ -85,8 +89,8 @@ class _AddWalletScreenState extends State<AddWalletScreen> {
                       child: Container(
                         decoration: BoxDecoration(
                           color: _selectedIconPath == iconPath
-                              ? Colors.green.withAlpha(70)
-                              : Colors.grey.withAlpha(30),
+                              ? Colors.green.withOpacity(0.1)
+                              : Colors.grey.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8.0),
                           border: Border.all(
                             color: _selectedIconPath == iconPath
@@ -97,7 +101,7 @@ class _AddWalletScreenState extends State<AddWalletScreen> {
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(12.0),
-                          child: Image.asset(iconPath),
+                          child: SvgPicture.asset(iconPath, color: _selectedIconPath == iconPath ? Colors.green : Colors.black),
                         ),
                       ),
                     );
