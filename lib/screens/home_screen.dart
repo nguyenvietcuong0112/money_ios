@@ -25,19 +25,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _isBalanceVisible = true;
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -216,58 +203,66 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           child: Column(
             children: [
-              TabBar(
-                controller: _tabController,
-                indicator: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.green.withOpacity(0.1),
-                ),
-                labelColor: Colors.green,
-                unselectedLabelColor: Colors.grey[600],
-                labelStyle: AppTextStyles.body,
-                tabs: [
-                  Tab(text: 'total_expense'.tr),
-                  Tab(text: 'total_income'.tr),
+             Obx(() {
+                final transactionController = Get.find<TransactionController>();
+                  final now = DateTime.now();
+                  final monthTransactions = transactionController.transactions.where((tx) => tx.date.year == now.year && tx.date.month == now.month).toList();
+
+                  final data = _prepareChartData(monthTransactions);
+                  final totalExpense = data.$3;
+                  final totalIncome = data.$4;
+              return Row(
+                children: [
+                  Expanded(child: _buildReportCard('total_expense'.tr, totalExpense, false)),
+                  Expanded(child: _buildReportCard('total_income'.tr, totalIncome, true)),
                 ],
-                onTap: (index) {
-                  setState(() {}); // Rebuild to update chart
-                },
-              ),
+              );
+             }),
               const SizedBox(height: 20),
               SizedBox(
                 height: 200,
                 child: Obx(() {
                   final transactionController = Get.find<TransactionController>();
-                  final appController = Get.find<AppController>();
                   final now = DateTime.now();
                   final monthTransactions = transactionController.transactions.where((tx) => tx.date.year == now.year && tx.date.month == now.month).toList();
 
                   final data = _prepareChartData(monthTransactions);
+                  final chartData = data.$1; // Show expense data by default
 
-                  final chartData = _tabController.index == 0 ? data.$1 : data.$2;
-                  final totalAmount = _tabController.index == 0 ? data.$3 : data.$4;
-
-                  return Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          '${_tabController.index == 0 ? '-' : '+'}${appController.currencySymbol}${totalAmount.toStringAsFixed(2)}',
-                          style: AppTextStyles.totalAmount.copyWith(
-                            color: _tabController.index == 0 ? AppTextStyles.expenseAmount.color : AppTextStyles.incomeAmount.color,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Expanded(child: _buildLineChart(chartData, _tabController.index == 0 ? Colors.red : Colors.green)),
-                    ],
-                  );
+                  return _buildLineChart(chartData, Colors.red); // Chart for expense
                 }),
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+   Widget _buildReportCard(String title, double amount, bool isIncome) {
+    final AppController appController = Get.find();
+    return Container(
+       padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isIncome ? const Color(0xFF50B432) : Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          SvgPicture.asset(isIncome ? 'assets/icons/ic_income.svg' : 'assets/icons/ic_expense.svg', width: 24, height: 24, color: isIncome? Colors.white : Colors.black87),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: AppTextStyles.caption.copyWith(color: isIncome ? Colors.white : Colors.black87)),
+              Text(
+                '${appController.currencySymbol}${amount.toStringAsFixed(0)}',
+                 style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold, color: isIncome ? Colors.white : Colors.black),
+              )
+            ],
+          )
+        ],
+      ),
     );
   }
 
@@ -301,12 +296,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
 
     final double maxAmount = spots.map((spot) => spot.y).fold(0.0, (max, current) => max > current ? max : current);
+    final double maxY = maxAmount > 0 ? (maxAmount * 1.4).round().toDouble() : 100;
+
 
     return LineChart(
       LineChartData(
         gridData: const FlGridData(show: false),
         titlesData: FlTitlesData(
-          leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: AxisTitles(
+             sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (double value, TitleMeta meta) {
+                if (value == 0 || value >= maxY) return const Text(''); 
+                return Text('${(value / 1000).round()}k', style: AppTextStyles.caption);
+              },
+              reservedSize: 28,
+              interval: maxY / 5, 
+            ),
+          ),
           topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           bottomTitles: AxisTitles(
@@ -335,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         minX: 1,
         maxX: DateTime.now().day.toDouble(),
         minY: 0,
-        maxY: maxAmount * 1.2,
+        maxY: maxY, 
         lineBarsData: [
           LineChartBarData(
             spots: spots,
@@ -400,7 +407,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         leading: CircleAvatar(
           radius: 25,
           backgroundColor: Color(transaction.colorValue).withAlpha(25),
-          child: Image.asset(transaction.iconPath, width: 28, height: 28, color: Color(transaction.colorValue)),
+          child: SvgPicture.asset(transaction.iconPath, width: 28, height: 28),
         ),
         title: Text(transaction.categoryName.tr, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)), // Dịch
         subtitle: Text(transaction.title.isNotEmpty ? transaction.title : DateFormat('d MMMM yyyy').format(transaction.date), style: AppTextStyles.caption),
