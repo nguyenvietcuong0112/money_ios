@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:money_manager/common/text_styles.dart';
@@ -169,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           CircleAvatar(
             radius: 20,
             backgroundColor: _getWalletColor(wallet.name).withOpacity(0.1),
-            child: Image.asset(wallet.iconPath, width: 24, height: 24),
+            child: SvgPicture.asset(wallet.iconPath, width: 24, height: 24),
           ),
           const SizedBox(width: 10),
           Expanded(

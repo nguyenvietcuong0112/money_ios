@@ -252,7 +252,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               itemBuilder: (context, index) {
                 final wallet = walletController.wallets[index];
                 return ListTile(
-                  leading: Image.asset(wallet.iconPath, width: 30, height: 30),
+                  leading: SvgPicture.asset(wallet.iconPath, width: 30, height: 30),
                   title: Text(wallet.name, style: AppTextStyles.body),
                   onTap: () {
                     setState(() {
@@ -275,7 +275,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         child: Row(
           children: [
             if (_selectedWallet != null)
-              Image.asset(_selectedWallet!.iconPath, width: 30, height: 30),
+              SvgPicture.asset(_selectedWallet!.iconPath, width: 30, height: 30),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
