@@ -231,15 +231,15 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           child: TextField(
             controller: _amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: AppTextStyles.heading1,
+            style: AppTextStyles.heading1Black,
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: '0',
-              hintStyle: AppTextStyles.heading1.copyWith(color: Colors.grey)
+              hintStyle: AppTextStyles.heading1Black.copyWith(color: Colors.grey)
             ),
           ),
         ),
-        Text(appController.currencySymbol, style: AppTextStyles.heading1.copyWith(color: Colors.grey)),
+        Text(appController.currencySymbol, style: AppTextStyles.heading1Black.copyWith(color: Colors.grey)),
       ],
     );
   }

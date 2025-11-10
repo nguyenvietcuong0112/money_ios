@@ -42,7 +42,7 @@ class WalletDetailScreen extends StatelessWidget {
               );
               return Text(
                 '${updatedWallet.balance.toStringAsFixed(0)} ${appController.currencySymbol}',
-                style: AppTextStyles.heading1.copyWith(
+                style: AppTextStyles.heading1Black.copyWith(
                   color: updatedWallet.balance >= 0 ? Colors.green : Colors.red,
                 ),
               );
