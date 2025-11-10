@@ -25,6 +25,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _isBalanceVisible = true;
+  bool _isIncomeSelected = true;
 
   @override
   Widget build(BuildContext context) {
@@ -213,8 +214,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   final totalIncome = data.$4;
               return Row(
                 children: [
-                  Expanded(child: _buildReportCard('total_expense'.tr, totalExpense, false)),
-                  Expanded(child: _buildReportCard('total_income'.tr, totalIncome, true)),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _isIncomeSelected = false),
+                      child: _buildReportCard('total_expense'.tr, totalExpense, !_isIncomeSelected),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _isIncomeSelected = true),
+                      child: _buildReportCard('total_income'.tr, totalIncome, _isIncomeSelected),
+                    ),
+                  ),
                 ],
               );
              }),
@@ -227,9 +238,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   final monthTransactions = transactionController.transactions.where((tx) => tx.date.year == now.year && tx.date.month == now.month).toList();
 
                   final data = _prepareChartData(monthTransactions);
-                  final chartData = data.$1; // Show expense data by default
+                  final chartData = _isIncomeSelected ? data.$2 : data.$1;
+                  final chartColor = _isIncomeSelected ? Colors.green : Colors.red;
 
-                  return _buildLineChart(chartData, Colors.red); // Chart for expense
+                  return _buildLineChart(chartData, chartColor);
                 }),
               ),
             ],
@@ -239,25 +251,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-   Widget _buildReportCard(String title, double amount, bool isIncome) {
+   Widget _buildReportCard(String title, double amount, bool isSelected) {
     final AppController appController = Get.find();
+    final bool isIncome = title == 'total_income'.tr;
+
     return Container(
        padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isIncome ? const Color(0xFF50B432) : Colors.transparent,
+        color: isSelected ? (isIncome ? const Color(0xFF50B432) : Colors.red) : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
-          SvgPicture.asset(isIncome ? 'assets/icons/ic_income.svg' : 'assets/icons/ic_expense.svg', width: 24, height: 24, color: isIncome? Colors.white : Colors.black87),
+          SvgPicture.asset(isIncome ? 'assets/icons/ic_income.svg' : 'assets/icons/ic_expense.svg', width: 24, height: 24, color: isSelected? Colors.white : Colors.black87),
           const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: AppTextStyles.caption.copyWith(color: isIncome ? Colors.white : Colors.black87)),
+              Text(title, style: AppTextStyles.caption.copyWith(color: isSelected ? Colors.white : Colors.black87)),
               Text(
                 '${appController.currencySymbol}${amount.toStringAsFixed(0)}',
-                 style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold, color: isIncome ? Colors.white : Colors.black),
+                 style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold, color: isSelected ? Colors.white : Colors.black),
               )
             ],
           )
