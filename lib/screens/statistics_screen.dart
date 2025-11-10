@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
@@ -120,7 +121,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         backgroundColor: const Color(0xFFE8E8E8),
                         child: wallet == null
                             ? const Icon(Icons.account_balance_wallet, size: 20, color: Colors.black)
-                            : Image.asset(wallet.iconPath, width: 24, height: 24),
+                            : SvgPicture.asset(wallet.iconPath, width: 24, height: 24),
                       ),
                       const SizedBox(width: 8),
                       Text(wallet?.name ?? 'total'.tr, style: AppTextStyles.body),
