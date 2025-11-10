@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:money_manager/common/text_styles.dart';
@@ -280,7 +281,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               itemBuilder: (context, index) {
                 final wallet = wallets[index];
                 return ListTile(
-                  leading: Image.asset(wallet.iconPath, width: 24, height: 24),
+                  leading: SvgPicture.asset(wallet.iconPath, width: 24, height: 24),
                   title: Text(wallet.name, style: AppTextStyles.body),
                   onTap: () {
                     setState(() {
@@ -347,7 +348,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset(category.iconPath, width: 30, height: 30, color: categoryColor),
+                    SvgPicture.asset(category.iconPath, width: 30, height: 30, color: categoryColor),
                     const SizedBox(height: 5),
                     Text(category.name.tr, textAlign: TextAlign.center, style: AppTextStyles.caption),
                   ],

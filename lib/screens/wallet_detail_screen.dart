@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:money_manager/common/text_styles.dart';
@@ -84,7 +85,7 @@ class WalletDetailScreen extends StatelessWidget {
                               Color(transaction.colorValue).withOpacity(0.2),
                           child: Padding(
                             padding: const EdgeInsets.all(6.0),
-                            child: Image.asset(transaction.iconPath,
+                            child: SvgPicture.asset(transaction.iconPath,
                                 color: Color(transaction.colorValue)),
                           ),
                         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
@@ -406,7 +407,7 @@ class _RecordScreenState extends State<RecordScreen> {
         leading: CircleAvatar(
           radius: 20,
           backgroundColor: Color(transaction.colorValue).withAlpha(25),
-          child: Image.asset(transaction.iconPath, width: 22, height: 22),
+          child: SvgPicture.asset(transaction.iconPath, width: 22, height: 22),
         ),
         title: Text(transaction.categoryName.tr, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
         subtitle: transaction.title.isNotEmpty ? Text(transaction.title, style: AppTextStyles.caption) : null,

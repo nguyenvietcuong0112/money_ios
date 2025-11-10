@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:collection/collection.dart';
+import 'package:draggable_fab/draggable_fab.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -25,7 +26,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _isBalanceVisible = true;
-  bool _isIncomeSelected = true;
+  bool _isIncomeSelected = false; // Mặc định là Expense
+  DateTime _selectedMonth = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -75,12 +77,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.to(() => const AddTransactionScreen());
-        },
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.add),
+      floatingActionButton: DraggableFab(
+        child: FloatingActionButton(
+          onPressed: () {
+            Get.to(() => const AddTransactionScreen());
+          },
+          backgroundColor: Colors.green,
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
@@ -182,11 +186,66 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  void _selectMonth(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedMonth,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      initialDatePickerMode: DatePickerMode.day,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Colors.green,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != _selectedMonth) {
+      setState(() {
+        _selectedMonth = picked;
+      });
+    }
+  }
+
   Widget _buildReportSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('report_this_month'.tr, style: AppTextStyles.heading2),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('report_this_month'.tr, style: AppTextStyles.heading2),
+            GestureDetector(
+              onTap: () => _selectMonth(context),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.calendar_today, size: 16, color: Colors.green),
+                    const SizedBox(width: 6),
+                    Text(
+                      DateFormat('MM/yyyy').format(_selectedMonth),
+                      style: AppTextStyles.caption.copyWith(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 15),
         Container(
           padding: const EdgeInsets.all(12),
@@ -204,42 +263,55 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           child: Column(
             children: [
-             Obx(() {
+              Obx(() {
                 final transactionController = Get.find<TransactionController>();
-                  final now = DateTime.now();
-                  final monthTransactions = transactionController.transactions.where((tx) => tx.date.year == now.year && tx.date.month == now.month).toList();
+                final monthTransactions = transactionController.transactions.where((tx) =>
+                tx.date.year == _selectedMonth.year &&
+                    tx.date.month == _selectedMonth.month
+                ).toList();
 
-                  final data = _prepareChartData(monthTransactions);
-                  final totalExpense = data.$3;
-                  final totalIncome = data.$4;
-              return Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => _isIncomeSelected = false),
-                      child: _buildReportCard('total_expense'.tr, totalExpense, !_isIncomeSelected),
+                final data = _prepareChartData(monthTransactions);
+                final totalExpense = data.$3;
+                final totalIncome = data.$4;
+                return Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _isIncomeSelected = false),
+                        child: _buildReportCard('total_expense'.tr, totalExpense, !_isIncomeSelected),
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => _isIncomeSelected = true),
-                      child: _buildReportCard('total_income'.tr, totalIncome, _isIncomeSelected),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _isIncomeSelected = true),
+                        child: _buildReportCard('total_income'.tr, totalIncome, _isIncomeSelected),
+                      ),
                     ),
-                  ),
-                ],
-              );
-             }),
+                  ],
+                );
+              }),
               const SizedBox(height: 20),
               SizedBox(
                 height: 200,
                 child: Obx(() {
                   final transactionController = Get.find<TransactionController>();
-                  final now = DateTime.now();
-                  final monthTransactions = transactionController.transactions.where((tx) => tx.date.year == now.year && tx.date.month == now.month).toList();
+                  final monthTransactions = transactionController.transactions.where((tx) =>
+                  tx.date.year == _selectedMonth.year &&
+                      tx.date.month == _selectedMonth.month
+                  ).toList();
 
                   final data = _prepareChartData(monthTransactions);
                   final chartData = _isIncomeSelected ? data.$2 : data.$1;
                   final chartColor = _isIncomeSelected ? Colors.green : Colors.red;
+
+                  if (chartData.isEmpty || chartData.every((spot) => spot.y == 0)) {
+                    return Center(
+                      child: Text(
+                        'no_data_for_this_month'.tr,
+                        style: AppTextStyles.body.copyWith(color: Colors.grey),
+                      ),
+                    );
+                  }
 
                   return _buildLineChart(chartData, chartColor);
                 }),
@@ -251,12 +323,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-   Widget _buildReportCard(String title, double amount, bool isSelected) {
+  Widget _buildReportCard(String title, double amount, bool isSelected) {
     final AppController appController = Get.find();
     final bool isIncome = title == 'total_income'.tr;
 
     return Container(
-       padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isSelected ? (isIncome ? const Color(0xFF50B432) : Colors.red) : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
@@ -271,7 +343,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               Text(title, style: AppTextStyles.caption.copyWith(color: isSelected ? Colors.white : Colors.black87)),
               Text(
                 '${appController.currencySymbol}${amount.toStringAsFixed(0)}',
-                 style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold, color: isSelected ? Colors.white : Colors.black),
+                style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold, color: isSelected ? Colors.white : Colors.black),
               )
             ],
           )
@@ -280,28 +352,48 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  (List<FlSpot>, List<FlSpot>, double, double) _prepareChartData(List<Transaction> transactions) {
+  (List<FlSpot>, List<FlSpot>, double, double, int, int) _prepareChartData(List<Transaction> transactions) {
+    // Tìm ngày đầu tiên và cuối cùng có data
+    int minDay = 1;
+    int maxDay = 1;
+
+    if (transactions.isNotEmpty) {
+      final days = transactions.map((tx) => tx.date.day).toList();
+      minDay = days.reduce(min);
+      maxDay = days.reduce(max);
+    }
+
+    // Expense data
     final expenseTransactions = transactions.where((tx) => tx.type == TransactionType.expense).toList();
     final totalExpense = expenseTransactions.fold(0.0, (sum, item) => sum + item.amount);
     final expenseDataByDay = groupBy(expenseTransactions, (Transaction tx) => tx.date.day);
     List<FlSpot> expenseSpots = [];
-    for (var day = 1; day <= DateTime.now().day; day++) {
-      final dayTotal = expenseDataByDay[day]?.fold(0.0, (sum, item) => sum + item.amount) ?? 0.0;
-      expenseSpots.add(FlSpot(day.toDouble(), dayTotal));
-    }
-    if (expenseSpots.isEmpty) expenseSpots.add(const FlSpot(1, 0));
 
+    if (expenseTransactions.isNotEmpty) {
+      for (var day = minDay; day <= maxDay; day++) {
+        final dayTotal = expenseDataByDay[day]?.fold(0.0, (sum, item) => sum + item.amount) ?? 0.0;
+        expenseSpots.add(FlSpot(day.toDouble(), dayTotal));
+      }
+    } else {
+      expenseSpots.add(const FlSpot(1, 0));
+    }
+
+    // Income data
     final incomeTransactions = transactions.where((tx) => tx.type == TransactionType.income).toList();
     final totalIncome = incomeTransactions.fold(0.0, (sum, item) => sum + item.amount);
     final incomeDataByDay = groupBy(incomeTransactions, (Transaction tx) => tx.date.day);
     List<FlSpot> incomeSpots = [];
-    for (var day = 1; day <= DateTime.now().day; day++) {
-      final dayTotal = incomeDataByDay[day]?.fold(0.0, (sum, item) => sum + item.amount) ?? 0.0;
-      incomeSpots.add(FlSpot(day.toDouble(), dayTotal));
-    }
-    if (incomeSpots.isEmpty) incomeSpots.add(const FlSpot(1, 0));
 
-    return (expenseSpots, incomeSpots, totalExpense, totalIncome);
+    if (incomeTransactions.isNotEmpty) {
+      for (var day = minDay; day <= maxDay; day++) {
+        final dayTotal = incomeDataByDay[day]?.fold(0.0, (sum, item) => sum + item.amount) ?? 0.0;
+        incomeSpots.add(FlSpot(day.toDouble(), dayTotal));
+      }
+    } else {
+      incomeSpots.add(const FlSpot(1, 0));
+    }
+
+    return (expenseSpots, incomeSpots, totalExpense, totalIncome, minDay, maxDay);
   }
 
   Widget _buildLineChart(List<FlSpot> spots, Color lineColor) {
@@ -312,20 +404,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final double maxAmount = spots.map((spot) => spot.y).fold(0.0, (max, current) => max > current ? max : current);
     final double maxY = maxAmount > 0 ? (maxAmount * 1.4).round().toDouble() : 100;
 
+    // Lấy min và max day từ spots
+    final double minDay = spots.map((s) => s.x).reduce(min);
+    final double maxDay = spots.map((s) => s.x).reduce(max);
 
     return LineChart(
       LineChartData(
         gridData: const FlGridData(show: false),
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
-             sideTitles: SideTitles(
+            sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (double value, TitleMeta meta) {
-                if (value == 0 || value >= maxY) return const Text(''); 
-                return Text('${(value / 1000).round()}k', style: AppTextStyles.caption);
+                if (value == 0) return const Text('0', style: TextStyle(fontSize: 10));
+                if (value >= 1000) {
+                  return Text('${(value / 1000).toStringAsFixed(0)}k', style: AppTextStyles.caption);
+                }
+                return Text(value.toStringAsFixed(0), style: AppTextStyles.caption);
               },
-              reservedSize: 28,
-              interval: maxY / 5, 
+              reservedSize: 35,
+              interval: maxY / 4,
             ),
           ),
           topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -334,29 +432,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 30,
-              interval: 5,
+              interval: max(1, ((maxDay - minDay) / 6).ceil().toDouble()),
               getTitlesWidget: (double value, TitleMeta meta) {
-                Widget text;
-                switch (value.toInt()) {
-                  case 1: text = Text('1', style: AppTextStyles.caption); break;
-                  case 5: text = Text('5', style: AppTextStyles.caption); break;
-                  case 10: text = Text('10', style: AppTextStyles.caption); break;
-                  case 15: text = Text('15', style: AppTextStyles.caption); break;
-                  case 20: text = Text('20', style: AppTextStyles.caption); break;
-                  case 25: text = Text('25', style: AppTextStyles.caption); break;
-                  case 30: text = Text('30', style: AppTextStyles.caption); break;
-                  default: text = const Text(''); break;
-                }
-                return SideTitleWidget(meta: meta, child: text);
+                if (value < minDay || value > maxDay) return const Text('');
+                return SideTitleWidget(
+                    meta: meta,
+                    child: Text('${value.toInt()}', style: AppTextStyles.caption)
+                );
               },
             ),
           ),
         ),
         borderData: FlBorderData(show: false),
-        minX: 1,
-        maxX: DateTime.now().day.toDouble(),
+        minX: minDay,
+        maxX: maxDay,
         minY: 0,
-        maxY: maxY, 
+        maxY: maxY,
         lineBarsData: [
           LineChartBarData(
             spots: spots,
@@ -423,7 +514,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           backgroundColor: Color(transaction.colorValue).withAlpha(25),
           child: SvgPicture.asset(transaction.iconPath, width: 28, height: 28),
         ),
-        title: Text(transaction.categoryName.tr, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)), // Dịch
+        title: Text(transaction.categoryName.tr, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
         subtitle: Text(transaction.title.isNotEmpty ? transaction.title : DateFormat('d MMMM yyyy').format(transaction.date), style: AppTextStyles.caption),
         trailing: Obx(() {
           final appController = Get.find<AppController>();
