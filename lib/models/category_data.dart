@@ -31,15 +31,15 @@ final List<Category> defaultCategories = [
       iconPath: 'assets/icons/ic_bill.svg',
       colorValue: Colors.lightBlue.value),
   Category(
-      name: 'Entertain...',
-      iconPath: 'assets/icons/ic_entertaintment.svg',
+      name: 'Entertaiments',
+      iconPath: 'assets/icons/ic_entertaiment.svg',
       colorValue: Colors.yellow.value),
   Category(
       name: 'Family',
       iconPath: 'assets/icons/ic_family.svg',
       colorValue: Colors.brown.value),
   Category(
-      name: 'Home S...',
+      name: 'Home Service',
       iconPath: 'assets/icons/ic_homeservice.svg',
       colorValue: Colors.grey.value),
   Category(
