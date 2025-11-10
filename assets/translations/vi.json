@@ -88,5 +88,6 @@
     "save_changes": "Lưu thay đổi",
     "current_balance": "Số dư hiện tại",
     "no_transactions_for_wallet": "Chưa có giao dịch nào cho ví này.",
-    "success": "Thành công"
+    "success": "Thành công",
+    "add_your_first_transaction": "Thêm giao dịch đầu tiên của bạn."
 }
