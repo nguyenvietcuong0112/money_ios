@@ -86,6 +86,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
@@ -340,12 +341,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.white,
                   border: Border.all(
-                    color: isSelected ? const Color(0xFF4A80F0) : Colors.grey[300]!,
+                    color: isSelected ? const Color(0xFF3E70FD) : Color(0xFFF0F3FA),
                     width: isSelected ? 3 : 1,
                   ),
                    boxShadow: [
@@ -359,8 +359,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 ),
                 child: SvgPicture.asset(
                   category.iconPath,
-                  width: 32, 
-                  height: 32,
+                  width: 50,
+                  height: 50,
                   // The color of the SVG can be controlled via its properties or a ColorFilter
                   // color: isSelected ? Colors.white : Color(category.colorValue),
                 ),
