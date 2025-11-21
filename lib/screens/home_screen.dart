@@ -29,6 +29,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _isBalanceVisible = true;
   bool _isIncomeSelected = false;
   DateTime _selectedMonth = DateTime.now();
+  TransactionType _selectedType = TransactionType.expense; // mặc định expense
+
 
   @override
   Widget build(BuildContext context) {
@@ -370,9 +372,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ? (isIncome ? AppColors.textColorGreen : AppColors.textColorRed)
             : Colors.transparent,
         borderRadius: BorderRadius.only(
-            topLeft: isIncome ? const Radius.circular(0) : Radius.circular(16),
+            topLeft: isIncome ? const Radius.circular(0) : const Radius.circular(16),
             topRight:
-                isIncome ? const Radius.circular(16) : Radius.circular(0)),
+                isIncome ? const Radius.circular(16) : const Radius.circular(0)),
       ),
       child: Row(
         children: [

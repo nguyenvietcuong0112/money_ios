@@ -95,7 +95,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           onPressed: () => Get.back(),
         ),
         title: Text('add_transaction'.tr,
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20)),
+            style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 20)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -103,10 +106,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TransactionTypeToggle(
+              // uncontrolled mode (widget tự giữ state), chỉ cần onChanged
               onChanged: (type) {
                 setState(() {
                   _selectedType = type;
-                  // Reset category and set default for the new type
                   if (type == TransactionType.expense) {
                     _selectedCategory = defaultCategories.first;
                   } else {
@@ -114,12 +117,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   }
                 });
               },
+              showAmount: false, // mặc định false, bạn có thể bỏ
             ),
             const SizedBox(height: 24),
             _buildSectionTitle('Amount'),
             _buildAmountField(),
             const SizedBox(height: 24),
-             _buildSectionTitle('Day Trading'),
+            _buildSectionTitle('Day Trading'),
             _buildDateField(),
             const SizedBox(height: 24),
             _buildSectionTitle('Wallet'),
@@ -140,8 +144,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16.0)),
               ),
-              child:
-                  Text('SAVE', style: AppTextStyles.button.copyWith(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+              child: Text('SAVE',
+                  style: AppTextStyles.button.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18)),
             ),
           ],
         ),
@@ -174,9 +181,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         prefixStyle: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
         hintText: '0',
         hintStyle: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[400]),
+            fontSize: 28, fontWeight: FontWeight.bold, color: Colors.grey[400]),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
@@ -195,7 +200,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         if (_amountController.text != newText) {
           _amountController.value = TextEditingValue(
             text: newText,
-            selection: TextSelection.fromPosition(TextPosition(offset: newText.length)),
+            selection: TextSelection.fromPosition(
+                TextPosition(offset: newText.length)),
           );
         }
       },
@@ -252,7 +258,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               itemBuilder: (context, index) {
                 final wallet = walletController.wallets[index];
                 return ListTile(
-                  leading: SvgPicture.asset(wallet.iconPath, width: 30, height: 30),
+                  leading:
+                      SvgPicture.asset(wallet.iconPath, width: 30, height: 30),
                   title: Text(wallet.name, style: AppTextStyles.body),
                   onTap: () {
                     setState(() {
@@ -275,15 +282,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         child: Row(
           children: [
             if (_selectedWallet != null)
-              SvgPicture.asset(_selectedWallet!.iconPath, width: 30, height: 30),
+              SvgPicture.asset(_selectedWallet!.iconPath,
+                  width: 30, height: 30),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 _selectedWallet?.name ?? 'Choose Wallet',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
-             const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey)
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey)
           ],
         ),
       ),
@@ -330,7 +339,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       itemBuilder: (context, index) {
         final category = categories[index];
         final isSelected = _selectedCategory?.name == category.name;
-        
+
         return GestureDetector(
           onTap: () {
             setState(() {
@@ -345,17 +354,19 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   shape: BoxShape.circle,
                   color: Colors.white,
                   border: Border.all(
-                    color: isSelected ? const Color(0xFF3E70FD) : Color(0xFFF0F3FA),
+                    color: isSelected
+                        ? const Color(0xFF3E70FD)
+                        : Color(0xFFF0F3FA),
                     width: isSelected ? 3 : 1,
                   ),
-                   boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
                 ),
                 child: SvgPicture.asset(
                   category.iconPath,
@@ -369,7 +380,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               Text(
                 category.name.tr,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal),
                 overflow: TextOverflow.ellipsis,
               ),
             ],
