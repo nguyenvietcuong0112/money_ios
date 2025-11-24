@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -73,27 +74,35 @@ class MyApp extends StatelessWidget {
     final appController = Get.find<AppController>();
     final themeController = Get.find<ThemeController>();
 
-    return GetMaterialApp(
-      title: 'Money Manager',
-      theme: lightTheme,
-      darkTheme: darkTheme,
-      themeMode: themeController.themeMode,
-      locale: appController.locale ?? const Locale('vi', 'VN'), // Ngôn ngữ mặc định
-      fallbackLocale: const Locale('en', 'US'), // Ngôn ngữ dự phòng
-      translations: AppTranslations(translations),
-      supportedLocales: const [
-        Locale('en', 'US'),
-        Locale('vi', 'VN'),
-        Locale('zh', 'CN'),
-        Locale('hi', 'IN'),
-        Locale('es', 'ES'),
-      ],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      home: isFirstTime
+    return ScreenUtilInit(
+      designSize: const Size(360, 690),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context , child) {
+        return GetMaterialApp(
+          title: 'Money Manager',
+          theme: lightTheme,
+          darkTheme: darkTheme,
+          themeMode: themeController.themeMode,
+          locale: appController.locale ?? const Locale('vi', 'VN'), // Ngôn ngữ mặc định
+          fallbackLocale: const Locale('en', 'US'), // Ngôn ngữ dự phòng
+          translations: AppTranslations(translations),
+          supportedLocales: const [
+            Locale('en', 'US'),
+            Locale('vi', 'VN'),
+            Locale('zh', 'CN'),
+            Locale('hi', 'IN'),
+            Locale('es', 'ES'),
+          ],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: child,
+        );
+      },
+      child: isFirstTime
           ? const LanguageSelectionScreen(isInitialSetup: true)
           : const MyHomePage(),
     );
