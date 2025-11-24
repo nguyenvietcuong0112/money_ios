@@ -31,6 +31,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   DateTime _selectedMonth = DateTime.now();
   TransactionType _selectedType = TransactionType.expense; // mặc định expense
 
+  String _formatBalance(double balance) {
+    if (balance >= 1000000000) {
+      return '${(balance / 1000000000).toStringAsFixed(1)}B';
+    } else if (balance >= 1000000) {
+      return '${(balance / 1000000).toStringAsFixed(1)}M';
+    } else if (balance >= 1000) {
+      return '${(balance / 1000).toStringAsFixed(1)}K';
+    }
+    return balance.toStringAsFixed(0);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,38 +56,58 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
         elevation: 0,
-        title: Text('total_balance'.tr, style: AppTextStyles.heading2White),
+        title: Row(
+          children: [
+            Flexible(
+              child: Text(
+                'total_balance'.tr,
+                style: AppTextStyles.heading2White,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
         actions: [
           Obx(() {
             final walletController = Get.find<WalletController>();
             final appController = Get.find<AppController>();
             final totalBalance = walletController.totalBalance;
-            return Row(
-              children: [
-                Text(
-                  _isBalanceVisible
-                      ? '${appController.currencySymbol}${totalBalance.toStringAsFixed(2)}'
-                      : '*********',
-                  style: AppTextStyles.heading1White,
-                ),
-                IconButton(
-                  icon: Icon(
+
+            return Flexible( // Thêm Flexible để cho phép co giãn
+              child: Row(
+                mainAxisSize: MainAxisSize.min, // Chỉ chiếm không gian cần thiết
+                children: [
+                  Flexible( // Wrap Text với Flexible
+                    child: Text(
                       _isBalanceVisible
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                      color: Colors.white),
-                  onPressed: () {
-                    setState(() {
-                      _isBalanceVisible = !_isBalanceVisible;
-                    });
-                  },
-                ),
-              ],
+                          ? '${appController.currencySymbol}${_formatBalance(totalBalance)}'
+                          : '*********',
+                      style: AppTextStyles.heading1White,
+                      maxLines: 1, // Giới hạn 1 dòng
+                      overflow: TextOverflow.ellipsis, // Hiển thị ... khi tràn
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                        _isBalanceVisible ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.white),
+                    onPressed: () {
+                      setState(() {
+                        _isBalanceVisible = !_isBalanceVisible;
+                      });
+                    },
+                    padding: EdgeInsets.zero, // Giảm padding
+                    constraints: const BoxConstraints(), // Giảm kích thước tối thiểu
+                  ),
+                ],
+              ),
             );
           }),
           const SizedBox(width: 8),
         ],
       ),
+
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -186,28 +217,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             child: SvgPicture.asset(wallet.iconPath, width: 50, height: 50),
           ),
           const SizedBox(width: 10),
-          Expanded(
+          Flexible(
             child: Column(
+              mainAxisSize: MainAxisSize.min, // chỉ chiếm height cần thiết
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(wallet.name,
-                    style: AppTextStyles.body
-                        .copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  wallet.name,
+                  style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const SizedBox(height: 5),
                 Obx(() {
                   final appController = Get.find<AppController>();
                   return Text(
-                    '${wallet.balance.toStringAsFixed(2)}${appController.currencySymbol}',
+                    '${wallet.balance.toStringAsFixed(0)}${appController.currencySymbol}',
                     style: AppTextStyles.caption.copyWith(
                         color: wallet.balance < 0
                             ? AppColors.textColorRed
                             : AppColors.textColorGreen),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   );
                 }),
               ],
             ),
-          ),
+          )
+
         ],
       ),
     );
@@ -384,35 +421,48 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Row(
         children: [
           SvgPicture.asset(
-              isIncome
-                  ? 'assets/icons/ic_income.svg'
-                  : 'assets/icons/ic_expense.svg',
-              width: 45,
-              height: 45,
-              color: isSelected
-                  ? AppColors.textColorWhite
-                  : AppColors.textColorGrey),
+            isIncome
+                ? 'assets/icons/ic_income.svg'
+                : 'assets/icons/ic_expense.svg',
+            width: 45,
+            height: 45,
+            color: isSelected
+                ? AppColors.textColorWhite
+                : AppColors.textColorGrey,
+          ),
           const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title,
+          Expanded( // <- cho Column chiếm không gian còn lại, tránh tràn
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min, // chỉ chiếm height cần thiết
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.caption.copyWith(
-                      color: isSelected
-                          ? AppColors.textColorWhite
-                          : AppColors.textColorGrey)),
-              Text(
-                '${appController.currencySymbol}${amount.toStringAsFixed(0)}',
-                style: AppTextStyles.body.copyWith(
+                    color: isSelected
+                        ? AppColors.textColorWhite
+                        : AppColors.textColorGrey,
+                  ),
+                ),
+                Text(
+                  '${appController.currencySymbol}${amount.toStringAsFixed(0)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.body.copyWith(
                     fontWeight: FontWeight.bold,
                     color: isSelected
                         ? AppColors.textColorWhite
-                        : AppColors.textColorGrey),
-              )
-            ],
-          )
+                        : AppColors.textColorGrey,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
-      ),
+      )
+
     );
   }
 
@@ -595,7 +645,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               itemCount: recentTransactions.length,
               itemBuilder: (context, index) {
                 final transaction = recentTransactions[index];
-                return _buildTransactionItem(transaction);
+                return Column(
+                  children: [
+                    _buildTransactionItem(transaction),
+                    if (index != recentTransactions.length - 1)
+                      const Divider(
+                        height: 1,
+                        thickness: 1,
+                        indent: 16,
+                        endIndent: 16,
+                        color: Color(0XFFF0F1FA),
+                      ),
+                  ],
+                );
               },
             ),
           );
@@ -607,24 +669,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildTransactionItem(Transaction transaction) {
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.symmetric(vertical: 1),
+      margin: const EdgeInsets.symmetric(vertical: 1, horizontal: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
       color: Colors.white,
       child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
         leading: CircleAvatar(
           radius: 25,
           backgroundColor: Color(transaction.colorValue).withAlpha(25),
           child: SvgPicture.asset(transaction.iconPath, width: 28, height: 28),
         ),
-        title: Text(transaction.categoryName.tr,
-            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
+        title: Text(
+          transaction.categoryName.tr,
+          style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+        ),
         subtitle: Text(
-            transaction.title.isNotEmpty
-                ? transaction.title
-                : DateFormat('d MMMM yyyy').format(transaction.date),
-            style: AppTextStyles.caption),
+          transaction.title.isNotEmpty
+              ? transaction.title
+              : DateFormat('d MMMM yyyy').format(transaction.date),
+          style: AppTextStyles.caption,
+        ),
         trailing: Obx(() {
           final appController = Get.find<AppController>();
           return Text(

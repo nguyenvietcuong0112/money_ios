@@ -17,6 +17,8 @@ class WalletScreen extends StatelessWidget {
     final WalletController walletController = Get.find();
     final AppController appController = Get.find();
 
+
+
     return Scaffold(
       backgroundColor: AppColors.textColorGreyContainer,
       appBar: AppBar(
@@ -60,7 +62,7 @@ class WalletScreen extends StatelessWidget {
                             style: AppTextStyles.body
                                 .copyWith(fontWeight: FontWeight.bold)),
                         subtitle: Text(
-                          '${wallet.balance.toStringAsFixed(0)} ${appController.currencySymbol}',
+                          '${_formatBalance(wallet.balance)} ${appController.currencySymbol}',
                           style: AppTextStyles.body.copyWith(
                             color: wallet.balance < 0
                                 ? AppColors.textColorRed
@@ -104,6 +106,17 @@ class WalletScreen extends StatelessWidget {
     );
   }
 
+
+  String _formatBalance(double balance) {
+    if (balance >= 1000000000) {
+      return '${(balance / 1000000000).toStringAsFixed(1)}B';
+    } else if (balance >= 1000000) {
+      return '${(balance / 1000000).toStringAsFixed(1)}M';
+    } else if (balance >= 1000) {
+      return '${(balance / 1000).toStringAsFixed(1)}K';
+    }
+    return balance.toStringAsFixed(0);
+  }
   Widget _buildTotalBalanceCard(
       BuildContext context, double totalBalance, AppController appController) {
     return Container(
@@ -118,26 +131,29 @@ class WalletScreen extends StatelessWidget {
             height: 50.w,
           ),
           const SizedBox(width: 16.0),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'total_balance'.tr,
-                style: AppTextStyles.subtitle
-                    .copyWith(color: Colors.grey.shade600),
-              ),
-              const SizedBox(height: 4.0),
-              Text(
-                '${totalBalance.toStringAsFixed(0)} ${appController.currencySymbol}',
-                style: AppTextStyles.heading2.copyWith(
-                  color: AppColors.textColorBlue,
-                  fontWeight: FontWeight.bold,
+          Expanded( // <-- thêm đây
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'total_balance'.tr,
+                  style: AppTextStyles.subtitle.copyWith(color: Colors.grey.shade600),
                 ),
-              ),
-            ],
+                const SizedBox(height: 4.0),
+                Text(
+                  ' ${appController.currencySymbol}${_formatBalance(totalBalance)}',
+                  style: AppTextStyles.heading2.copyWith(
+                    color: AppColors.textColorBlue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1, // giới hạn 1 dòng
+                  overflow: TextOverflow.ellipsis, // thêm dấu … nếu quá dài
+                ),
+              ],
+            ),
           ),
         ],
-      ),
+      )
     );
   }
 }

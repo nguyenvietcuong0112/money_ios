@@ -55,6 +55,17 @@ class _RecordScreenState extends State<RecordScreen> {
     return months;
   }
 
+  String _formatNumber(double number) {
+    if (number.abs() >= 1000000000) {
+      return '${(number / 1000000000).toStringAsFixed(1)}B';
+    } else if (number.abs() >= 1000000) {
+      return '${(number / 1000000).toStringAsFixed(1)}M';
+    } else if (number.abs() >= 10000) {
+      return '${(number / 1000).toStringAsFixed(0)}K';
+    }
+    return number.toStringAsFixed(0);
+  }
+
   @override
   Widget build(BuildContext context) {
     final TransactionController transactionController = Get.find();
@@ -337,19 +348,27 @@ class _RecordScreenState extends State<RecordScreen> {
                   Text('${day.day}',
                       style: AppTextStyles.caption.copyWith(fontSize: 12)),
                   if (income > 0)
-                    Text(
-                        '+${appController.currencySymbol}${income.toStringAsFixed(0)}',
-                        style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textColorGreen,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold)),
+                    Flexible(
+                      child: Text(
+                          '+${appController.currencySymbol}${_formatNumber(income)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textColorGreen,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold)),
+                    ),
                   if (expense > 0)
-                    Text(
-                        '-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
-                        style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textColorRed,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold)),
+                    Flexible(
+                      child: Text(
+                          '-${appController.currencySymbol}${_formatNumber(expense)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textColorRed,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold)),
+                    ),
                 ],
               ),
             );
@@ -371,19 +390,27 @@ class _RecordScreenState extends State<RecordScreen> {
                       style: AppTextStyles.caption
                           .copyWith(fontSize: 12, fontWeight: FontWeight.bold)),
                   if (income > 0)
-                    Text(
-                        '+${appController.currencySymbol}${income.toStringAsFixed(0)}',
-                        style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textColorGreen,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold)),
+                    Flexible(
+                      child: Text(
+                          '+${appController.currencySymbol}${_formatNumber(income)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textColorGreen,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold)),
+                    ),
                   if (expense > 0)
-                    Text(
-                        '-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
-                        style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textColorRed,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold)),
+                    Flexible(
+                      child: Text(
+                          '-${appController.currencySymbol}${_formatNumber(expense)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textColorRed,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold)),
+                    ),
                 ],
               ),
             );
@@ -406,19 +433,27 @@ class _RecordScreenState extends State<RecordScreen> {
                           color: AppColors.textColorBlack,
                           fontWeight: FontWeight.bold)),
                   if (income > 0)
-                    Text(
-                        '+${appController.currencySymbol}${income.toStringAsFixed(0)}',
-                        style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textColorGreen,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold)),
+                    Flexible(
+                      child: Text(
+                          '+${appController.currencySymbol}${_formatNumber(income)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textColorGreen,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold)),
+                    ),
                   if (expense > 0)
-                    Text(
-                        '-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
-                        style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textColorRed,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold)),
+                    Flexible(
+                      child: Text(
+                          '-${appController.currencySymbol}${_formatNumber(expense)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textColorRed,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold)),
+                    ),
                 ],
               ),
             );
@@ -453,24 +488,27 @@ class _RecordScreenState extends State<RecordScreen> {
   }
 
   Widget _buildSummaryItem(String title, double amount, Color color) {
-    return Column(
-      children: [
-        Text(title,
-            style: AppTextStyles.body
-                .copyWith(color: Colors.grey[600], fontSize: 16)),
-        const SizedBox(height: 4.0),
-        Obx(() {
-          final appController = Get.find<AppController>();
-          return Text(
-            '${appController.currencySymbol}${amount.toStringAsFixed(0)}',
-            style: AppTextStyles.body.copyWith(
-                color: color, fontWeight: FontWeight.bold, fontSize: 18),
-          );
-        }),
-      ],
+    return Expanded( // Thay Column bằng Expanded
+      child: Column(
+        children: [
+          Text(title,
+              style: AppTextStyles.body
+                  .copyWith(color: Colors.grey[600], fontSize: 16)),
+          const SizedBox(height: 4.0),
+          Obx(() {
+            final appController = Get.find<AppController>();
+            return Text(
+              '${appController.currencySymbol}${_formatNumber(amount)}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.body.copyWith(
+                  color: color, fontWeight: FontWeight.bold, fontSize: 18),
+            );
+          }),
+        ],
+      ),
     );
   }
-
   Widget _buildTransactionList(
       List<DateTime> sortedDates,
       Map<DateTime, List<Transaction>> groupedTransactions,
@@ -537,7 +575,6 @@ class _RecordScreenState extends State<RecordScreen> {
                 children: [
                   ...dailyTransactions
                       .map((tx) => _buildTransactionItem(context, tx)),
-                  const SizedBox(height: 10),
                 ],
               );
             },
@@ -563,22 +600,27 @@ class _RecordScreenState extends State<RecordScreen> {
         subtitle: Text(
           transaction.title.isNotEmpty
               ? transaction.title
-              : DateFormat('d MMMM yyyy').format(transaction.date),),
+              : DateFormat('d MMMM yyyy').format(transaction.date),
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Obx(() {
-              final appController = Get.find<AppController>();
-              return Text(
-                '${transaction.amount.toStringAsFixed(0)}${appController.currencySymbol}',
-                style: AppTextStyles.body.copyWith(
-                    color: transaction.type == TransactionType.income
-                        ? AppColors.textColorGreen
-                        : AppColors.textColorRed,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
-              );
-            }),
+            Flexible( // Thêm Flexible
+              child: Obx(() {
+                final appController = Get.find<AppController>();
+                return Text(
+                  '${_formatNumber(transaction.amount)}${appController.currencySymbol}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.body.copyWith(
+                      color: transaction.type == TransactionType.income
+                          ? AppColors.textColorGreen
+                          : AppColors.textColorRed,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                );
+              }),
+            ),
             const SizedBox(width: 8),
             const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.textColorBlue),
           ],

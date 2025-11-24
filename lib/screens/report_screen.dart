@@ -1,9 +1,10 @@
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:money_manager/common/color.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
@@ -30,12 +31,12 @@ class _ReportScreenState extends State<ReportScreen> {
   Widget build(BuildContext context) {
     final AppController appController = Get.find();
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7F7), // Fixed color
+      backgroundColor: const Color(0xFFF0F3FA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF6F7F7), // Fixed color
+        backgroundColor: const Color(0xFFF0F3FA),
         elevation: 0,
         title: Text('report'.tr,
-            style: AppTextStyles.title.copyWith(color: Colors.black)), // Fixed color
+            style: AppTextStyles.title.copyWith(color: AppColors.textDefault)),
         actions: [
           _buildDateFilter(),
         ],
@@ -55,29 +56,33 @@ class _ReportScreenState extends State<ReportScreen> {
               .fold(0, (sum, item) => sum + item.amount);
           final double saving = totalIncome - totalExpense;
 
-          final expenseTransactions = transactions
-              .where((tx) => tx.type == TransactionType.expense)
+          // Lọc theo loại được chọn (EXPENSE hoặc INCOME)
+          final filteredByType = transactions
+              .where((tx) => _selectedType == 'EXPENSE'
+                  ? tx.type == TransactionType.expense
+                  : tx.type == TransactionType.income)
               .toList();
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSummaryCard(
-                  totalExpense, totalIncome, saving, appController.currencySymbol),
-              const SizedBox(height: 24.0),
+              _buildSummaryCard(totalExpense, totalIncome, saving,
+                  appController.currencySymbol),
+              SizedBox(height: 15.h),
               _buildExpenseTypeDropdown(),
-              const SizedBox(height: 16.0),
-              if (expenseTransactions.isNotEmpty)
-                _buildChart(expenseTransactions)
+              SizedBox(height: 50.h),
+              if (filteredByType.isNotEmpty)
+                _buildChart(filteredByType)
               else
                 SizedBox(
-                  height: 200,
+                  height: 200.h,
                   child: Center(
-                    child: Text('no_data_available'.tr, style: AppTextStyles.body),
+                    child:
+                        Text('no_data_available'.tr, style: AppTextStyles.body),
                   ),
                 ),
-              const SizedBox(height: 24.0),
-              _buildExpenseList(expenseTransactions),
+              SizedBox(height: 50.h),
+              _buildExpenseList(filteredByType, appController.currencySymbol),
             ],
           );
         }),
@@ -105,7 +110,7 @@ class _ReportScreenState extends State<ReportScreen> {
         margin: const EdgeInsets.only(right: 16),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFF2C3A8D), // Fixed color
+          color: Color(0XFF2C3E64),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -115,7 +120,7 @@ class _ReportScreenState extends State<ReportScreen> {
               style: AppTextStyles.body.copyWith(color: Colors.white),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.arrow_drop_down, color: Colors.white),
+            const Icon(Icons.arrow_drop_down, color: AppColors.textColorRed),
           ],
         ),
       ),
@@ -128,15 +133,7 @@ class _ReportScreenState extends State<ReportScreen> {
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
@@ -144,16 +141,23 @@ class _ReportScreenState extends State<ReportScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildSummaryItem('assets/icons/ic_expense.svg', 'Total EXPENSE',
-                  totalExpense, Colors.red, currencySymbol),
+                  totalExpense, AppColors.textColorRed, currencySymbol),
+              Container(
+                height: 50,
+                width: 1,
+                color: Color(0XFFF0F3FA),
+              ),
               _buildSummaryItem('assets/icons/ic_income.svg', 'Total INCOME',
-                  totalIncome, Colors.green, currencySymbol),
+                  totalIncome, AppColors.textColorGreen, currencySymbol),
             ],
           ),
           const SizedBox(height: 16),
-          const Divider(),
+          const Divider(
+            color: Color(0XFFF0F3FA),
+          ),
           const SizedBox(height: 8),
-          _buildSavingItem(
-              'assets/icons/ic_saving.svg', 'SAVING', saving, const Color(0xFF8A5AC5), currencySymbol),
+          _buildSavingItem('assets/icons/ic_saving.svg', 'SAVING', saving,
+              const Color(0xFF8A5AC5), currencySymbol),
         ],
       ),
     );
@@ -162,34 +166,47 @@ class _ReportScreenState extends State<ReportScreen> {
   Widget _buildSummaryItem(String icon, String title, double amount,
       Color amountColor, String currencySymbol) {
     return Row(
+      children: [
+        SvgPicture.asset(
+          icon,
+          width: 40,
+          height: 40,
+          color: title == "Total EXPENSE"
+              ? AppColors.textColorRed
+              : AppColors.textColorGreen,
+        ),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SvgPicture.asset(icon, width: 40, height: 40),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: AppTextStyles.caption.copyWith(color: amountColor, fontWeight: FontWeight.bold)),
-                Text(
-                  '${amount.toStringAsFixed(0)}$currencySymbol',
-                  style: AppTextStyles.title.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
-                ),
-              ],
-            )
+            Text(title,
+                style: AppTextStyles.caption
+                    .copyWith(color: amountColor, fontWeight: FontWeight.bold)),
+            Text(
+              '${amount.toStringAsFixed(0)}$currencySymbol',
+              style: AppTextStyles.title
+                  .copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+            ),
           ],
-        );
+        )
+      ],
+    );
   }
 
-    Widget _buildSavingItem(String icon, String title, double amount,
+  Widget _buildSavingItem(String icon, String title, double amount,
       Color iconColor, String currencySymbol) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        SvgPicture.asset(icon, width: 40, height: 40, color: iconColor),
+        SvgPicture.asset(icon, width: 40, height: 40),
         const SizedBox(width: 16),
-        Text('$title: ', style: AppTextStyles.subtitle.copyWith(color: iconColor, fontWeight: FontWeight.bold)),
+        Text('$title: ',
+            style: AppTextStyles.subtitle
+                .copyWith(color: iconColor, fontWeight: FontWeight.bold)),
         Text(
           '${amount.toStringAsFixed(0)}$currencySymbol',
-          style: AppTextStyles.title.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+          style: AppTextStyles.title
+              .copyWith(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -197,28 +214,38 @@ class _ReportScreenState extends State<ReportScreen> {
 
   Widget _buildExpenseTypeDropdown() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: DropdownButton<String>(
-        value: _selectedType,
-        isExpanded: true,
-        underline: const SizedBox.shrink(),
-        items: ['EXPENSE', 'INCOME'].map((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value.tr, style: AppTextStyles.body),
-          );
-        }).toList(),
-        onChanged: (newValue) {
-          setState(() {
-            _selectedType = newValue!;
-          });
-        },
-      ),
-    );
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: DropdownButton<String>(
+          value: _selectedType,
+          isExpanded: false,
+          underline: SizedBox.shrink(),
+          icon: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: SvgPicture.asset(
+              'assets/icons/ic_dropdown.svg',
+              width: 24,
+              height: 24,
+            ),
+          ),
+          items: ['EXPENSE', 'INCOME'].map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value.tr,
+                  style: AppTextStyles.body.copyWith(
+                      color: AppColors.textDefault,
+                      fontWeight: FontWeight.bold)),
+            );
+          }).toList(),
+          onChanged: (newValue) {
+            setState(() {
+              _selectedType = newValue!;
+            });
+          },
+        ));
   }
 
   Widget _buildChart(List<Transaction> transactions) {
@@ -229,27 +256,27 @@ class _ReportScreenState extends State<ReportScreen> {
     }
     final totalValue = transactions.fold(0.0, (sum, item) => sum + item.amount);
 
-
     final List<PieChartSectionData> sections =
         categoryValue.entries.map((entry) {
       final category = defaultCategories.firstWhere(
         (cat) => cat.name == entry.key,
-        orElse: () =>
-            Category(name: 'other'.tr, iconPath: '', colorValue: Colors.grey.value),
+        orElse: () => Category(
+            name: 'other'.tr, iconPath: '', colorValue: Colors.grey.value),
       );
 
       final isTouched =
           categoryValue.entries.toList().indexOf(entry) == touchedIndex;
       final radius = isTouched ? 80.0 : 70.0;
-      final percentage = totalValue > 0 ? (entry.value / totalValue) * 100 : 0.0;
-
+      final percentage =
+          totalValue > 0 ? (entry.value / totalValue) * 100 : 0.0;
 
       return PieChartSectionData(
         color: Color(category.colorValue),
         value: entry.value,
         title: '${percentage.toStringAsFixed(0)}%',
         radius: radius,
-        titleStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
+        titleStyle: AppTextStyles.caption
+            .copyWith(fontWeight: FontWeight.bold, color: Colors.white),
       );
     }).toList();
 
@@ -280,64 +307,92 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  Widget _buildExpenseList(List<Transaction> transactions) {
+  Widget _buildExpenseList(
+      List<Transaction> transactions, String currencySymbol) {
     Map<String, double> categoryTotals = {};
     for (var tx in transactions) {
-      categoryTotals.update(tx.categoryName, (value) => value + tx.amount, ifAbsent: () => tx.amount);
+      categoryTotals.update(tx.categoryName, (value) => value + tx.amount,
+          ifAbsent: () => tx.amount);
     }
 
     var sortedCategories = categoryTotals.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
+    // Màu sắc tùy theo loại giao dịch
+    final amountColor = _selectedType == 'EXPENSE'
+        ? AppColors.textColorRed
+        : AppColors.textColorGreen;
 
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: sortedCategories.length,
-      itemBuilder: (context, index) {
-        final categoryEntry = sortedCategories[index];
-        final category = defaultCategories.firstWhere(
-          (cat) => cat.name == categoryEntry.key,
-          orElse: () => Category(name: 'other'.tr, iconPath: '', colorValue: Colors.grey.value),
-        );
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.textColorWhite,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: sortedCategories.length,
+        itemBuilder: (context, index) {
+          final categoryEntry = sortedCategories[index];
+          final category = defaultCategories.firstWhere(
+                (cat) => cat.name == categoryEntry.key,
+            orElse: () => Category(
+                name: 'other'.tr, iconPath: '', colorValue: Colors.grey.value),
+          );
 
-        // Find a transaction for this category to display the date. This is not ideal.
-        final transactionForDate = transactions.firstWhere((tx) => tx.categoryName == category.name, orElse: () => transactions.first);
+          final transactionForDate = transactions.firstWhere(
+                  (tx) => tx.categoryName == category.name,
+              orElse: () => transactions.first);
 
-        return Card(
-          margin: const EdgeInsets.only(bottom: 10),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Color(category.colorValue).withOpacity(0.1),
-              child: SvgPicture.asset(category.iconPath, width: 24, height: 24),
-            ),
-            title: Text(category.name.tr, style: AppTextStyles.subtitle),
-            subtitle: Text(
-              DateFormat('d MMMM yyyy').format(transactionForDate.date), 
-              style: AppTextStyles.caption.copyWith(color: Colors.grey),
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '${categoryEntry.value.toStringAsFixed(0)}\$',
-                  style: AppTextStyles.subtitle.copyWith(color: Colors.red),
+          return Column(
+            children: [
+              ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Color(category.colorValue).withOpacity(0.1),
+                  child: SvgPicture.asset(category.iconPath, width: 24, height: 24),
                 ),
-                const SizedBox(width: 8),
-                const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-              ],
-            ),
-          ),
-        );
-      },
+                title: Text(category.name.tr,
+                    style: AppTextStyles.subtitle
+                        .copyWith(color: AppColors.textColorBlack)),
+                subtitle: Text(
+                  DateFormat('d MMMM yyyy').format(transactionForDate.date),
+                  style: AppTextStyles.caption
+                      .copyWith(color: AppColors.textColorGrey),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${categoryEntry.value.toStringAsFixed(0)}$currencySymbol',
+                      style: AppTextStyles.subtitle.copyWith(color: amountColor),
+                    ),
+                    SizedBox(width: 8.w),
+                    const Icon(Icons.arrow_forward_ios,
+                        size: 16, color: AppColors.textColorBlue),
+                  ],
+                ),
+              ),
+              if (index != sortedCategories.length - 1)
+                const Divider(
+                  height: 1,
+                  thickness: 1,
+                  indent: 16,
+                  endIndent: 16,
+                  color: Color(0XFFF0F1FA),
+                ),
+            ],
+          );
+        },
+      ),
     );
+
   }
 
   List<Transaction> _getFilteredTransactions(List<Transaction> transactions) {
     return transactions.where((tx) {
       final txDate = tx.date;
-      bool dateMatch = txDate.year == _selectedDate.year && txDate.month == _selectedDate.month;
+      bool dateMatch = txDate.year == _selectedDate.year &&
+          txDate.month == _selectedDate.month;
       return dateMatch;
     }).toList();
   }

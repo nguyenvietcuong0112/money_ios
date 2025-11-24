@@ -181,7 +181,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         prefixStyle: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
         hintText: '0',
         hintStyle: TextStyle(
-            fontSize: 28, fontWeight: FontWeight.bold, color: Colors.grey[400]),
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: Colors.grey[400],
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
@@ -194,19 +197,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           borderSide: BorderSide(color: const Color(0xFF4A80F0), width: 2),
         ),
       ),
-      onChanged: (value) {
-        // Simple currency formatting
-        String newText = '\$${value.replaceAll(r'$', '')}';
-        if (_amountController.text != newText) {
-          _amountController.value = TextEditingValue(
-            text: newText,
-            selection: TextSelection.fromPosition(
-                TextPosition(offset: newText.length)),
-          );
+      onTap: () {
+        if (_amountController.text == "0") {
+          _amountController.clear();
         }
       },
     );
   }
+
+
 
   Widget _buildDateField() {
     return InkWell(
