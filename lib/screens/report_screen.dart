@@ -1,18 +1,16 @@
+
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
-import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/models/category_data.dart';
 import 'package:money_manager/models/category_model.dart';
 import 'package:money_manager/models/transaction_model.dart';
-import 'package:money_manager/models/wallet_model.dart';
-import 'package:money_manager/widgets/custom_toggle_button.dart';
-import 'package:intl/intl.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart';
 
 class ReportScreen extends StatefulWidget {
   final Function(int) onScreenChanged;
@@ -24,45 +22,62 @@ class ReportScreen extends StatefulWidget {
 }
 
 class _ReportScreenState extends State<ReportScreen> {
-  bool _isMonthSelected = true;
   DateTime _selectedDate = DateTime.now();
-  Wallet? _selectedWallet;
-  int _selectedChartTabIndex = 0; // 0 for Expense, 1 for Income
+  String _selectedType = 'EXPENSE';
+  int touchedIndex = -1;
 
   @override
   Widget build(BuildContext context) {
+    final AppController appController = Get.find();
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7F7),
+      backgroundColor: const Color(0xFFF6F7F7), // Fixed color
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text('report'.tr, style: AppTextStyles.title),
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFFF6F7F7), // Fixed color
         elevation: 0,
+        title: Text('report'.tr,
+            style: AppTextStyles.title.copyWith(color: Colors.black)), // Fixed color
         actions: [
-          IconButton(
-            icon: const Icon(Icons.ios_share_outlined, color: Colors.black),
-            onPressed: () {},
-          ),
+          _buildDateFilter(),
         ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Obx(() {
+          final TransactionController transactionController = Get.find();
+          final transactions =
+              _getFilteredTransactions(transactionController.transactions);
+
+          final double totalIncome = transactions
+              .where((tx) => tx.type == TransactionType.income)
+              .fold(0, (sum, item) => sum + item.amount);
+          final double totalExpense = transactions
+              .where((tx) => tx.type == TransactionType.expense)
+              .fold(0, (sum, item) => sum + item.amount);
+          final double saving = totalIncome - totalExpense;
+
+          final expenseTransactions = transactions
+              .where((tx) => tx.type == TransactionType.expense)
+              .toList();
+
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomToggleButton(
-                isMonthSelected: _isMonthSelected,
-                onMonthSelected: () => setState(() => _isMonthSelected = true),
-                onYearSelected: () => setState(() => _isMonthSelected = false),
-              ),
+              _buildSummaryCard(
+                  totalExpense, totalIncome, saving, appController.currencySymbol),
               const SizedBox(height: 24.0),
-              _buildFilters(),
-              const SizedBox(height: 24.0),
-              _buildSummary(),
-              const SizedBox(height: 24.0),
-              _buildChartTabs(),
+              _buildExpenseTypeDropdown(),
               const SizedBox(height: 16.0),
-              _buildChartAndLegend(),
+              if (expenseTransactions.isNotEmpty)
+                _buildChart(expenseTransactions)
+              else
+                SizedBox(
+                  height: 200,
+                  child: Center(
+                    child: Text('no_data_available'.tr, style: AppTextStyles.body),
+                  ),
+                ),
+              const SizedBox(height: 24.0),
+              _buildExpenseList(expenseTransactions),
             ],
           );
         }),
@@ -70,369 +85,260 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  Widget _buildFilters() {
-    final WalletController walletController = Get.find();
-    final List<Wallet?> walletItems = [null, ...walletController.wallets];
-
-    return Row(
-      children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: _isMonthSelected ? _showMonthYearPicker : _showYearPicker,
-            child: _buildDropdownContainer(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    _isMonthSelected
-                        ? DateFormat('MM/yyyy').format(_selectedDate)
-                        : DateFormat('yyyy').format(_selectedDate),
-                    style: AppTextStyles.body,
-                  ),
-                  const Icon(Icons.arrow_drop_down),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildDropdownContainer(
-            child: DropdownButton<Wallet>(
-              isExpanded: true,
-              underline: const SizedBox.shrink(),
-              value: _selectedWallet,
-              hint: Row(
-                children: [
-                  const CircleAvatar(
-                    backgroundColor: Color(0xFFE8E8E8),
-                    child: Icon(Icons.account_balance_wallet, size: 20, color: Colors.black),
-                  ),
-                  const SizedBox(width: 8),
-                  Text('total'.tr, style: AppTextStyles.body),
-                ],
-              ),
-              items: walletItems.map((wallet) {
-                return DropdownMenuItem<Wallet>(
-                  value: wallet,
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: const Color(0xFFE8E8E8),
-                        child: wallet == null
-                            ? const Icon(Icons.account_balance_wallet, size: 20, color: Colors.black)
-                            : SvgPicture.asset(wallet.iconPath, width: 24, height: 24),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(wallet?.name ?? 'total'.tr, style: AppTextStyles.body),
-                    ],
-                  ),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() => _selectedWallet = value);
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showMonthYearPicker() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext builder) {
-        return SizedBox(
-          height: 250,
-          child: Column(
-            children: [
-              SizedBox(
-                height: 40,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr, style: AppTextStyles.button.copyWith(color: Colors.red))),
-                    TextButton(onPressed: () => Get.back(), child: Text('done'.tr, style: AppTextStyles.button.copyWith(color: Colors.green))),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.date,
-                  initialDateTime: _selectedDate,
-                  onDateTimeChanged: (DateTime newDate) {
-                    setState(() {
-                      _selectedDate = newDate;
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
+  Widget _buildDateFilter() {
+    return GestureDetector(
+      onTap: () {
+        showMonthPicker(
+          context: context,
+          initialDate: _selectedDate,
+          firstDate: DateTime(2018),
+          lastDate: DateTime.now(),
+        ).then((date) {
+          if (date != null) {
+            setState(() {
+              _selectedDate = date;
+            });
+          }
+        });
       },
-    );
-  }
-
-  void _showYearPicker() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext builder) {
-        int tempYear = _selectedDate.year;
-        return SizedBox(
-          height: 250,
-          child: Column(
-            children: [
-              SizedBox(
-                height: 40,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr, style: AppTextStyles.button.copyWith(color: Colors.red))),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _selectedDate = DateTime(tempYear);
-                        });
-                        Get.back();
-                      },
-                      child: Text('ok'.tr, style: AppTextStyles.button.copyWith(color: Colors.green)),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: CupertinoPicker(
-                  itemExtent: 40,
-                  scrollController: FixedExtentScrollController(initialItem: _selectedDate.year - 2018),
-                  onSelectedItemChanged: (int index) {
-                    tempYear = 2018 + index;
-                  },
-                  children: List<Widget>.generate(12, (int index) {
-                    return Center(child: Text((2018 + index).toString(), style: AppTextStyles.body));
-                  }),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildDropdownContainer({required Widget child}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.0),
+      child: Container(
+        margin: const EdgeInsets.only(right: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2C3A8D), // Fixed color
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Text(
+              DateFormat('MMMM yyyy').format(_selectedDate),
+              style: AppTextStyles.body.copyWith(color: Colors.white),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_drop_down, color: Colors.white),
+          ],
+        ),
       ),
-      child: child,
     );
   }
 
-  Widget _buildSummary() {
-    final TransactionController transactionController = Get.find();
-    final transactions = _getFilteredTransactions(transactionController.transactions);
-
-    final double totalIncome = transactions.where((tx) => tx.type == TransactionType.income).fold(0, (sum, item) => sum + item.amount);
-    final double totalExpense = transactions.where((tx) => tx.type == TransactionType.expense).fold(0, (sum, item) => sum + item.amount);
-    final double total = totalIncome - totalExpense;
-
+  Widget _buildSummaryCard(double totalExpense, double totalIncome,
+      double saving, String currencySymbol) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          _buildSummaryRow('expense'.tr, totalExpense, Colors.red),
-          _buildSummaryRow('income'.tr, totalIncome, Colors.green),
-          const Divider(),
-          _buildSummaryRow('total'.tr, total, Colors.black, isTotal: true),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryRow(String title, double amount, Color color, {bool isTotal = false}) {
-    final AppController appController = Get.find();
-    String displayText;
-    if (isTotal) {
-      displayText = '${amount.toStringAsFixed(2)} ${appController.currencySymbol}';
-    } else {
-      final sign = title == 'income'.tr ? '+' : '-';
-      displayText = '$sign${amount.toStringAsFixed(2)} ${appController.currencySymbol}';
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title, style: AppTextStyles.body.copyWith(color: Colors.grey[600])),
-          Text(
-            displayText,
-            style: (isTotal ? AppTextStyles.title : AppTextStyles.subtitle).copyWith(color: color),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildSummaryItem('assets/icons/ic_expense.svg', 'Total EXPENSE',
+                  totalExpense, Colors.red, currencySymbol),
+              _buildSummaryItem('assets/icons/ic_income.svg', 'Total INCOME',
+                  totalIncome, Colors.green, currencySymbol),
+            ],
           ),
+          const SizedBox(height: 16),
+          const Divider(),
+          const SizedBox(height: 8),
+          _buildSavingItem(
+              'assets/icons/ic_saving.svg', 'SAVING', saving, const Color(0xFF8A5AC5), currencySymbol),
         ],
       ),
     );
   }
 
-  Widget _buildChartTabs() {
+  Widget _buildSummaryItem(String icon, String title, double amount,
+      Color amountColor, String currencySymbol) {
+    return Row(
+          children: [
+            SvgPicture.asset(icon, width: 40, height: 40),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AppTextStyles.caption.copyWith(color: amountColor, fontWeight: FontWeight.bold)),
+                Text(
+                  '${amount.toStringAsFixed(0)}$currencySymbol',
+                  style: AppTextStyles.title.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+                ),
+              ],
+            )
+          ],
+        );
+  }
+
+    Widget _buildSavingItem(String icon, String title, double amount,
+      Color iconColor, String currencySymbol) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SvgPicture.asset(icon, width: 40, height: 40, color: iconColor),
+        const SizedBox(width: 16),
+        Text('$title: ', style: AppTextStyles.subtitle.copyWith(color: iconColor, fontWeight: FontWeight.bold)),
+        Text(
+          '${amount.toStringAsFixed(0)}$currencySymbol',
+          style: AppTextStyles.title.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExpenseTypeDropdown() {
     return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
-        children: [
-          _buildTabItem(0, "total_expense".tr),
-          _buildTabItem(1, "total_income".tr),
-        ],
+      child: DropdownButton<String>(
+        value: _selectedType,
+        isExpanded: true,
+        underline: const SizedBox.shrink(),
+        items: ['EXPENSE', 'INCOME'].map((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value.tr, style: AppTextStyles.body),
+          );
+        }).toList(),
+        onChanged: (newValue) {
+          setState(() {
+            _selectedType = newValue!;
+          });
+        },
       ),
     );
   }
 
-  Widget _buildTabItem(int index, String title) {
-    bool isSelected = _selectedChartTabIndex == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _selectedChartTabIndex = index),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: isSelected ? Colors.green : Colors.transparent,
-                width: 2,
-              ),
-            ),
+  Widget _buildChart(List<Transaction> transactions) {
+    final Map<String, double> categoryValue = {};
+    for (var tx in transactions) {
+      categoryValue.update(tx.categoryName, (value) => value + tx.amount,
+          ifAbsent: () => tx.amount);
+    }
+    final totalValue = transactions.fold(0.0, (sum, item) => sum + item.amount);
+
+
+    final List<PieChartSectionData> sections =
+        categoryValue.entries.map((entry) {
+      final category = defaultCategories.firstWhere(
+        (cat) => cat.name == entry.key,
+        orElse: () =>
+            Category(name: 'other'.tr, iconPath: '', colorValue: Colors.grey.value),
+      );
+
+      final isTouched =
+          categoryValue.entries.toList().indexOf(entry) == touchedIndex;
+      final radius = isTouched ? 80.0 : 70.0;
+      final percentage = totalValue > 0 ? (entry.value / totalValue) * 100 : 0.0;
+
+
+      return PieChartSectionData(
+        color: Color(category.colorValue),
+        value: entry.value,
+        title: '${percentage.toStringAsFixed(0)}%',
+        radius: radius,
+        titleStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
+      );
+    }).toList();
+
+    return SizedBox(
+      height: 220,
+      child: PieChart(
+        PieChartData(
+          pieTouchData: PieTouchData(
+            touchCallback: (FlTouchEvent event, pieTouchResponse) {
+              setState(() {
+                if (!event.isInterestedForInteractions ||
+                    pieTouchResponse == null ||
+                    pieTouchResponse.touchedSection == null) {
+                  touchedIndex = -1;
+                  return;
+                }
+                touchedIndex =
+                    pieTouchResponse.touchedSection!.touchedSectionIndex;
+              });
+            },
           ),
-          child: Text(
-            title,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.body.copyWith(color: isSelected ? Colors.green : Colors.grey, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
-          ),
+          borderData: FlBorderData(show: false),
+          sectionsSpace: 2,
+          centerSpaceRadius: 70,
+          sections: sections,
         ),
       ),
     );
   }
 
-  Widget _buildChartAndLegend() {
-    final AppController appController = Get.find();
-    final TransactionController transactionController = Get.find();
-    final allTransactions = _getFilteredTransactions(transactionController.transactions);
-
-    final TransactionType selectedType = _selectedChartTabIndex == 0 ? TransactionType.expense : TransactionType.income;
-
-    final relevantTransactions = allTransactions.where((tx) => tx.type == selectedType).toList();
-    final totalValue = relevantTransactions.fold(0.0, (sum, item) => sum + item.amount);
-
-    final Map<String, double> categoryValue = {};
-    for (var tx in relevantTransactions) {
-      categoryValue.update(tx.categoryName, (value) => value + tx.amount, ifAbsent: () => tx.amount);
+  Widget _buildExpenseList(List<Transaction> transactions) {
+    Map<String, double> categoryTotals = {};
+    for (var tx in transactions) {
+      categoryTotals.update(tx.categoryName, (value) => value + tx.amount, ifAbsent: () => tx.amount);
     }
 
-    final List<PieChartSectionData> sections = categoryValue.entries.map((entry) {
-      final category = defaultCategories.firstWhere(
-        (cat) => cat.name == entry.key,
-        orElse: () => Category(name: 'other'.tr, iconPath: '', colorValue: Colors.grey.value),
-      );
-      final percentage = totalValue > 0 ? (entry.value / totalValue) * 100 : 0.0;
+    var sortedCategories = categoryTotals.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
 
-      return PieChartSectionData(
-        color: Color(category.colorValue),
-        value: entry.value,
-        title: '${percentage.toStringAsFixed(1)}%',
-        radius: 60,
-        titleStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
-      );
-    }).toList();
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (relevantTransactions.isNotEmpty)
-          Expanded(
-            flex: 1,
-            child: SizedBox(
-              height: 200,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Text(
-                    '${('total'.tr)}\n${totalValue.toStringAsFixed(2)} ${appController.currencySymbol}',
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  PieChart(PieChartData(
-                    sections: sections,
-                    centerSpaceRadius: 50,
-                    sectionsSpace: 2,
-                  )),
-                ],
-              ),
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: sortedCategories.length,
+      itemBuilder: (context, index) {
+        final categoryEntry = sortedCategories[index];
+        final category = defaultCategories.firstWhere(
+          (cat) => cat.name == categoryEntry.key,
+          orElse: () => Category(name: 'other'.tr, iconPath: '', colorValue: Colors.grey.value),
+        );
+
+        // Find a transaction for this category to display the date. This is not ideal.
+        final transactionForDate = transactions.firstWhere((tx) => tx.categoryName == category.name, orElse: () => transactions.first);
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 10),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Color(category.colorValue).withOpacity(0.1),
+              child: SvgPicture.asset(category.iconPath, width: 24, height: 24),
             ),
-          ),
-        if (relevantTransactions.isNotEmpty) const SizedBox(width: 24),
-        Expanded(
-          flex: 1,
-          child: SizedBox(
-            height: 200,
-            child: ListView.builder(
-              itemCount: categoryValue.length,
-              itemBuilder: (context, index) {
-                final entry = categoryValue.entries.elementAt(index);
-                final category = defaultCategories.firstWhere(
-                  (cat) => cat.name == entry.key,
-                  orElse: () => Category(name: 'other'.tr, iconPath: '', colorValue: Colors.grey.value),
-                );
-                return _buildLegendItem(Color(category.colorValue), entry.key.tr, entry.value);
-              },
+            title: Text(category.name.tr, style: AppTextStyles.subtitle),
+            subtitle: Text(
+              DateFormat('d MMMM yyyy').format(transactionForDate.date), 
+              style: AppTextStyles.caption.copyWith(color: Colors.grey),
             ),
-          ),
-        )
-      ],
-    );
-  }
-
-  Widget _buildLegendItem(Color color, String name, double amount) {
-    final AppController appController = Get.find();
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Container(width: 12, height: 12, color: color),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(name, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
-                Text('${amount.toStringAsFixed(2)} ${appController.currencySymbol}', style: AppTextStyles.caption),
+                Text(
+                  '${categoryEntry.value.toStringAsFixed(0)}\$',
+                  style: AppTextStyles.subtitle.copyWith(color: Colors.red),
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
               ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   List<Transaction> _getFilteredTransactions(List<Transaction> transactions) {
     return transactions.where((tx) {
       final txDate = tx.date;
-      bool dateMatch;
-      if (_isMonthSelected) {
-        dateMatch = txDate.year == _selectedDate.year && txDate.month == _selectedDate.month;
-      } else {
-        dateMatch = txDate.year == _selectedDate.year;
-      }
-      final walletMatch = _selectedWallet == null || tx.walletId == _selectedWallet!.id;
-      return dateMatch && walletMatch;
+      bool dateMatch = txDate.year == _selectedDate.year && txDate.month == _selectedDate.month;
+      return dateMatch;
     }).toList();
   }
 }
