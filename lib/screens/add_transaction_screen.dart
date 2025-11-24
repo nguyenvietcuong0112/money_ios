@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:money_manager/common/text_styles.dart';
@@ -170,6 +171,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
+
   Widget _buildAmountField() {
     final AppController appController = Get.find();
     return TextField(
@@ -197,6 +199,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           borderSide: BorderSide(color: const Color(0xFF4A80F0), width: 2),
         ),
       ),
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')), // chỉ số và dấu .
+        LengthLimitingTextInputFormatter(10), // giới hạn tối đa 10 ký tự
+      ],
       onTap: () {
         if (_amountController.text == "0") {
           _amountController.clear();
@@ -204,6 +210,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       },
     );
   }
+
 
 
 

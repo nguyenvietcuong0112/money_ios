@@ -692,7 +692,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         trailing: Obx(() {
           final appController = Get.find<AppController>();
           return Text(
-            '${transaction.type == TransactionType.income ? '+' : '-'}${appController.currencySymbol}${transaction.amount.toStringAsFixed(2)}',
+            '${transaction.type == TransactionType.income ? '+' : '-'}${appController.currencySymbol}${transaction.amount.toStringAsFixed(0)}',
             style: transaction.type == TransactionType.income
                 ? AppTextStyles.incomeAmount
                 : AppTextStyles.expenseAmount,

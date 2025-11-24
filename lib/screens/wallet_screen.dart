@@ -146,8 +146,8 @@ class WalletScreen extends StatelessWidget {
                     color: AppColors.textColorBlue,
                     fontWeight: FontWeight.bold,
                   ),
-                  maxLines: 1, // giới hạn 1 dòng
-                  overflow: TextOverflow.ellipsis, // thêm dấu … nếu quá dài
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
