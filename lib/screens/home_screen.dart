@@ -31,7 +31,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   DateTime _selectedMonth = DateTime.now();
   TransactionType _selectedType = TransactionType.expense; // mặc định expense
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -98,8 +97,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           onPressed: () {
             Get.to(() => const AddTransactionScreen());
           },
-          backgroundColor: Colors.green,
-          child: const Icon(Icons.add),
+          shape: CircleBorder(),
+          backgroundColor: AppColors.textColorRed,
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
         ),
       ),
     );
@@ -246,32 +249,32 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             Text('report_this_month'.tr,
                 style: AppTextStyles.heading2
                     .copyWith(color: AppColors.textDefault)),
-            GestureDetector(
-              onTap: () => _selectMonth(context),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.calendar_today,
-                        size: 16, color: Colors.green),
-                    const SizedBox(width: 6),
-                    Text(
-                      DateFormat('MM/yyyy').format(_selectedMonth),
-                      style: AppTextStyles.caption.copyWith(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            // GestureDetector(
+            //   onTap: () => _selectMonth(context),
+            //   child: Container(
+            //     padding:
+            //         const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            //     decoration: BoxDecoration(
+            //       color: Colors.green.withOpacity(0.1),
+            //       borderRadius: BorderRadius.circular(20),
+            //     ),
+            //     child: Row(
+            //       mainAxisSize: MainAxisSize.min,
+            //       children: [
+            //         const Icon(Icons.calendar_today,
+            //             size: 16, color: Colors.green),
+            //         const SizedBox(width: 6),
+            //         Text(
+            //           DateFormat('MM/yyyy').format(_selectedMonth),
+            //           style: AppTextStyles.caption.copyWith(
+            //             color: Colors.green,
+            //             fontWeight: FontWeight.bold,
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
           ],
         ),
         const SizedBox(height: 15),
@@ -372,9 +375,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ? (isIncome ? AppColors.textColorGreen : AppColors.textColorRed)
             : Colors.transparent,
         borderRadius: BorderRadius.only(
-            topLeft: isIncome ? const Radius.circular(0) : const Radius.circular(16),
-            topRight:
-                isIncome ? const Radius.circular(16) : const Radius.circular(0)),
+            topLeft:
+                isIncome ? const Radius.circular(0) : const Radius.circular(16),
+            topRight: isIncome
+                ? const Radius.circular(16)
+                : const Radius.circular(0)),
       ),
       child: Row(
         children: [
@@ -542,10 +547,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             barWidth: 3,
             isStrokeCapRound: true,
             dotData: const FlDotData(show: true),
-            belowBarData: BarAreaData(
-              show: true,
-              color: Colors.transparent
-            ),
+            belowBarData: BarAreaData(show: true, color: Colors.transparent),
           ),
         ],
       ),
@@ -559,7 +561,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('recent_transactions'.tr, style: AppTextStyles.heading2.copyWith(color: AppColors.textDefault)),
+            Text('recent_transactions'.tr,
+                style: AppTextStyles.heading2
+                    .copyWith(color: AppColors.textDefault)),
             // TextButton(
             //   onPressed: () {
             //     widget.onScreenChanged(1);
@@ -580,14 +584,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     padding: const EdgeInsets.all(20),
                     child: Text('no_recent_transactions'.tr)));
           }
-          return ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: recentTransactions.length,
-            itemBuilder: (context, index) {
-              final transaction = recentTransactions[index];
-              return _buildTransactionItem(transaction);
-            },
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: recentTransactions.length,
+              itemBuilder: (context, index) {
+                final transaction = recentTransactions[index];
+                return _buildTransactionItem(transaction);
+              },
+            ),
           );
         }),
       ],
@@ -597,7 +607,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildTransactionItem(Transaction transaction) {
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.symmetric(vertical: 6.0),
+      margin: const EdgeInsets.symmetric(vertical: 1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
       color: Colors.white,
       child: ListTile(

@@ -42,7 +42,8 @@ class _RecordScreenState extends State<RecordScreen> {
     final lastMonth = DateTime(now.year + 1, now.month);
     final months = <DateTime>[];
     DateTime currentMonth = firstMonth;
-    while (currentMonth.isBefore(lastMonth) || currentMonth.isAtSameMomentAs(lastMonth)) {
+    while (currentMonth.isBefore(lastMonth) ||
+        currentMonth.isAtSameMomentAs(lastMonth)) {
       months.add(currentMonth);
       currentMonth = DateTime(currentMonth.year, currentMonth.month + 1);
     }
@@ -55,46 +56,61 @@ class _RecordScreenState extends State<RecordScreen> {
     final AppController appController = Get.find();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8F7),
+      backgroundColor: const Color(0xFFF0F3FA),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text('record'.tr, style: AppTextStyles.title.copyWith(color: Colors.black, fontWeight: FontWeight.bold)), // Dịch
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.black54),
-            onPressed: () {
-              // TODO: Implement search functionality
-            },
-          ),
-        ],
+        title: Text('record'.tr,
+            style: AppTextStyles.title.copyWith(
+                color: Colors.black, fontWeight: FontWeight.bold)),
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.search, color: Colors.black54),
+        //     onPressed: () {
+        //       // TODO: Implement search functionality
+        //     },
+        //   ),
+        // ],
       ),
       body: Obx(() {
         final allTransactions = transactionController.transactions;
 
         final monthlyTransactions = allTransactions.where((tx) {
-          final walletMatch = _selectedWallet == 'Total' || tx.walletId == _selectedWallet;
-          final monthMatch = tx.date.year == _focusedDay.year && tx.date.month == _focusedDay.month;
+          final walletMatch =
+              _selectedWallet == 'Total' || tx.walletId == _selectedWallet;
+          final monthMatch = tx.date.year == _focusedDay.year &&
+              tx.date.month == _focusedDay.month;
           return walletMatch && monthMatch;
         }).toList();
 
         final dailyTotals = groupBy(
           allTransactions,
-          (Transaction tx) => DateTime(tx.date.year, tx.date.month, tx.date.day),
+          (Transaction tx) =>
+              DateTime(tx.date.year, tx.date.month, tx.date.day),
         ).map((date, txs) {
-          final income = txs.where((tx) => tx.type == TransactionType.income).fold(0.0, (sum, item) => sum + item.amount);
-          final expense = txs.where((tx) => tx.type == TransactionType.expense).fold(0.0, (sum, item) => sum + item.amount);
+          final income = txs
+              .where((tx) => tx.type == TransactionType.income)
+              .fold(0.0, (sum, item) => sum + item.amount);
+          final expense = txs
+              .where((tx) => tx.type == TransactionType.expense)
+              .fold(0.0, (sum, item) => sum + item.amount);
           return MapEntry(date, {'income': income, 'expense': expense});
         });
 
         final groupedTransactions = groupBy(
           monthlyTransactions,
-          (Transaction tx) => DateTime(tx.date.year, tx.date.month, tx.date.day),
+          (Transaction tx) =>
+              DateTime(tx.date.year, tx.date.month, tx.date.day),
         );
-        final sortedDates = groupedTransactions.keys.toList()..sort((a, b) => b.compareTo(a));
+        final sortedDates = groupedTransactions.keys.toList()
+          ..sort((a, b) => b.compareTo(a));
 
-        final totalIncome = monthlyTransactions.where((tx) => tx.type == TransactionType.income).fold(0.0, (sum, item) => sum + item.amount);
-        final totalExpense = monthlyTransactions.where((tx) => tx.type == TransactionType.expense).fold(0.0, (sum, item) => sum + item.amount);
+        final totalIncome = monthlyTransactions
+            .where((tx) => tx.type == TransactionType.income)
+            .fold(0.0, (sum, item) => sum + item.amount);
+        final totalExpense = monthlyTransactions
+            .where((tx) => tx.type == TransactionType.expense)
+            .fold(0.0, (sum, item) => sum + item.amount);
 
         return SingleChildScrollView(
           child: Column(
@@ -108,7 +124,8 @@ class _RecordScreenState extends State<RecordScreen> {
               _buildCalendar(dailyTotals, appController),
               const SizedBox(height: 16),
               _buildSummary(totalIncome, totalExpense),
-              _buildTransactionList(sortedDates, groupedTransactions, appController),
+              _buildTransactionList(
+                  sortedDates, groupedTransactions, appController),
             ],
           ),
         );
@@ -125,7 +142,9 @@ class _RecordScreenState extends State<RecordScreen> {
 
   Widget _buildHeader(WalletController walletController) {
     List<DropdownMenuItem<String>> walletItems = [
-      DropdownMenuItem(value: 'Total', child: Text('total'.tr, style: AppTextStyles.body)), // Dịch
+      DropdownMenuItem(
+          value: 'Total', child: Text('total'.tr, style: AppTextStyles.body)),
+      // Dịch
       ...walletController.wallets.map((wallet) {
         return DropdownMenuItem(
           value: wallet.id,
@@ -135,18 +154,26 @@ class _RecordScreenState extends State<RecordScreen> {
     ];
 
     DateTime selectedMonth = _months.firstWhere(
-        (month) => month.year == _focusedDay.year && month.month == _focusedDay.month,
+        (month) =>
+            month.year == _focusedDay.year && month.month == _focusedDay.month,
         orElse: () => _months.firstWhere(
-            (m) => m.year == DateTime.now().year && m.month == DateTime.now().month,
+            (m) =>
+                m.year == DateTime.now().year &&
+                m.month == DateTime.now().month,
             orElse: () => _months.first));
 
-    return Padding(
+    return Container(
+      decoration: BoxDecoration(
+        color: Color(0XFF2C3E64),
+      ),
+      margin: EdgeInsets.symmetric(horizontal: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20.0),
@@ -158,7 +185,8 @@ class _RecordScreenState extends State<RecordScreen> {
                 items: _months.map((DateTime month) {
                   return DropdownMenuItem<DateTime>(
                     value: month,
-                    child: Text(DateFormat('MMMM yyyy').format(month), style: AppTextStyles.body),
+                    child: Text(DateFormat('MMMM yyyy').format(month),
+                        style: AppTextStyles.body),
                   );
                 }).toList(),
                 onChanged: (DateTime? newValue) {
@@ -173,7 +201,8 @@ class _RecordScreenState extends State<RecordScreen> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20.0),
@@ -198,10 +227,12 @@ class _RecordScreenState extends State<RecordScreen> {
     );
   }
 
-  Widget _buildCalendar(Map<DateTime, Map<String, double>> dailyTotals, AppController appController) {
+  Widget _buildCalendar(Map<DateTime, Map<String, double>> dailyTotals,
+      AppController appController) {
     return Container(
       margin: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12.0)),
+      decoration: BoxDecoration(
+          color: Colors.white, borderRadius: BorderRadius.circular(12.0)),
       child: TableCalendar(
         headerVisible: false,
         firstDay: _months.first,
@@ -229,8 +260,10 @@ class _RecordScreenState extends State<RecordScreen> {
           });
         },
         daysOfWeekStyle: DaysOfWeekStyle(
-          weekdayStyle: AppTextStyles.body.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
-          weekendStyle: AppTextStyles.body.copyWith(color: Colors.red, fontWeight: FontWeight.bold),
+          weekdayStyle: AppTextStyles.body
+              .copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+          weekendStyle: AppTextStyles.body
+              .copyWith(color: Colors.red, fontWeight: FontWeight.bold),
         ),
         calendarBuilders: CalendarBuilders(
           defaultBuilder: (context, day, focusedDay) {
@@ -242,9 +275,22 @@ class _RecordScreenState extends State<RecordScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('${day.day}', style: AppTextStyles.caption.copyWith(fontSize: 12)),
-                  if (income > 0) Text('+${appController.currencySymbol}${income.toStringAsFixed(0)}', style: AppTextStyles.caption.copyWith(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
-                  if (expense > 0) Text('-${appController.currencySymbol}${expense.toStringAsFixed(0)}', style: AppTextStyles.caption.copyWith(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold)),
+                  Text('${day.day}',
+                      style: AppTextStyles.caption.copyWith(fontSize: 12)),
+                  if (income > 0)
+                    Text(
+                        '+${appController.currencySymbol}${income.toStringAsFixed(0)}',
+                        style: AppTextStyles.caption.copyWith(
+                            color: Colors.blue,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold)),
+                  if (expense > 0)
+                    Text(
+                        '-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
+                        style: AppTextStyles.caption.copyWith(
+                            color: Colors.red,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold)),
                 ],
               ),
             );
@@ -262,9 +308,23 @@ class _RecordScreenState extends State<RecordScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('${day.day}', style: AppTextStyles.caption.copyWith(fontSize: 12, fontWeight: FontWeight.bold)),
-                  if (income > 0) Text('+${appController.currencySymbol}${income.toStringAsFixed(0)}', style: AppTextStyles.caption.copyWith(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
-                  if (expense > 0) Text('-${appController.currencySymbol}${expense.toStringAsFixed(0)}', style: AppTextStyles.caption.copyWith(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold)),
+                  Text('${day.day}',
+                      style: AppTextStyles.caption
+                          .copyWith(fontSize: 12, fontWeight: FontWeight.bold)),
+                  if (income > 0)
+                    Text(
+                        '+${appController.currencySymbol}${income.toStringAsFixed(0)}',
+                        style: AppTextStyles.caption.copyWith(
+                            color: Colors.blue,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold)),
+                  if (expense > 0)
+                    Text(
+                        '-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
+                        style: AppTextStyles.caption.copyWith(
+                            color: Colors.red,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold)),
                 ],
               ),
             );
@@ -282,9 +342,23 @@ class _RecordScreenState extends State<RecordScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('${day.day}', style: AppTextStyles.caption.copyWith(fontSize: 12, fontWeight: FontWeight.bold)),
-                  if (income > 0) Text('+${appController.currencySymbol}${income.toStringAsFixed(0)}', style: AppTextStyles.caption.copyWith(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
-                  if (expense > 0) Text('-${appController.currencySymbol}${expense.toStringAsFixed(0)}', style: AppTextStyles.caption.copyWith(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold)),
+                  Text('${day.day}',
+                      style: AppTextStyles.caption
+                          .copyWith(fontSize: 12, fontWeight: FontWeight.bold)),
+                  if (income > 0)
+                    Text(
+                        '+${appController.currencySymbol}${income.toStringAsFixed(0)}',
+                        style: AppTextStyles.caption.copyWith(
+                            color: Colors.blue,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold)),
+                  if (expense > 0)
+                    Text(
+                        '-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
+                        style: AppTextStyles.caption.copyWith(
+                            color: Colors.red,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold)),
                 ],
               ),
             );
@@ -301,9 +375,13 @@ class _RecordScreenState extends State<RecordScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildSummaryItem('income'.tr, income, Colors.blue), // Dịch
-          _buildSummaryItem('expenses'.tr, expense, Colors.red), // Dịch
-          _buildSummaryItem('total'.tr, total, total >= 0 ? Colors.green : Colors.orange), // Dịch
+          _buildSummaryItem('income'.tr, income, Colors.blue),
+          // Dịch
+          _buildSummaryItem('expenses'.tr, expense, Colors.red),
+          // Dịch
+          _buildSummaryItem(
+              'total'.tr, total, total >= 0 ? Colors.green : Colors.orange),
+          // Dịch
         ],
       ),
     );
@@ -312,30 +390,37 @@ class _RecordScreenState extends State<RecordScreen> {
   Widget _buildSummaryItem(String title, double amount, Color color) {
     return Column(
       children: [
-        Text(title, style: AppTextStyles.body.copyWith(color: Colors.grey[600], fontSize: 16)),
+        Text(title,
+            style: AppTextStyles.body
+                .copyWith(color: Colors.grey[600], fontSize: 16)),
         const SizedBox(height: 4.0),
         Obx(() {
           final appController = Get.find<AppController>();
           return Text(
             '${appController.currencySymbol}${amount.toStringAsFixed(2)}',
-            style: AppTextStyles.body.copyWith(color: color, fontWeight: FontWeight.bold, fontSize: 18),
+            style: AppTextStyles.body.copyWith(
+                color: color, fontWeight: FontWeight.bold, fontSize: 18),
           );
         }),
       ],
     );
   }
 
-  Widget _buildTransactionList(List<DateTime> sortedDates,
-      Map<DateTime, List<Transaction>> groupedTransactions, AppController appController) {
+  Widget _buildTransactionList(
+      List<DateTime> sortedDates,
+      Map<DateTime, List<Transaction>> groupedTransactions,
+      AppController appController) {
     if (_selectedDay != null) {
-      final selectedDayKey = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
+      final selectedDayKey =
+          DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
       final selectedDayTransactions = groupedTransactions[selectedDayKey] ?? [];
 
       if (selectedDayTransactions.isEmpty) {
         return Center(
             child: Padding(
                 padding: const EdgeInsets.all(20.0),
-                child: Text('no_transactions_on_this_day'.tr, style: AppTextStyles.body))); // Dịch
+                child: Text('no_transactions_on_this_day'.tr,
+                    style: AppTextStyles.body))); // Dịch
       }
 
       return Column(
@@ -345,10 +430,12 @@ class _RecordScreenState extends State<RecordScreen> {
             padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 8.0),
             child: Text(
               DateFormat('dd/MM/yyyy').format(selectedDayKey),
-              style: AppTextStyles.title.copyWith(fontSize: 18, color: Colors.grey[700]),
+              style: AppTextStyles.title
+                  .copyWith(fontSize: 18, color: Colors.grey[700]),
             ),
           ),
-          ...selectedDayTransactions.map((tx) => _buildTransactionItem(context, tx))
+          ...selectedDayTransactions
+              .map((tx) => _buildTransactionItem(context, tx))
         ],
       );
     } else {
@@ -356,7 +443,8 @@ class _RecordScreenState extends State<RecordScreen> {
         return Center(
             child: Padding(
                 padding: const EdgeInsets.all(30.0),
-                child: Text('no_transactions_in_this_month'.tr, style: AppTextStyles.body))); // Dịch
+                child: Text('no_transactions_in_this_month'.tr,
+                    style: AppTextStyles.body))); // Dịch
       }
       return ListView.builder(
         shrinkWrap: true,
@@ -366,7 +454,8 @@ class _RecordScreenState extends State<RecordScreen> {
           final date = sortedDates[index];
           final dailyTransactions = groupedTransactions[date]!;
           final dailyTotal = dailyTransactions.fold(0.0, (sum, tx) {
-            return sum + (tx.type == TransactionType.income ? tx.amount : -tx.amount);
+            return sum +
+                (tx.type == TransactionType.income ? tx.amount : -tx.amount);
           });
 
           return Column(
@@ -379,16 +468,19 @@ class _RecordScreenState extends State<RecordScreen> {
                   children: [
                     Text(
                       DateFormat('dd/MM/yyyy').format(date),
-                      style: AppTextStyles.title.copyWith(fontSize: 18, color: Colors.grey[700]),
+                      style: AppTextStyles.title
+                          .copyWith(fontSize: 18, color: Colors.grey[700]),
                     ),
                     Text(
                       '${dailyTotal >= 0 ? '+' : ''}${appController.currencySymbol}${dailyTotal.abs().toStringAsFixed(2)}',
-                      style: AppTextStyles.title.copyWith(fontSize: 18, color: Colors.grey[700]),
+                      style: AppTextStyles.title
+                          .copyWith(fontSize: 18, color: Colors.grey[700]),
                     ),
                   ],
                 ),
               ),
-              ...dailyTransactions.map((tx) => _buildTransactionItem(context, tx)),
+              ...dailyTransactions
+                  .map((tx) => _buildTransactionItem(context, tx)),
               const SizedBox(height: 10),
             ],
           );
@@ -409,8 +501,11 @@ class _RecordScreenState extends State<RecordScreen> {
           backgroundColor: Color(transaction.colorValue).withAlpha(25),
           child: SvgPicture.asset(transaction.iconPath, width: 22, height: 22),
         ),
-        title: Text(transaction.categoryName.tr, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
-        subtitle: transaction.title.isNotEmpty ? Text(transaction.title, style: AppTextStyles.caption) : null,
+        title: Text(transaction.categoryName.tr,
+            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
+        subtitle: transaction.title.isNotEmpty
+            ? Text(transaction.title, style: AppTextStyles.caption)
+            : null,
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -419,7 +514,9 @@ class _RecordScreenState extends State<RecordScreen> {
               return Text(
                 '${transaction.type == TransactionType.income ? '+' : '-'}${appController.currencySymbol}${transaction.amount.toStringAsFixed(2)}',
                 style: AppTextStyles.body.copyWith(
-                    color: transaction.type == TransactionType.income ? Colors.blue : Colors.red,
+                    color: transaction.type == TransactionType.income
+                        ? Colors.blue
+                        : Colors.red,
                     fontWeight: FontWeight.bold,
                     fontSize: 16),
               );
