@@ -37,7 +37,7 @@ Money Manager là một ứng dụng di động đa nền tảng giúp người 
 2.  **Tạo file `text_styles.dart`:** Tạo một file mới tại `lib/common/text_styles.dart`.
 3.  **Định nghĩa các TextStyle với font Lato:**
     - Trong lớp `AppTextStyles`, định nghĩa các `TextStyle` tĩnh sử dụng `GoogleFonts.lato()`.
-    - Các style bao gồm: `heading1`, `heading2`, `title`, `subtitle`, `body`, `button`, `incomeAmount`, `expenseAmount`, v.v.
+    - Các style bao gồm: `heading1Black`, `heading2`, `title`, `subtitle`, `body`, `button`, `incomeAmount`, `expenseAmount`, v.v.
 4.  **Tái cấu trúc (Refactor) mã nguồn:**
     - Bắt đầu với `home_screen.dart`.
     - Thay thế các `TextStyle` inline bằng cách tham chiếu đến style trong `AppTextStyles`.
