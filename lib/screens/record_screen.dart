@@ -1,6 +1,9 @@
+import 'package:draggable_fab/draggable_fab.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
+import 'package:money_manager/common/color.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/models/transaction_model.dart';
@@ -8,6 +11,7 @@ import 'package:get/get.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/screens/transaction_detail_screen.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:collection/collection.dart';
 
@@ -28,6 +32,8 @@ class _RecordScreenState extends State<RecordScreen> {
   DateTime? _selectedDay;
   String _selectedWallet = 'Total';
   late List<DateTime> _months;
+  final walletController = Get.find<WalletController>();
+  String? _selectedWalletId;
 
   @override
   void initState() {
@@ -61,8 +67,8 @@ class _RecordScreenState extends State<RecordScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text('record'.tr,
-            style: AppTextStyles.title.copyWith(
-                color: Colors.black, fontWeight: FontWeight.bold)),
+            style: AppTextStyles.title
+                .copyWith(color: Colors.black, fontWeight: FontWeight.bold)),
         // actions: [
         //   IconButton(
         //     icon: const Icon(Icons.search, color: Colors.black54),
@@ -122,7 +128,7 @@ class _RecordScreenState extends State<RecordScreen> {
                 },
               ),
               _buildCalendar(dailyTotals, appController),
-              const SizedBox(height: 16),
+              SizedBox(height: 2.h),
               _buildSummary(totalIncome, totalExpense),
               _buildTransactionList(
                   sortedDates, groupedTransactions, appController),
@@ -130,12 +136,18 @@ class _RecordScreenState extends State<RecordScreen> {
           ),
         );
       }),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.to(() => const AddTransactionScreen());
-        },
-        backgroundColor: Colors.green[600],
-        child: const Icon(Icons.add),
+      floatingActionButton: DraggableFab(
+        child: FloatingActionButton(
+          onPressed: () {
+            Get.to(() => const AddTransactionScreen());
+          },
+          shape: CircleBorder(),
+          backgroundColor: AppColors.textColorRed,
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }
@@ -144,7 +156,6 @@ class _RecordScreenState extends State<RecordScreen> {
     List<DropdownMenuItem<String>> walletItems = [
       DropdownMenuItem(
           value: 'Total', child: Text('total'.tr, style: AppTextStyles.body)),
-      // Dịch
       ...walletController.wallets.map((wallet) {
         return DropdownMenuItem(
           value: wallet.id,
@@ -163,65 +174,98 @@ class _RecordScreenState extends State<RecordScreen> {
             orElse: () => _months.first));
 
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Color(0XFF2C3E64),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(12),
+          topRight: Radius.circular(12),
+        ),
       ),
-      margin: EdgeInsets.symmetric(horizontal: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      margin: EdgeInsets.symmetric(horizontal: 10.w),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<DateTime>(
-                value: selectedMonth,
-                icon: const Icon(Icons.arrow_drop_down, color: Colors.green),
-                items: _months.map((DateTime month) {
-                  return DropdownMenuItem<DateTime>(
-                    value: month,
-                    child: Text(DateFormat('MMMM yyyy').format(month),
-                        style: AppTextStyles.body),
-                  );
-                }).toList(),
-                onChanged: (DateTime? newValue) {
-                  if (newValue != null) {
-                    setState(() {
-                      _focusedDay = newValue;
-                      _selectedDay = null;
-                    });
-                  }
-                },
+          InkWell(
+            onTap: () {
+              showMonthPicker(
+                context: context,
+                initialDate: selectedMonth ?? DateTime.now(),
+                firstDate: DateTime(2020),
+                lastDate: DateTime(2030),
+              ).then((date) {
+                if (date != null) {
+                  setState(() {
+                    selectedMonth = date;
+                    _focusedDay = date;
+                    _selectedDay = null;
+                  });
+                }
+              });
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    selectedMonth != null
+                        ? DateFormat('MMMM yyyy').format(selectedMonth!)
+                        : 'Select Month',
+                    style: AppTextStyles.body
+                        .copyWith(color: AppColors.textColorWhite),
+                  ),
+                  Icon(Icons.arrow_drop_down,
+                      color: AppColors.textColorRed, size: 30.h),
+                ],
               ),
             ),
           ),
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 2.h),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20.0),
+              color: AppColors.textColorGreyContainer,
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedWallet,
-                icon: const Icon(Icons.arrow_drop_down, color: Colors.green),
-                items: walletItems,
-                onChanged: (String? newValue) {
-                  if (newValue != null) {
-                    setState(() {
-                      _selectedWallet = newValue;
-                    });
-                  }
-                },
+            child: Obx(
+                  () => DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _selectedWalletId ?? (walletController.wallets.isNotEmpty ? walletController.wallets.first.id : null),
+                  icon: Icon(Icons.arrow_drop_down, color: AppColors.textColorRed, size: 30.w),
+                  items: walletController.wallets.map((wallet) {
+                    return DropdownMenuItem<String>(
+                      value: wallet.id,
+                      child: Row(
+                        children: [
+                          SvgPicture.asset(
+                            wallet.iconPath,
+                            width: 24.w,
+                            height: 24.h,
+                          ),
+                          SizedBox(width: 8.w),
+                          Text(
+                            wallet.name,
+                            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (String? newWalletId) {
+                    if (newWalletId != null) {
+                      setState(() {
+                        _selectedWalletId = newWalletId;
+                      });
+                    }
+                  },
+                ),
               ),
             ),
-          ),
+          )
         ],
       ),
     );
@@ -230,9 +274,9 @@ class _RecordScreenState extends State<RecordScreen> {
   Widget _buildCalendar(Map<DateTime, Map<String, double>> dailyTotals,
       AppController appController) {
     return Container(
-      margin: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(12.0)),
+      padding: EdgeInsets.only(top: 10.h),
+      margin: EdgeInsets.symmetric(horizontal: 10.w),
+      decoration: const BoxDecoration(color: Colors.white),
       child: TableCalendar(
         headerVisible: false,
         firstDay: _months.first,
@@ -260,11 +304,12 @@ class _RecordScreenState extends State<RecordScreen> {
           });
         },
         daysOfWeekStyle: DaysOfWeekStyle(
-          weekdayStyle: AppTextStyles.body
-              .copyWith(color: Colors.black, fontWeight: FontWeight.bold),
-          weekendStyle: AppTextStyles.body
-              .copyWith(color: Colors.red, fontWeight: FontWeight.bold),
+          weekdayStyle: AppTextStyles.body.copyWith(
+              color: AppColors.textColorBlack, fontWeight: FontWeight.bold),
+          weekendStyle: AppTextStyles.body.copyWith(
+              color: AppColors.textColorRed, fontWeight: FontWeight.bold),
         ),
+        daysOfWeekHeight: 30.h,
         calendarBuilders: CalendarBuilders(
           defaultBuilder: (context, day, focusedDay) {
             final totals = dailyTotals[DateTime(day.year, day.month, day.day)];
@@ -281,14 +326,14 @@ class _RecordScreenState extends State<RecordScreen> {
                     Text(
                         '+${appController.currencySymbol}${income.toStringAsFixed(0)}',
                         style: AppTextStyles.caption.copyWith(
-                            color: Colors.blue,
+                            color: AppColors.textColorGreen,
                             fontSize: 9,
                             fontWeight: FontWeight.bold)),
                   if (expense > 0)
                     Text(
                         '-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
                         style: AppTextStyles.caption.copyWith(
-                            color: Colors.red,
+                            color: AppColors.textColorRed,
                             fontSize: 9,
                             fontWeight: FontWeight.bold)),
                 ],
@@ -315,14 +360,14 @@ class _RecordScreenState extends State<RecordScreen> {
                     Text(
                         '+${appController.currencySymbol}${income.toStringAsFixed(0)}',
                         style: AppTextStyles.caption.copyWith(
-                            color: Colors.blue,
+                            color: AppColors.textColorGreen,
                             fontSize: 9,
                             fontWeight: FontWeight.bold)),
                   if (expense > 0)
                     Text(
                         '-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
                         style: AppTextStyles.caption.copyWith(
-                            color: Colors.red,
+                            color: AppColors.textColorRed,
                             fontSize: 9,
                             fontWeight: FontWeight.bold)),
                 ],
@@ -336,27 +381,28 @@ class _RecordScreenState extends State<RecordScreen> {
             return Container(
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.green, width: 1.5),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
+                  border: Border.all(color: Color(0XFF3E70FD), width: 1.5),
+                  borderRadius: BorderRadius.circular(12)),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text('${day.day}',
-                      style: AppTextStyles.caption
-                          .copyWith(fontSize: 12, fontWeight: FontWeight.bold)),
+                      style: AppTextStyles.caption.copyWith(
+                          fontSize: 12,
+                          color: AppColors.textColorBlack,
+                          fontWeight: FontWeight.bold)),
                   if (income > 0)
                     Text(
                         '+${appController.currencySymbol}${income.toStringAsFixed(0)}',
                         style: AppTextStyles.caption.copyWith(
-                            color: Colors.blue,
+                            color: AppColors.textColorGreen,
                             fontSize: 9,
                             fontWeight: FontWeight.bold)),
                   if (expense > 0)
                     Text(
                         '-${appController.currencySymbol}${expense.toStringAsFixed(0)}',
                         style: AppTextStyles.caption.copyWith(
-                            color: Colors.red,
+                            color: AppColors.textColorRed,
                             fontSize: 9,
                             fontWeight: FontWeight.bold)),
                 ],
@@ -370,18 +416,23 @@ class _RecordScreenState extends State<RecordScreen> {
 
   Widget _buildSummary(double income, double expense) {
     final total = expense - income;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.textColorWhite,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(12),
+          bottomRight: Radius.circular(12),
+        ),
+      ),
+      margin: EdgeInsets.symmetric(horizontal: 10.w),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildSummaryItem('income'.tr, income, Colors.blue),
-          // Dịch
-          _buildSummaryItem('expenses'.tr, expense, Colors.red),
-          // Dịch
-          _buildSummaryItem(
-              'total'.tr, total, total >= 0 ? Colors.green : Colors.orange),
-          // Dịch
+          _buildSummaryItem('income'.tr, income, AppColors.textColorGreen),
+          _buildSummaryItem('expenses'.tr, expense, AppColors.textColorRed),
+          _buildSummaryItem('total'.tr, total,
+              total >= 0 ? AppColors.textColorBlue : AppColors.textColorBlue),
         ],
       ),
     );
@@ -397,7 +448,7 @@ class _RecordScreenState extends State<RecordScreen> {
         Obx(() {
           final appController = Get.find<AppController>();
           return Text(
-            '${appController.currencySymbol}${amount.toStringAsFixed(2)}',
+            '${appController.currencySymbol}${amount.toStringAsFixed(0)}',
             style: AppTextStyles.body.copyWith(
                 color: color, fontWeight: FontWeight.bold, fontSize: 18),
           );
@@ -410,119 +461,138 @@ class _RecordScreenState extends State<RecordScreen> {
       List<DateTime> sortedDates,
       Map<DateTime, List<Transaction>> groupedTransactions,
       AppController appController) {
-    if (_selectedDay != null) {
-      final selectedDayKey =
-          DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
-      final selectedDayTransactions = groupedTransactions[selectedDayKey] ?? [];
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12)
+      ),
+      margin: EdgeInsets.symmetric(horizontal: 10.w,vertical: 10.h),
+      child: _selectedDay != null
+          ? Builder(
+        builder: (context) {
+          final selectedDayKey = DateTime(
+              _selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
+          final selectedDayTransactions =
+              groupedTransactions[selectedDayKey] ?? [];
 
-      if (selectedDayTransactions.isEmpty) {
-        return Center(
-            child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Text('no_transactions_on_this_day'.tr,
-                    style: AppTextStyles.body))); // Dịch
-      }
-
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 8.0),
-            child: Text(
-              DateFormat('dd/MM/yyyy').format(selectedDayKey),
-              style: AppTextStyles.title
-                  .copyWith(fontSize: 18, color: Colors.grey[700]),
-            ),
-          ),
-          ...selectedDayTransactions
-              .map((tx) => _buildTransactionItem(context, tx))
-        ],
-      );
-    } else {
-      if (groupedTransactions.isEmpty) {
-        return Center(
-            child: Padding(
-                padding: const EdgeInsets.all(30.0),
-                child: Text('no_transactions_in_this_month'.tr,
-                    style: AppTextStyles.body))); // Dịch
-      }
-      return ListView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: sortedDates.length,
-        itemBuilder: (context, index) {
-          final date = sortedDates[index];
-          final dailyTransactions = groupedTransactions[date]!;
-          final dailyTotal = dailyTransactions.fold(0.0, (sum, tx) {
-            return sum +
-                (tx.type == TransactionType.income ? tx.amount : -tx.amount);
-          });
+          if (selectedDayTransactions.isEmpty) {
+            return Center(
+                child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Text('no_transactions_on_this_day'.tr,
+                        style: AppTextStyles.body)));
+          }
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      DateFormat('dd/MM/yyyy').format(date),
-                      style: AppTextStyles.title
-                          .copyWith(fontSize: 18, color: Colors.grey[700]),
-                    ),
-                    Text(
-                      '${dailyTotal >= 0 ? '+' : ''}${appController.currencySymbol}${dailyTotal.abs().toStringAsFixed(2)}',
-                      style: AppTextStyles.title
-                          .copyWith(fontSize: 18, color: Colors.grey[700]),
-                    ),
-                  ],
+                child: Text(
+                  DateFormat('dd/MM/yyyy').format(selectedDayKey),
+                  style: AppTextStyles.title
+                      .copyWith(fontSize: 18, color: Colors.grey[700]),
                 ),
               ),
-              ...dailyTransactions
-                  .map((tx) => _buildTransactionItem(context, tx)),
-              const SizedBox(height: 10),
+              ...selectedDayTransactions
+                  .map((tx) => _buildTransactionItem(context, tx))
             ],
           );
         },
-      );
-    }
+      )
+          : Builder(
+        builder: (context) {
+          if (groupedTransactions.isEmpty) {
+            return Center(
+                child: Padding(
+                    padding: const EdgeInsets.all(30.0),
+                    child: Text('no_transactions_in_this_month'.tr,
+                        style: AppTextStyles.body)));
+          }
+
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: sortedDates.length,
+            itemBuilder: (context, index) {
+              final date = sortedDates[index];
+              final dailyTransactions = groupedTransactions[date]!;
+              final dailyTotal = dailyTransactions.fold(0.0, (sum, tx) {
+                return sum +
+                    (tx.type == TransactionType.income
+                        ? tx.amount
+                        : -tx.amount);
+              });
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Padding(
+                  //   padding:
+                  //   const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 8.0),
+                  //   child: Row(
+                  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //     children: [
+                  //       Text(
+                  //         DateFormat('dd/MM/yyyy').format(date),
+                  //         style: AppTextStyles.title
+                  //             .copyWith(fontSize: 16, color: AppColors.textColorGrey),
+                  //       ),
+                  //       Text(
+                  //         '${dailyTotal >= 0 ? '+' : ''}${dailyTotal.abs().toStringAsFixed(0)}${appController.currencySymbol}',
+                  //         style: AppTextStyles.title
+                  //             .copyWith(fontSize: 16, color: AppColors.textColorGrey),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+                  ...dailyTransactions
+                      .map((tx) => _buildTransactionItem(context, tx)),
+                  const SizedBox(height: 10),
+                ],
+              );
+            },
+          );
+        },
+      ),
+    );
   }
+
 
   Widget _buildTransactionItem(BuildContext context, Transaction transaction) {
     return Card(
       elevation: 0,
       color: Colors.white,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: ListTile(
         leading: CircleAvatar(
-          radius: 20,
+          radius: 25,
           backgroundColor: Color(transaction.colorValue).withAlpha(25),
-          child: SvgPicture.asset(transaction.iconPath, width: 22, height: 22),
+          child: SvgPicture.asset(transaction.iconPath, width: 30, height: 30),
         ),
         title: Text(transaction.categoryName.tr,
             style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
-        subtitle: transaction.title.isNotEmpty
-            ? Text(transaction.title, style: AppTextStyles.caption)
-            : null,
+        subtitle: Text(
+          transaction.title.isNotEmpty
+              ? transaction.title
+              : DateFormat('d MMMM yyyy').format(transaction.date),),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Obx(() {
               final appController = Get.find<AppController>();
               return Text(
-                '${transaction.type == TransactionType.income ? '+' : '-'}${appController.currencySymbol}${transaction.amount.toStringAsFixed(2)}',
+                '${transaction.amount.toStringAsFixed(0)}${appController.currencySymbol}',
                 style: AppTextStyles.body.copyWith(
                     color: transaction.type == TransactionType.income
-                        ? Colors.blue
-                        : Colors.red,
+                        ? AppColors.textColorGreen
+                        : AppColors.textColorRed,
                     fontWeight: FontWeight.bold,
                     fontSize: 16),
               );
             }),
             const SizedBox(width: 8),
-            const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+            const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.textColorBlue),
           ],
         ),
         onTap: () {
