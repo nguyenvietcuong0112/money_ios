@@ -40,12 +40,12 @@ class WalletScreen extends StatelessWidget {
                   itemCount: walletController.wallets.length,
                   itemBuilder: (context, index) {
                     final wallet = walletController.wallets[index];
-                    return Card(
-                      elevation: 1,
-                      margin: const EdgeInsets.symmetric(vertical: 6.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16.0),
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12)
                       ),
+                      margin: EdgeInsets.only(bottom: 5.h),
                       child: ListTile(
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 20.0, vertical: 10.0),
@@ -63,9 +63,9 @@ class WalletScreen extends StatelessWidget {
                           '${wallet.balance.toStringAsFixed(0)} ${appController.currencySymbol}',
                           style: AppTextStyles.body.copyWith(
                             color: wallet.balance < 0
-                                ? Colors.red
-                                : Colors.black54,
-                            fontWeight: FontWeight.w600,
+                                ? AppColors.textColorRed
+                                : AppColors.textColorGreen,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         trailing: const Icon(Icons.arrow_forward_ios,
@@ -112,17 +112,17 @@ class WalletScreen extends StatelessWidget {
           color: Colors.white, borderRadius: BorderRadius.circular(12)),
       child: Row(
         children: [
-          const CircleAvatar(
-            radius: 30,
-            backgroundColor: Color(0xFFD7F5DD),
-            child: Icon(Icons.account_balance, size: 30, color: Colors.green),
+          SvgPicture.asset(
+            "assets/icons/ic_total.svg",
+            width: 50.w,
+            height: 50.w,
           ),
           const SizedBox(width: 16.0),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'total_balance'.tr, // Dịch
+                'total_balance'.tr,
                 style: AppTextStyles.subtitle
                     .copyWith(color: Colors.grey.shade600),
               ),
@@ -130,7 +130,7 @@ class WalletScreen extends StatelessWidget {
               Text(
                 '${totalBalance.toStringAsFixed(0)} ${appController.currencySymbol}',
                 style: AppTextStyles.heading2.copyWith(
-                  color: totalBalance < 0 ? Colors.red : Colors.black,
+                  color: AppColors.textColorBlue,
                   fontWeight: FontWeight.bold,
                 ),
               ),

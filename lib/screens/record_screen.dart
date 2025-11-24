@@ -30,15 +30,14 @@ class _RecordScreenState extends State<RecordScreen> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  String _selectedWallet = 'Total';
+  String _selectedWalletId = 'Total'; // Đổi tên và set default là 'Total'
   late List<DateTime> _months;
   final walletController = Get.find<WalletController>();
-  String? _selectedWalletId;
 
   @override
   void initState() {
     super.initState();
-    _selectedDay = null; // Default to showing the whole month
+    _selectedDay = null;
     _months = _getMonths();
   }
 
@@ -69,29 +68,27 @@ class _RecordScreenState extends State<RecordScreen> {
         title: Text('record'.tr,
             style: AppTextStyles.title
                 .copyWith(color: Colors.black, fontWeight: FontWeight.bold)),
-        // actions: [
-        //   IconButton(
-        //     icon: const Icon(Icons.search, color: Colors.black54),
-        //     onPressed: () {
-        //       // TODO: Implement search functionality
-        //     },
-        //   ),
-        // ],
       ),
       body: Obx(() {
         final allTransactions = transactionController.transactions;
 
+        // Lọc transactions theo wallet và tháng
         final monthlyTransactions = allTransactions.where((tx) {
           final walletMatch =
-              _selectedWallet == 'Total' || tx.walletId == _selectedWallet;
+              _selectedWalletId == 'Total' || tx.walletId == _selectedWalletId;
           final monthMatch = tx.date.year == _focusedDay.year &&
               tx.date.month == _focusedDay.month;
           return walletMatch && monthMatch;
         }).toList();
 
+        // Tính dailyTotals có lọc theo wallet
         final dailyTotals = groupBy(
-          allTransactions,
-          (Transaction tx) =>
+          allTransactions.where((tx) {
+            final walletMatch = _selectedWalletId == 'Total' ||
+                tx.walletId == _selectedWalletId;
+            return walletMatch;
+          }),
+              (Transaction tx) =>
               DateTime(tx.date.year, tx.date.month, tx.date.day),
         ).map((date, txs) {
           final income = txs
@@ -105,7 +102,7 @@ class _RecordScreenState extends State<RecordScreen> {
 
         final groupedTransactions = groupBy(
           monthlyTransactions,
-          (Transaction tx) =>
+              (Transaction tx) =>
               DateTime(tx.date.year, tx.date.month, tx.date.day),
         );
         final sortedDates = groupedTransactions.keys.toList()
@@ -153,23 +150,12 @@ class _RecordScreenState extends State<RecordScreen> {
   }
 
   Widget _buildHeader(WalletController walletController) {
-    List<DropdownMenuItem<String>> walletItems = [
-      DropdownMenuItem(
-          value: 'Total', child: Text('total'.tr, style: AppTextStyles.body)),
-      ...walletController.wallets.map((wallet) {
-        return DropdownMenuItem(
-          value: wallet.id,
-          child: Text(wallet.name, style: AppTextStyles.body),
-        );
-      }),
-    ];
-
     DateTime selectedMonth = _months.firstWhere(
-        (month) =>
-            month.year == _focusedDay.year && month.month == _focusedDay.month,
+            (month) =>
+        month.year == _focusedDay.year && month.month == _focusedDay.month,
         orElse: () => _months.firstWhere(
-            (m) =>
-                m.year == DateTime.now().year &&
+                (m) =>
+            m.year == DateTime.now().year &&
                 m.month == DateTime.now().month,
             orElse: () => _months.first));
 
@@ -186,11 +172,12 @@ class _RecordScreenState extends State<RecordScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // Month Picker
           InkWell(
             onTap: () {
               showMonthPicker(
                 context: context,
-                initialDate: selectedMonth ?? DateTime.now(),
+                initialDate: selectedMonth,
                 firstDate: DateTime(2020),
                 lastDate: DateTime(2030),
               ).then((date) {
@@ -213,9 +200,7 @@ class _RecordScreenState extends State<RecordScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    selectedMonth != null
-                        ? DateFormat('MMMM yyyy').format(selectedMonth!)
-                        : 'Select Month',
+                    DateFormat('MMMM yyyy').format(selectedMonth),
                     style: AppTextStyles.body
                         .copyWith(color: AppColors.textColorWhite),
                   ),
@@ -225,36 +210,65 @@ class _RecordScreenState extends State<RecordScreen> {
               ),
             ),
           ),
+
+          // Wallet Dropdown
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 2.h),
             decoration: BoxDecoration(
               color: AppColors.textColorGreyContainer,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Obx(
-                  () => DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _selectedWalletId ?? (walletController.wallets.isNotEmpty ? walletController.wallets.first.id : null),
-                  icon: Icon(Icons.arrow_drop_down, color: AppColors.textColorRed, size: 30.w),
-                  items: walletController.wallets.map((wallet) {
-                    return DropdownMenuItem<String>(
-                      value: wallet.id,
-                      child: Row(
-                        children: [
-                          SvgPicture.asset(
-                            wallet.iconPath,
-                            width: 24.w,
-                            height: 24.h,
-                          ),
-                          SizedBox(width: 8.w),
-                          Text(
-                            wallet.name,
-                            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                        ],
+            child: Obx(() {
+              // Build dropdown items: Total + all wallets
+              List<DropdownMenuItem<String>> items = [
+                DropdownMenuItem<String>(
+                  value: 'Total',
+                  child: Row(
+                    children: [
+                      SvgPicture.asset(
+                        "assets/icons/ic_total.svg",
+                        width: 24.w,
+                        height: 24.h,
                       ),
-                    );
-                  }).toList(),
+                      SizedBox(width: 8.w),
+                      Text(
+                        'total'.tr,
+                        style: AppTextStyles.body.copyWith(
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                ...walletController.wallets.map((wallet) {
+                  return DropdownMenuItem<String>(
+                    value: wallet.id,
+                    child: Row(
+                      children: [
+                        SvgPicture.asset(
+                          wallet.iconPath,
+                          width: 24.w,
+                          height: 24.h,
+                        ),
+                        SizedBox(width: 8.w),
+                        Text(
+                          wallet.name,
+                          style: AppTextStyles.body.copyWith(
+                              fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ];
+
+              return DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _selectedWalletId,
+                  icon: Icon(Icons.arrow_drop_down,
+                      color: AppColors.textColorRed, size: 30.w),
+                  items: items,
                   onChanged: (String? newWalletId) {
                     if (newWalletId != null) {
                       setState(() {
@@ -263,8 +277,8 @@ class _RecordScreenState extends State<RecordScreen> {
                     }
                   },
                 ),
-              ),
-            ),
+              );
+            }),
           )
         ],
       ),
@@ -463,8 +477,8 @@ class _RecordScreenState extends State<RecordScreen> {
       AppController appController) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12)
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12)
       ),
       margin: EdgeInsets.symmetric(horizontal: 10.w,vertical: 10.h),
       child: _selectedDay != null
@@ -517,35 +531,10 @@ class _RecordScreenState extends State<RecordScreen> {
             itemBuilder: (context, index) {
               final date = sortedDates[index];
               final dailyTransactions = groupedTransactions[date]!;
-              final dailyTotal = dailyTransactions.fold(0.0, (sum, tx) {
-                return sum +
-                    (tx.type == TransactionType.income
-                        ? tx.amount
-                        : -tx.amount);
-              });
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Padding(
-                  //   padding:
-                  //   const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 8.0),
-                  //   child: Row(
-                  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //     children: [
-                  //       Text(
-                  //         DateFormat('dd/MM/yyyy').format(date),
-                  //         style: AppTextStyles.title
-                  //             .copyWith(fontSize: 16, color: AppColors.textColorGrey),
-                  //       ),
-                  //       Text(
-                  //         '${dailyTotal >= 0 ? '+' : ''}${dailyTotal.abs().toStringAsFixed(0)}${appController.currencySymbol}',
-                  //         style: AppTextStyles.title
-                  //             .copyWith(fontSize: 16, color: AppColors.textColorGrey),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
                   ...dailyTransactions
                       .map((tx) => _buildTransactionItem(context, tx)),
                   const SizedBox(height: 10),
@@ -557,7 +546,6 @@ class _RecordScreenState extends State<RecordScreen> {
       ),
     );
   }
-
 
   Widget _buildTransactionItem(BuildContext context, Transaction transaction) {
     return Card(

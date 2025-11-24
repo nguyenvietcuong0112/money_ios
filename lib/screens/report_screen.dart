@@ -14,16 +14,16 @@ import 'package:money_manager/models/wallet_model.dart';
 import 'package:money_manager/widgets/custom_toggle_button.dart';
 import 'package:intl/intl.dart';
 
-class StatisticsScreen extends StatefulWidget {
+class ReportScreen extends StatefulWidget {
   final Function(int) onScreenChanged;
 
-  const StatisticsScreen({super.key, required this.onScreenChanged});
+  const ReportScreen({super.key, required this.onScreenChanged});
 
   @override
-  State<StatisticsScreen> createState() => _StatisticsScreenState();
+  State<ReportScreen> createState() => _ReportScreenState();
 }
 
-class _StatisticsScreenState extends State<StatisticsScreen> {
+class _ReportScreenState extends State<ReportScreen> {
   bool _isMonthSelected = true;
   DateTime _selectedDate = DateTime.now();
   Wallet? _selectedWallet;

@@ -4,7 +4,7 @@ import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/screens/home_screen.dart';
 import 'package:money_manager/screens/more_screen.dart';
 import 'package:money_manager/screens/record_screen.dart';
-import 'package:money_manager/screens/statistics_screen.dart';
+import 'package:money_manager/screens/report_screen.dart';
 import 'package:money_manager/screens/wallet_screen.dart';
 import 'dart:developer' as developer;
 
@@ -26,7 +26,7 @@ class _MyHomePageState extends State<MyHomePage> {
       HomeScreen(onScreenChanged: _onItemTapped),
       RecordScreen(onScreenChanged: _onItemTapped),
       const WalletScreen(),
-      StatisticsScreen(onScreenChanged: _onItemTapped),
+      ReportScreen(onScreenChanged: _onItemTapped),
       const MoreScreen(),
     ];
 
