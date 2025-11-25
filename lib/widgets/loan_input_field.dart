@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:money_manager/common/text_styles.dart';
@@ -25,7 +24,8 @@ class LoanInputField extends StatelessWidget {
         Row(
           children: [
             Text(label,
-                style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
+                style:
+                    AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(width: 4),
             const Icon(Icons.info_outline, size: 16, color: Colors.grey),
           ],
@@ -41,7 +41,22 @@ class LoanInputField extends StatelessWidget {
             suffixText: suffixText,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
-              borderSide: BorderSide.none,
+              borderSide: BorderSide(
+                color: Color(0XFFCBD4EA),
+                width: 1,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              // viền khi không focus
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide:
+                  const BorderSide(color: Color(0XFFCBD4EA), width: 1.0),
+            ),
+            focusedBorder: OutlineInputBorder(
+              // viền khi focus
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide:
+                  const BorderSide(color: Color(0XFFCBD4EA), width: 2.0),
             ),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

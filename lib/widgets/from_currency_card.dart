@@ -1,6 +1,7 @@
 
 import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/common/utils.dart';
 
@@ -44,19 +45,20 @@ class FromCurrencyCard extends StatelessWidget {
                   ],
                 ),
                 const Spacer(),
-                Icon(Icons.arrow_drop_down, color: primaryColor),
+                SvgPicture.asset("assets/icons/ic_currency.svg"),
               ],
             ),
           ),
           const SizedBox(height: 16),
           TextFormField(
             controller: amountController,
+            readOnly: true, // ⬅️ quan trọng
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: AppTextStyles.title.copyWith(fontSize: 24, fontWeight: FontWeight.bold),
             decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
-                borderSide: BorderSide(color: Colors.grey.shade300),
+                borderSide: const BorderSide(color: Color(0XFF5684F6)),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),

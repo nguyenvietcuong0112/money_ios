@@ -2,6 +2,7 @@
 import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:money_manager/common/color.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/common/utils.dart';
 
@@ -48,8 +49,8 @@ class ToCurrencyList extends StatelessWidget {
                         return ListTile(
                           leading: Text(Utils.currencyToEmoji(currency), style: const TextStyle(fontSize: 24)),
                           title: Text(currency.code, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
-                          subtitle: Text('1:${rate.toStringAsFixed(4)}', style: AppTextStyles.body.copyWith(color: Colors.grey)),
-                          trailing: Text(result.toStringAsFixed(2), style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold, color: primaryColor)),
+                          subtitle: Text('1:${rate.toStringAsFixed(3)}', style: AppTextStyles.body.copyWith(color: Colors.grey)),
+                          trailing: Text(result.toStringAsFixed(2), style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold, color: AppColors.textColorRed)),
                         );
                       },
                     ),
@@ -58,7 +59,7 @@ class ToCurrencyList extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: navigateAndAddCurrency,
               icon: const Icon(Icons.add),
-              label: Text('add'.tr),
+              label: Text('Add'.tr),
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
                 foregroundColor: Colors.white,

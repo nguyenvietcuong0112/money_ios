@@ -1,6 +1,7 @@
 
 import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:money_manager/common/color.dart';
 import 'package:money_manager/common/text_styles.dart';
@@ -18,7 +19,7 @@ class ExchangeRateScreen extends StatefulWidget {
 }
 
 class _ExchangeRateScreenState extends State<ExchangeRateScreen> {
-  final _amountController = TextEditingController(text: '1');
+  final _amountController = TextEditingController(text: '0');
   final _exchangeRateService = ExchangeRateService();
 
   Currency _fromCurrency = CurrencyService().findByCode('USD')!;
@@ -117,25 +118,28 @@ class _ExchangeRateScreenState extends State<ExchangeRateScreen> {
                       cardColor: AppColors.cardColor,
                     ),
                     const SizedBox(height: 16),
-                    Expanded(
-                      child: ToCurrencyList(
-                        isLoading: _isLoading,
-                        toCurrencies: _toCurrencies,
-                        rates: _rates,
-                        amount: double.tryParse(_amountController.text) ?? 0,
-                        navigateAndAddCurrency: _navigateAndAddToCurrency,
-                        primaryColor: AppColors.primaryColor,
-                        cardColor: AppColors.cardColor,
-                      ),
+                    ToCurrencyList(
+                      isLoading: _isLoading,
+                      toCurrencies: _toCurrencies,
+                      rates: _rates,
+                      amount: double.tryParse(_amountController.text) ?? 0,
+                      navigateAndAddCurrency: _navigateAndAddToCurrency,
+                      primaryColor: AppColors.primaryColor,
+                      cardColor: AppColors.cardColor,
                     ),
                   ],
                 ),
               ),
             ),
             Container(
-              height: MediaQuery.of(context).size.height * (2 / 5),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
+              margin: EdgeInsets.only(top: 10.h),
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white
+              ),
+              alignment: AlignmentGeometry.bottomCenter,
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * (1/3),
                 child: Calculator(
                   cardColor: AppColors.cardColor,
                   textColor: AppColors.textColorBlack,

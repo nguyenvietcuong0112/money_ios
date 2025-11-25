@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:money_manager/common/color.dart';
 import 'package:money_manager/common/text_styles.dart';
 
 class LoanDatePicker extends StatelessWidget {
@@ -39,6 +40,10 @@ class LoanDatePicker extends StatelessWidget {
             decoration: BoxDecoration(
               color: backgroundColor,
               borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(
+                color:  const Color(0XFFCBD4EA),
+                width: 1,
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -47,7 +52,7 @@ class LoanDatePicker extends StatelessWidget {
                   DateFormat('dd/MM/yyyy').format(selectedDate),
                   style: AppTextStyles.body,
                 ),
-                Icon(Icons.calendar_today, color: primaryColor),
+                Icon(Icons.calendar_today, color: AppColors.textColorBlack),
               ],
             ),
           ),

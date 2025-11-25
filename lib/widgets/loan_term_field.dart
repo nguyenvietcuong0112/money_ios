@@ -41,7 +41,22 @@ class LoanTermField extends StatelessWidget {
                   hintText: 'Years',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide.none,
+                    borderSide: BorderSide(
+                      color: Color(0XFFCBD4EA),
+                      width: 1,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    // viền khi không focus
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide:
+                    const BorderSide(color: Color(0XFFCBD4EA), width: 1.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    // viền khi focus
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide:
+                    const BorderSide(color: Color(0XFFCBD4EA), width: 2.0),
                   ),
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -59,7 +74,22 @@ class LoanTermField extends StatelessWidget {
                     hintText: 'Months',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide.none,
+                      borderSide: BorderSide(
+                        color: Color(0XFFCBD4EA),
+                        width: 1,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      // viền khi không focus
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                      const BorderSide(color: Color(0XFFCBD4EA), width: 1.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      // viền khi focus
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                      const BorderSide(color: Color(0XFFCBD4EA), width: 2.0),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12)),
