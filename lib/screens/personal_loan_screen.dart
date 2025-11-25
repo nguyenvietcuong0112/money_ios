@@ -21,7 +21,7 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
   DateTime _startDate = DateTime.now();
 
   final Color _primaryColor = const Color(0xFF4CAF50); // Neutral Green
-  final Color _backgroundColor = const Color(0xFFF6F8F7);
+  final Color _backgroundColor = const Color(0xFFF0F3FA);
 
   void _calculateAndNavigate() {
     final double? loanAmount = double.tryParse(_loanAmountController.text);

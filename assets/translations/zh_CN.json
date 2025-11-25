@@ -88,5 +88,7 @@
     "save_changes": "保存更改",
     "current_balance": "当前余额",
     "no_transactions_for_wallet": "此钱包还没有交易。",
-    "success": "成功"
+    "success": "成功",
+    "exchange_rate": "Convert Money",
+    "personal_loan": "Personal Loan"
 }

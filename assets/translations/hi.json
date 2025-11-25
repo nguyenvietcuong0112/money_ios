@@ -88,5 +88,7 @@
     "save_changes": "बदलाव सहेजें",
     "current_balance": "वर्तमान शेष",
     "no_transactions_for_wallet": "इस बटुए के लिए अभी तक कोई लेनदेन नहीं हुआ है।",
-    "success": "सफलता"
+    "success": "सफलता",
+    "exchange_rate": "Convert Money",
+    "personal_loan": "Personal Loan"
 }

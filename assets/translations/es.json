@@ -88,5 +88,7 @@
     "save_changes": "Guardar cambios",
     "current_balance": "Saldo actual",
     "no_transactions_for_wallet": "No hay transacciones para esta billetera todavía.",
-    "success": "Éxito"
+    "success": "Éxito",
+    "exchange_rate": "Convert Money",
+    "personal_loan": "Personal Loan"
 }

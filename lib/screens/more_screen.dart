@@ -1,5 +1,7 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/screens/exchange_rate_screen.dart';
@@ -12,24 +14,14 @@ class MoreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8F7),
+      backgroundColor: const Color(0xFFF0F3FA),
       appBar: AppBar(
         title: Text(
           'more'.tr,
           style: AppTextStyles.title.copyWith(color: Colors.black),
         ),
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined, color: Colors.black54, size: 28),
-            onPressed: () {
-              // Navigate to the original settings screen
-              Get.to(() => const SettingsScreen());
-            },
-            tooltip: 'settings'.tr,
-          ),
-        ],
+
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -38,22 +30,27 @@ class MoreScreen extends StatelessWidget {
             _buildToolCard(
               context,
               title: 'exchange_rate'.tr,
-              subtitle: 'fast_currency_conversion_calculator'.tr,
-              iconData: Icons.currency_exchange,
-              color: Colors.orange,
+              iconData: "assets/icons/ic_converter_money.svg",
               onTap: () {
                 Get.to(() => const ExchangeRateScreen());
               },
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 10.h),
             _buildToolCard(
               context,
               title: 'personal_loan'.tr,
-              subtitle: 'quick_personal_interest_calculation'.tr,
-              iconData: Icons.real_estate_agent,
-              color: Colors.pink,
+              iconData: "assets/icons/personal_loan.svg",
               onTap: () {
                 Get.to(() => const PersonalLoanScreen());
+              },
+            ),
+            SizedBox(height: 10.h),
+            _buildToolCard(
+              context,
+              title: 'settings'.tr,
+              iconData: "assets/icons/ic_settings.svg",
+              onTap: () {
+                Get.to(() => const SettingsScreen());
               },
             ),
           ],
@@ -62,19 +59,18 @@ class MoreScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildToolCard(BuildContext context, {required String title, required String subtitle, required IconData iconData, required Color color, required VoidCallback onTap}) {
+  Widget _buildToolCard(BuildContext context, {required String title, required String iconData, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(20.0),
-          border: Border.all(color: color.withOpacity(0.3)),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
-            Icon(iconData, size: 40, color: color),
+            SvgPicture.asset(iconData, width: 40,height: 40),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -83,11 +79,6 @@ class MoreScreen extends StatelessWidget {
                   Text(
                     title,
                     style: AppTextStyles.title.copyWith(color: Colors.black),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: AppTextStyles.body.copyWith(color: Colors.black54),
                   ),
                 ],
               ),
