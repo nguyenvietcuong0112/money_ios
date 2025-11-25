@@ -73,16 +73,14 @@ class _CalculatorState extends State<Calculator> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: widget.cardColor,
         borderRadius: BorderRadius.circular(12.0),
       ),
       child: GridView.count(
-        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
         crossAxisCount: 4,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
+        childAspectRatio: 2, // Make buttons rectangular
         children: [
           ...['C', '', '%', '/'],
           ...['7', '8', '9', 'x'],
@@ -90,14 +88,17 @@ class _CalculatorState extends State<Calculator> {
           ...['1', '2', '3', '+'],
           ...['.', '0', '=', 'OK'],
         ].map((key) {
-          return ElevatedButton(
-            onPressed: () => _buttonPressed(key),
-            child: Text(key, style: const TextStyle(fontSize: 18)),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey.shade200,
-              foregroundColor: widget.textColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
+          return Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: ElevatedButton(
+              onPressed: () => _buttonPressed(key),
+              child: Text(key, style: const TextStyle(fontSize: 18)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey.shade200,
+                foregroundColor: widget.textColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
               ),
             ),
           );

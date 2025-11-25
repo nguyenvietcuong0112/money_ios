@@ -101,44 +101,54 @@ class _ExchangeRateScreenState extends State<ExchangeRateScreen> {
         elevation: 0,
         foregroundColor: AppColors.textColorBlack,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+      body: Column(
           children: [
-            FromCurrencyCard(
-              fromCurrency: _fromCurrency,
-              amountController: _amountController,
-              openFromCurrencyPicker: _openFromCurrencyPicker,
-              primaryColor: AppColors.primaryColor,
-              cardColor: AppColors.cardColor,
-            ),
-            const SizedBox(height: 16),
             Expanded(
-              child: ToCurrencyList(
-                isLoading: _isLoading,
-                toCurrencies: _toCurrencies,
-                rates: _rates,
-                amount: double.tryParse(_amountController.text) ?? 0,
-                navigateAndAddCurrency: _navigateAndAddToCurrency,
-                primaryColor: AppColors.primaryColor,
-                cardColor: AppColors.cardColor,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    FromCurrencyCard(
+                      fromCurrency: _fromCurrency,
+                      amountController: _amountController,
+                      openFromCurrencyPicker: _openFromCurrencyPicker,
+                      primaryColor: AppColors.primaryColor,
+                      cardColor: AppColors.cardColor,
+                    ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: ToCurrencyList(
+                        isLoading: _isLoading,
+                        toCurrencies: _toCurrencies,
+                        rates: _rates,
+                        amount: double.tryParse(_amountController.text) ?? 0,
+                        navigateAndAddCurrency: _navigateAndAddToCurrency,
+                        primaryColor: AppColors.primaryColor,
+                        cardColor: AppColors.cardColor,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 2 / 5,
-              child: Calculator(
-                cardColor: AppColors.cardColor,
-                textColor: AppColors.textColorBlack,
-                onValueChanged: (value) {
-                  setState(() {
-                    _amountController.text = value;
-                  });
-                },
+            Container(
+              height: MediaQuery.of(context).size.height * (2 / 5),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Calculator(
+                  cardColor: AppColors.cardColor,
+                  textColor: AppColors.textColorBlack,
+                  onValueChanged: (value) {
+                    setState(() {
+                      _amountController.text = value;
+                    });
+                  },
+                ),
               ),
             ),
           ],
         ),
-      ),
     );
   }
 }
