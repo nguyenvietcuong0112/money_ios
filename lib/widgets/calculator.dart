@@ -82,7 +82,7 @@ class _CalculatorState extends State<Calculator> {
         crossAxisCount: 4,
         childAspectRatio: 2, // Make buttons rectangular
         children: [
-          ...['C', '', '%', '/'],
+          ...['C', 'X', '%', '/'],
           ...['7', '8', '9', 'x'],
           ...['4', '5', '6', '-'],
           ...['1', '2', '3', '+'],
