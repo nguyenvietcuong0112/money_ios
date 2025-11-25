@@ -1,3 +1,4 @@
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -14,6 +15,12 @@ class AppColors {
   static const Color textColorBlue = Color(0xFF3E70FD);
   static const Color textColorGreyContainer = Color(0xFFF0F3FA);
 
-
+  // from exchange_rate_screen.dart and personal_loan_screen.dart
+  static const Color primaryColor = Color(0xFF4F46E5); // Indigo
+  static const Color backgroundColor = Color(0xFFF0F3FA);
+  static const Color cardColor = Colors.white;
+  static const Color fieldColor = Colors.white;
+  static const Color buttonTextColor = Colors.white;
+  static const Color secondaryButtonColor = Color(0xFFE0E0E0);
   static const Color transparent = Colors.transparent;
 }
