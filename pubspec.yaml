@@ -33,6 +33,7 @@ dependencies:
   draggable_fab: ^0.1.4
   flutter_screenutil: ^5.9.3
   month_picker_dialog: ^6.7.0
+  sizer: ^2.0.15
 
 dev_dependencies:
   flutter_test:

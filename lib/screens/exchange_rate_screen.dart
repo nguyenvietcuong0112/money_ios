@@ -113,19 +113,28 @@ class _ExchangeRateScreenState extends State<ExchangeRateScreen> {
               cardColor: AppColors.cardColor,
             ),
             const SizedBox(height: 16),
-            ToCurrencyList(
-              isLoading: _isLoading,
-              toCurrencies: _toCurrencies,
-              rates: _rates,
-              amount: double.tryParse(_amountController.text) ?? 0,
-              navigateAndAddCurrency: _navigateAndAddToCurrency,
-              primaryColor: AppColors.primaryColor,
-              cardColor: AppColors.cardColor,
+            Expanded(
+              child: ToCurrencyList(
+                isLoading: _isLoading,
+                toCurrencies: _toCurrencies,
+                rates: _rates,
+                amount: double.tryParse(_amountController.text) ?? 0,
+                navigateAndAddCurrency: _navigateAndAddToCurrency,
+                primaryColor: AppColors.primaryColor,
+                cardColor: AppColors.cardColor,
+              ),
             ),
-            const Spacer(),
-            Calculator(
-              cardColor: AppColors.cardColor,
-              textColor: AppColors.textColorBlack,
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 2 / 5,
+              child: Calculator(
+                cardColor: AppColors.cardColor,
+                textColor: AppColors.textColorBlack,
+                onValueChanged: (value) {
+                  setState(() {
+                    _amountController.text = value;
+                  });
+                },
+              ),
             ),
           ],
         ),
