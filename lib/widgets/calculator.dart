@@ -73,7 +73,6 @@ class _CalculatorState extends State<Calculator> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: widget.cardColor,
         borderRadius: BorderRadius.circular(12.0),
@@ -84,7 +83,7 @@ class _CalculatorState extends State<Calculator> {
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
         children: [
-          ...['C', '', '%', '/'],
+          ...['C', 'X', '%', '/'],
           ...['7', '8', '9', 'x'],
           ...['4', '5', '6', '-'],
           ...['1', '2', '3', '+'],
@@ -92,7 +91,7 @@ class _CalculatorState extends State<Calculator> {
         ].map((key) {
           return ElevatedButton(
             onPressed: () => _buttonPressed(key),
-            child: Text(key, style: const TextStyle(fontSize: 18)),
+            child: Text(key, style: const TextStyle(fontSize: 16)),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.grey.shade200,
               foregroundColor: widget.textColor,

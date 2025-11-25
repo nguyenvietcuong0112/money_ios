@@ -21,7 +21,7 @@ class _ExchangeRateScreenState extends State<ExchangeRateScreen> {
   final _amountController = TextEditingController(text: '1');
   final _exchangeRateService = ExchangeRateService();
 
-  Currency _fromCurrency = CurrencyService().findByCode('IDR')!;
+  Currency _fromCurrency = CurrencyService().findByCode('USD')!;
   final List<Currency> _toCurrencies = [
     CurrencyService().findByCode('USD')!,
     CurrencyService().findByCode('RUB')!,
