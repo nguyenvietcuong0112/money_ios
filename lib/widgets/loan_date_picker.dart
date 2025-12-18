@@ -26,7 +26,7 @@ class LoanDatePicker extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text('start_date'.tr,
+            Text('Start Date'.tr,
                 style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(width: 4),
             const Icon(Icons.info_outline, size: 16, color: Colors.grey),

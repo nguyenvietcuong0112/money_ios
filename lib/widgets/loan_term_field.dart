@@ -22,7 +22,7 @@ class LoanTermField extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text('term'.tr,
+            Text('Term'.tr,
                 style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(width: 4),
             const Icon(Icons.info_outline, size: 16, color: Colors.grey),

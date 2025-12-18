@@ -35,8 +35,12 @@ class _ReportScreenState extends State<ReportScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFF0F3FA),
         elevation: 0,
-        title: Text('report'.tr,
-            style: AppTextStyles.title.copyWith(color: AppColors.textDefault)),
+        title: Row(
+          children: [
+            Text('report'.tr,
+                style: AppTextStyles.title.copyWith(color: AppColors.textDefault)),
+          ],
+        ),
         actions: [
           _buildDateFilter(),
         ],
@@ -56,7 +60,6 @@ class _ReportScreenState extends State<ReportScreen> {
               .fold(0, (sum, item) => sum + item.amount);
           final double saving = totalIncome - totalExpense;
 
-          // Lọc theo loại được chọn (EXPENSE hoặc INCOME)
           final filteredByType = transactions
               .where((tx) => _selectedType == 'EXPENSE'
                   ? tx.type == TransactionType.expense
@@ -78,7 +81,7 @@ class _ReportScreenState extends State<ReportScreen> {
                   height: 200.h,
                   child: Center(
                     child:
-                        Text('no_data_available'.tr, style: AppTextStyles.body),
+                        Text('No data available'.tr, style: AppTextStyles.body),
                   ),
                 ),
               SizedBox(height: 50.h),
@@ -224,7 +227,7 @@ class _ReportScreenState extends State<ReportScreen> {
           isExpanded: false,
           underline: SizedBox.shrink(),
           icon: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: EdgeInsets.symmetric(horizontal: 8.w),
             child: SvgPicture.asset(
               'assets/icons/ic_dropdown.svg',
               width: 24,

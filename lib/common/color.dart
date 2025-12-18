@@ -15,6 +15,8 @@ class AppColors {
   static const Color textColorBlue = Color(0xFF3E70FD);
   static const Color textColorGreyContainer = Color(0xFFF0F3FA);
 
+  static const Color colorHeader = Color(0xFF3D86BF);
+
   // from exchange_rate_screen.dart and personal_loan_screen.dart
   static const Color primaryColor = Color(0xFF4F46E5); // Indigo
   static const Color backgroundColor = Color(0xFFF0F3FA);

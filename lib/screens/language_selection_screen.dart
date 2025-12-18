@@ -244,7 +244,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
     if (_animationCompleted && _finalIconOffset != null) {
       return Positioned(
         left: _finalIconOffset!.dx - (_iconSize / 7),
-        top: _finalIconOffset!.dy - (_iconSize /30),
+        top: _finalIconOffset!.dy - (_iconSize /50),
         child: Lottie.asset('assets/animations/hand_tap.json',
             width: _iconSize, height: _iconSize),
       );

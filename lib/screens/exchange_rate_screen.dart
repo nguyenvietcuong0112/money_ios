@@ -97,7 +97,7 @@ class _ExchangeRateScreenState extends State<ExchangeRateScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
-        title: Text('convert_money'.tr, style: AppTextStyles.title.copyWith(color: AppColors.textColorBlack)),
+        title: Text('Convert Money'.tr, style: AppTextStyles.title.copyWith(color: AppColors.textDefault)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.textColorBlack,

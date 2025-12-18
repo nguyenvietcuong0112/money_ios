@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:money_manager/common/color.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/controllers/app_controller.dart';
 import 'package:money_manager/controllers/transaction_controller.dart';
@@ -22,8 +23,14 @@ class WalletDetailScreen extends StatelessWidget {
     final WalletController walletController = Get.find();
 
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
-        title: Text(wallet.name, style: AppTextStyles.title),
+        backgroundColor: AppColors.colorHeader,
+        leading: IconButton(
+          icon: Icon(Icons.close, color: Colors.white),
+          onPressed: () => Get.back(),
+        ),
+        title: Text(wallet.name, style: AppTextStyles.title.copyWith(color: Colors.white)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -32,7 +39,7 @@ class WalletDetailScreen extends StatelessWidget {
           children: [
             Text(
               'current_balance'.tr,
-              style: AppTextStyles.subtitle,
+              style: AppTextStyles.subtitle.copyWith(color: Colors.black),
             ),
             const SizedBox(height: 4),
             Obx(() {
@@ -43,7 +50,7 @@ class WalletDetailScreen extends StatelessWidget {
               return Text(
                 '${updatedWallet.balance.toStringAsFixed(0)} ${appController.currencySymbol}',
                 style: AppTextStyles.heading1Black.copyWith(
-                  color: updatedWallet.balance >= 0 ? Colors.green : Colors.red,
+                  color: updatedWallet.balance >= 0 ? AppColors.textColorGreen : AppColors.textColorRed,
                 ),
               );
             }),
@@ -69,11 +76,11 @@ class WalletDetailScreen extends StatelessWidget {
                   itemCount: walletTransactions.length,
                   itemBuilder: (context, index) {
                     final transaction = walletTransactions[index];
-                    return Card(
-                      elevation: 1,
+                    return Container(
                       margin: const EdgeInsets.symmetric(vertical: 6.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16)
                       ),
                       child: ListTile(
                         contentPadding: const EdgeInsets.symmetric(
@@ -81,15 +88,13 @@ class WalletDetailScreen extends StatelessWidget {
                         onTap: () => Get.to(
                             () => TransactionDetailScreen(transaction: transaction)),
                         leading: CircleAvatar(
-                          backgroundColor:
-                              Color(transaction.colorValue).withOpacity(0.2),
                           child: Padding(
                             padding: const EdgeInsets.all(6.0),
                             child: SvgPicture.asset(transaction.iconPath,
-                                color: Color(transaction.colorValue)),
+                                ),
                           ),
                         ),
-                        title: Text(transaction.title,
+                        title: Text(transaction.categoryName,
                             style: AppTextStyles.body
                                 .copyWith(fontWeight: FontWeight.bold)),
                         subtitle: Text(
@@ -99,8 +104,8 @@ class WalletDetailScreen extends StatelessWidget {
                           '${transaction.type == TransactionType.expense ? '-' : '+'}${transaction.amount.toStringAsFixed(0)} ${appController.currencySymbol}',
                           style: AppTextStyles.body.copyWith(
                             color: transaction.type == TransactionType.expense
-                                ? Colors.red
-                                : Colors.green,
+                                ? AppColors.textColorRed
+                                : AppColors.textColorGreen,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

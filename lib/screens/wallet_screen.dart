@@ -82,23 +82,23 @@ class WalletScreen extends StatelessWidget {
               }),
             ),
             const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                Get.to(() => const AddWalletScreen());
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1E9E54),
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28.0),
-                ),
-              ),
-              child: Text(
-                '+ ${('add_wallet'.tr)}',
-                style: AppTextStyles.button.copyWith(fontSize: 18),
-              ),
-            ),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     Get.to(() => const AddWalletScreen());
+            //   },
+            //   style: ElevatedButton.styleFrom(
+            //     backgroundColor: const Color(0xFF1E9E54),
+            //     foregroundColor: Colors.white,
+            //     minimumSize: const Size(double.infinity, 56),
+            //     shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(28.0),
+            //     ),
+            //   ),
+            //   child: Text(
+            //     '+ ${('add_wallet'.tr)}',
+            //     style: AppTextStyles.button.copyWith(fontSize: 18),
+            //   ),
+            // ),
             const SizedBox(height: 16.0),
           ],
         ),

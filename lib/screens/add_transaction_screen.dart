@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
+import 'package:money_manager/common/color.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/models/category_model.dart';
 import 'package:money_manager/models/transaction_model.dart';
@@ -87,9 +89,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: AppColors.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.close, color: Colors.black),
@@ -97,61 +99,75 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         ),
         title: Text('add_transaction'.tr,
             style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
+                color: AppColors.textColorBlack,
                 fontSize: 20)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TransactionTypeToggle(
-              // uncontrolled mode (widget tự giữ state), chỉ cần onChanged
-              onChanged: (type) {
-                setState(() {
-                  _selectedType = type;
-                  if (type == TransactionType.expense) {
-                    _selectedCategory = defaultCategories.first;
-                  } else {
-                    _selectedCategory = defaultIncomeCategories.first;
-                  }
-                });
-              },
-              showAmount: false, // mặc định false, bạn có thể bỏ
-            ),
-            const SizedBox(height: 24),
-            _buildSectionTitle('Amount'),
-            _buildAmountField(),
-            const SizedBox(height: 24),
-            _buildSectionTitle('Day Trading'),
-            _buildDateField(),
-            const SizedBox(height: 24),
-            _buildSectionTitle('Wallet'),
-            _buildWalletField(),
-            const SizedBox(height: 24),
-            _buildSectionTitle('Note'),
-            _buildNoteField(),
-            const SizedBox(height: 24),
-            _buildSectionTitle('Category'),
-            const SizedBox(height: 10),
-            _buildCategoryGrid(),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: _submitData,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 56),
-                backgroundColor: const Color(0xFF4A80F0),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.0)),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16)
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TransactionTypeToggle(
+                onChanged: (type) {
+                  setState(() {
+                    _selectedType = type;
+                    if (type == TransactionType.expense) {
+                      _selectedCategory = defaultCategories.first;
+                    } else {
+                      _selectedCategory = defaultIncomeCategories.first;
+                    }
+                  });
+                },
+                showAmount: false,
               ),
-              child: Text('SAVE',
-                  style: AppTextStyles.button.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18)),
-            ),
-          ],
+              SizedBox(height: 10.h),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionTitle('Amount'),
+                    _buildAmountField(),
+                    SizedBox(height: 10.h),
+                    _buildSectionTitle('Day Trading'),
+                    _buildDateField(),
+                    SizedBox(height: 10.h),
+                    _buildSectionTitle('Wallet'),
+                    _buildWalletField(),
+                    SizedBox(height: 10.h),
+                    _buildSectionTitle('Note'),
+                    _buildNoteField(),
+                    SizedBox(height: 10.h),
+                    _buildSectionTitle('Category'),
+                    _buildCategoryGrid(),
+                    SizedBox(height: 10.h),
+                    ElevatedButton(
+                      onPressed: _submitData,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 56),
+                        backgroundColor: const Color(0xFF4A80F0),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16.0)),
+                      ),
+                      child: Text('SAVE',
+                          style: AppTextStyles.button.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18)),
+                    ),
+                    SizedBox(height: 10.h),
+
+                  ],
+                ),
+              ),
+
+            ],
+          ),
         ),
       ),
     );

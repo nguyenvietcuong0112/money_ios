@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:money_manager/common/color.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/screens/exchange_rate_screen.dart';
 import 'package:money_manager/screens/personal_loan_screen.dart';
@@ -18,7 +19,7 @@ class MoreScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'more'.tr,
-          style: AppTextStyles.title.copyWith(color: Colors.black),
+          style: AppTextStyles.title.copyWith(color: AppColors.textDefault),
         ),
         backgroundColor: Colors.transparent,
 

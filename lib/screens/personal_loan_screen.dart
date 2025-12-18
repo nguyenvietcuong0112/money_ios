@@ -38,7 +38,7 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
         processingFee < 0 ||
         termInMonths <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('please_enter_valid_loan_details'.tr)),
+        SnackBar(content: Text('Please enter valid loan details'.tr)),
       );
       return;
     }
@@ -106,7 +106,7 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
-        title: Text('personal_loan'.tr, style: AppTextStyles.title),
+        title: Text('personal_loan'.tr, style: AppTextStyles.title.copyWith(color: AppColors.textDefault)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.black87,
@@ -123,14 +123,14 @@ class _PersonalLoanScreenState extends State<PersonalLoanScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               LoanInputField(
-                label: 'loan_amount'.tr,
+                label: 'Loan Amount'.tr,
                 controller: _loanAmountController,
                 suffixText: '₹',
                 backgroundColor: AppColors.backgroundColor,
               ),
               const SizedBox(height: 16),
               LoanInputField(
-                label: 'processing_fee'.tr,
+                label: 'Processing Fee'.tr,
                 controller: _processingFeeController,
                 suffixText: '%',
                 backgroundColor: AppColors.backgroundColor,

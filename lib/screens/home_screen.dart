@@ -159,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         Obx(() {
           final walletController = Get.find<WalletController>();
           if (walletController.wallets.isEmpty) {
-            return Text('no_wallets_available'.tr);
+            return Text('No wallets available'.tr);
           }
           return SizedBox(
             height: 80,

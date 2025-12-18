@@ -50,7 +50,7 @@ class _ToCurrencyScreenState extends State<ToCurrencyScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('to_currency'.tr, style: AppTextStyles.title.copyWith(color: Colors.black87)),
+        title: Text('To Currency'.tr, style: AppTextStyles.title.copyWith(color: Colors.black87)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.black87,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:money_manager/common/color.dart';
 import 'package:money_manager/controllers/wallet_controller.dart';
 import 'package:money_manager/screens/home_screen.dart';
 import 'package:money_manager/screens/more_screen.dart';
@@ -50,33 +52,103 @@ class _MyHomePageState extends State<MyHomePage> {
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: <BottomNavigationBarItem>[
+        items: [
           BottomNavigationBarItem(
-            icon: const Icon(Icons.home),
+            icon: SvgPicture.asset(
+              'assets/icons/home.svg',
+              colorFilter: const ColorFilter.mode(
+                Colors.grey,
+                BlendMode.srcIn,
+              ),
+            ),
+            activeIcon: SvgPicture.asset(
+              'assets/icons/home.svg',
+              colorFilter: const ColorFilter.mode(
+                AppColors.colorHeader,
+                BlendMode.srcIn,
+              ),
+            ),
             label: 'home'.tr,
           ),
+
           BottomNavigationBarItem(
-            icon: const Icon(Icons.edit_calendar_outlined),
+            icon: SvgPicture.asset(
+              'assets/icons/record.svg',
+              colorFilter: const ColorFilter.mode(
+                Colors.grey,
+                BlendMode.srcIn,
+              ),
+            ),
+            activeIcon: SvgPicture.asset(
+              'assets/icons/record.svg',
+              colorFilter: ColorFilter.mode(
+                AppColors.colorHeader,
+                BlendMode.srcIn,
+              ),
+            ),
             label: 'record'.tr,
           ),
+
           BottomNavigationBarItem(
-            icon: const Icon(Icons.account_balance_wallet),
+            icon: SvgPicture.asset(
+              'assets/icons/wallet.svg',
+              colorFilter: const ColorFilter.mode(
+                Colors.grey,
+                BlendMode.srcIn,
+              ),
+            ),
+            activeIcon: SvgPicture.asset(
+              'assets/icons/wallet.svg',
+              colorFilter: const ColorFilter.mode(
+                AppColors.colorHeader,
+                BlendMode.srcIn,
+              ),
+            ),
             label: 'my_wallet'.tr,
           ),
+
           BottomNavigationBarItem(
-            icon: const Icon(Icons.bar_chart),
+            icon: SvgPicture.asset(
+              'assets/icons/report.svg',
+              colorFilter: const ColorFilter.mode(
+                Colors.grey,
+                BlendMode.srcIn,
+              ),
+            ),
+            activeIcon: SvgPicture.asset(
+              'assets/icons/report.svg',
+              colorFilter: const ColorFilter.mode(
+                AppColors.colorHeader,
+                BlendMode.srcIn,
+              ),
+            ),
             label: 'report'.tr,
           ),
+
           BottomNavigationBarItem(
-            icon: const Icon(Icons.more_horiz),
+            icon: SvgPicture.asset(
+              'assets/icons/more.svg',
+              colorFilter: const ColorFilter.mode(
+                Colors.grey,
+                BlendMode.srcIn,
+              ),
+            ),
+            activeIcon: SvgPicture.asset(
+              'assets/icons/more.svg',
+              colorFilter: const ColorFilter.mode(
+                AppColors.colorHeader,
+                BlendMode.srcIn,
+              ),
+            ),
             label: 'more'.tr,
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
+        selectedItemColor: AppColors.colorHeader,
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
         showUnselectedLabels: true,
+        backgroundColor: Colors.white,
       ),
     );
   }

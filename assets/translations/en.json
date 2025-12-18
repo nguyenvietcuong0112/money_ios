@@ -90,5 +90,6 @@
     "no_transactions_for_wallet": "No transactions for this wallet yet.",
     "success": "Success",
     "exchange_rate": "Convert Money",
-    "personal_loan": "Personal Loan"
+    "personal_loan": "Personal Loan",
+    "no_data_available": "No data available"
 }
