@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:money_manager/common/color.dart';
 import 'package:money_manager/common/text_styles.dart';
 import 'package:money_manager/widgets/custom_radio_button.dart';
 
@@ -24,12 +25,12 @@ class LanguageTile extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 8.0),
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isSelected ? AppColors.textDefault: AppColors.backgroundColor,
           borderRadius: BorderRadius.circular(12.0),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF4CAF50) : Colors.grey.shade300,
-            width: isSelected ? 2.0 : 1.0,
-          ),
+          // border: Border.all(
+          //   color: isSelected ? const Color(0xFF4CAF50) : Colors.grey.shade300,
+          //   width: isSelected ? 2.0 : 1.0,
+          // ),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withAlpha(25),

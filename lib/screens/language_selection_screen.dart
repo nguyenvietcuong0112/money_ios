@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:money_manager/common/text_styles.dart';
@@ -55,7 +56,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
             _tileKeys['en']?.currentContext?.findRenderObject() as RenderBox?;
         if (englishBox != null) {
           setState(() {
-            _initialIconOffset = englishBox.localToGlobal(englishBox.size.center(Offset.zero));
+            _initialIconOffset =
+                englishBox.localToGlobal(englishBox.size.center(Offset.zero));
           });
         }
       }
@@ -89,16 +91,19 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
 
     if (!_animationCompleted) {
       _selectionMade = true;
-      
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final RenderBox? startBox =
-            _tileKeys[languageCode]!.currentContext?.findRenderObject() as RenderBox?;
+        final RenderBox? startBox = _tileKeys[languageCode]!
+            .currentContext
+            ?.findRenderObject() as RenderBox?;
         final RenderBox? endBox =
             _appBarActionKey.currentContext?.findRenderObject() as RenderBox?;
 
         if (startBox != null && endBox != null) {
-          final startOffset = startBox.localToGlobal(startBox.size.center(Offset.zero));
-          final endOffset = endBox.localToGlobal(endBox.size.center(Offset.zero));
+          final startOffset =
+              startBox.localToGlobal(startBox.size.center(Offset.zero));
+          final endOffset =
+              endBox.localToGlobal(endBox.size.center(Offset.zero));
 
           _finalIconOffset = endOffset;
 
@@ -124,16 +129,14 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
       String langCode = _selectedLanguageCode!;
       String? countryCode;
       if (langCode.contains('_')) {
-          final parts = langCode.split('_');
-          langCode = parts[0];
-          countryCode = parts[1];
+        final parts = langCode.split('_');
+        langCode = parts[0];
+        countryCode = parts[1];
       }
       final locale = Locale(langCode, countryCode);
 
-      // Sử dụng hàm mới để cập nhật UI ngay lập tức
       Get.find<AppController>().changeLocale(locale);
-      
-      // Lưu vào SharedPreferences (đã có trong hàm changeLocale nhưng để đây cho chắc chắn)
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('languageCode', langCode);
       if (countryCode != null) {
@@ -159,19 +162,20 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
       children: [
         Scaffold(
           appBar: AppBar(
-            title: Text('language'.tr, style: AppTextStyles.title), // Sử dụng .tr
+            backgroundColor: Color(0XFF3D86BF),
+            title: Text('language'.tr,
+                style: AppTextStyles.title.copyWith(color: Colors.white)),
             automaticallyImplyLeading: !widget.isInitialSetup,
             actions: [
               Padding(
                 padding: const EdgeInsets.only(right: 20.0),
                 child: IconButton(
                   key: _appBarActionKey,
-                  icon: Icon(
-                    Icons.check_circle,
+                  icon: SvgPicture.asset(
+                    "assets/icons/ic_next_language.svg",
                     color: _selectedLanguageCode != null
-                        ? Theme.of(context).colorScheme.primary
+                        ? Colors.white
                         : Colors.grey.withAlpha(128),
-                    size: 30,
                   ),
                   onPressed: _selectedLanguageCode != null ? _onNext : null,
                 ),
@@ -184,7 +188,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'select_language_to_continue'.tr, // Sử dụng .tr
+                  'select_language_to_continue'.tr,
                   style: AppTextStyles.subtitle,
                 ),
                 const SizedBox(height: 20),
@@ -218,7 +222,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
       return Positioned(
         left: _initialIconOffset!.dx - (_iconSize / 2),
         top: _initialIconOffset!.dy - (_iconSize / 2),
-        child: Lottie.asset('assets/animations/hand_tap.json', width: _iconSize, height: _iconSize),
+        child: Lottie.asset('assets/animations/hand_tap.json',
+            width: _iconSize, height: _iconSize),
       );
     }
 
@@ -229,7 +234,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
           return Positioned(
             left: _animation!.value.dx - (_iconSize / 2),
             top: _animation!.value.dy - (_iconSize / 2),
-            child: Lottie.asset('assets/animations/hand_tap.json', width: _iconSize, height: _iconSize),
+            child: Lottie.asset('assets/animations/hand_tap.json',
+                width: _iconSize, height: _iconSize),
           );
         },
       );
@@ -237,9 +243,10 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
 
     if (_animationCompleted && _finalIconOffset != null) {
       return Positioned(
-        left: _finalIconOffset!.dx - (_iconSize/1.2),
-        top: _finalIconOffset!.dy - (_iconSize / 8),
-        child: Lottie.asset('assets/animations/hand_tap.json', width: _iconSize, height: _iconSize),
+        left: _finalIconOffset!.dx - (_iconSize / 7),
+        top: _finalIconOffset!.dy - (_iconSize /30),
+        child: Lottie.asset('assets/animations/hand_tap.json',
+            width: _iconSize, height: _iconSize),
       );
     }
 
